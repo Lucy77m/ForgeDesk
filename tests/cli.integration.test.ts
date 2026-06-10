@@ -134,6 +134,26 @@ describe('cli integration', () => {
     expect(result.stderr).toContain('Risk severity must be one of')
   })
 
+  it('rejects blank record text', () => {
+    const repo = tempDir()
+    dirs.push(repo)
+    initGitRepo(repo)
+
+    expect(runCli(repo, ['init', '--repo', '.']).status).toBe(0)
+    expect(runCli(repo, ['start', '--title', 'Blank text demo']).status).toBe(0)
+
+    for (const [command, message] of [
+      ['intent', 'Intent text is required.'],
+      ['decision', 'Decision text is required.'],
+      ['risk', 'Risk text is required.'],
+      ['check', 'Manual check text is required.']
+    ]) {
+      const result = runCli(repo, [command, '   '])
+      expect(result.status).not.toBe(0)
+      expect(result.stderr).toContain(message)
+    }
+  })
+
   it('reports non-git init errors clearly', () => {
     const repo = tempDir()
     dirs.push(repo)

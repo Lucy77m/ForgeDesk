@@ -35,6 +35,14 @@ function makeId(label: string): string {
   return `${idPrefix()}-${slug}-${suffix}`
 }
 
+function requireText(value: string, label: string): string {
+  const trimmed = value.trim()
+  if (!trimmed) {
+    throw new ForgeDeskError(`${label} text is required.`)
+  }
+  return trimmed
+}
+
 export async function initProject(repoInput: string, cwd: string): Promise<Project> {
   const requestedPath = resolveFrom(cwd, repoInput)
 
@@ -103,7 +111,7 @@ export async function setIntent(text: string, cwd: string): Promise<ChangeSessio
   const session = await getActiveSession(workspace)
   const updated = {
     ...session,
-    intent: text.trim(),
+    intent: requireText(text, 'Intent'),
     updatedAt: now()
   }
   await writeSession(workspace.repoPath, updated)
@@ -114,9 +122,10 @@ export async function addDecision(text: string, cwd: string): Promise<ChangeSess
   const workspace = await loadWorkspace(cwd)
   const session = await getActiveSession(workspace)
   const timestamp = now()
+  const decisionText = requireText(text, 'Decision')
   const updated = {
     ...session,
-    decisions: [...session.decisions, { id: makeId('decision'), text: text.trim(), createdAt: timestamp }],
+    decisions: [...session.decisions, { id: makeId('decision'), text: decisionText, createdAt: timestamp }],
     updatedAt: timestamp
   }
   await writeSession(workspace.repoPath, updated)
@@ -131,9 +140,10 @@ export async function addRisk(
   const workspace = await loadWorkspace(cwd)
   const session = await getActiveSession(workspace)
   const timestamp = now()
+  const riskText = requireText(text, 'Risk')
   const updated = {
     ...session,
-    risks: [...session.risks, { id: makeId('risk'), text: text.trim(), severity, createdAt: timestamp }],
+    risks: [...session.risks, { id: makeId('risk'), text: riskText, severity, createdAt: timestamp }],
     updatedAt: timestamp
   }
   await writeSession(workspace.repoPath, updated)
@@ -144,11 +154,12 @@ export async function addManualCheck(text: string, cwd: string): Promise<ChangeS
   const workspace = await loadWorkspace(cwd)
   const session = await getActiveSession(workspace)
   const timestamp = now()
+  const checkText = requireText(text, 'Manual check')
   const updated = {
     ...session,
     manualChecks: [
       ...(session.manualChecks ?? []),
-      { id: makeId('check'), text: text.trim(), createdAt: timestamp }
+      { id: makeId('check'), text: checkText, createdAt: timestamp }
     ],
     updatedAt: timestamp
   }
