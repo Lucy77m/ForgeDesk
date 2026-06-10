@@ -64,6 +64,21 @@ describe('cli integration', () => {
     const customEvidence = runCli(repo, ['evidence', '--output-dir', 'custom-evidence'])
     expect(customEvidence.status).toBe(0)
     expect(existsSync(path.join(repo, 'custom-evidence', 'PR_EVIDENCE.md'))).toBe(true)
+
+    const evidenceList = runCli(repo, ['evidence', '--list'])
+    expect(evidenceList.status).toBe(0)
+    expect(evidenceList.stdout).toContain('ForgeDesk Evidence Packs')
+    expect(evidenceList.stdout).toContain('custom-evidence')
+    expect(evidenceList.stdout).toContain('Update demo readme')
+
+    const latestEvidence = runCli(repo, ['evidence', '--latest'])
+    expect(latestEvidence.status).toBe(0)
+    expect(latestEvidence.stdout).toContain('Latest ForgeDesk Evidence')
+    expect(latestEvidence.stdout).toContain('Evidence: custom-evidence')
+
+    const invalidDiscovery = runCli(repo, ['evidence', '--latest', '--session', sessionId])
+    expect(invalidDiscovery.status).not.toBe(0)
+    expect(invalidDiscovery.stderr).toContain('Use --list or --latest without --session or --output-dir')
   })
 
   it('generates evidence for an explicit session id', () => {
@@ -116,7 +131,7 @@ describe('cli integration', () => {
     expect(runCli(repo, ['test', '--command', 'pnpm test']).status).toBe(0)
     expect(runCli(repo, ['evidence']).status).toBe(0)
 
-    const show = runCli(repo, ['show', '--session', firstSessionId])
+    const show = runCli(repo, ['show'])
     expect(show.status).toBe(0)
     expect(show.stdout).toContain('ForgeDesk Session')
     expect(show.stdout).toContain('Exercise session lifecycle.')
@@ -152,7 +167,7 @@ describe('cli integration', () => {
 
     const showMissing = runCli(repo, ['show'])
     expect(showMissing.status).not.toBe(0)
-    expect(showMissing.stderr).toContain("required option '--session")
+    expect(showMissing.stderr).toContain('No active change session')
 
     const archiveMissing = runCli(repo, ['archive'])
     expect(archiveMissing.status).not.toBe(0)
@@ -165,6 +180,10 @@ describe('cli integration', () => {
     const badStatus = runCli(repo, ['sessions', '--status', 'closed'])
     expect(badStatus.status).not.toBe(0)
     expect(badStatus.stderr).toContain('Session status must be one of')
+
+    const emptyEvidence = runCli(repo, ['evidence', '--latest'])
+    expect(emptyEvidence.status).not.toBe(0)
+    expect(emptyEvidence.stderr).toContain('No ForgeDesk evidence packs yet')
   })
 
   it('records failing command exit codes', () => {

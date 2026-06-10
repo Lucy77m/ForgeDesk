@@ -2,7 +2,7 @@
 import { Command } from 'commander'
 import { pathToFileURL } from 'node:url'
 import { addDecision, addManualCheck, addRisk, initProject, setIntent, startSession } from '../core/session.js'
-import { generateEvidence } from '../core/evidence.js'
+import { generateEvidence, getLatestEvidencePack, listEvidencePacks } from '../core/evidence.js'
 import { ForgeDeskError } from '../core/errors.js'
 import { getStatus } from '../core/status.js'
 import { recordTestCommand, runTestCommand } from '../core/test-runner.js'
@@ -136,8 +136,8 @@ export function buildProgram(cwd = process.cwd()): Command {
   program
     .command('show')
     .description('Show one ForgeDesk change session.')
-    .requiredOption('--session <id>', 'session id')
-    .action(async (options: { session: string }) => {
+    .option('--session <id>', 'session id; defaults to the active session')
+    .action(async (options: { session?: string }) => {
       console.log(await showSession(cwd, options.session))
     })
 
@@ -172,7 +172,24 @@ export function buildProgram(cwd = process.cwd()): Command {
     .description('Generate evidence files for a session.')
     .option('--session <id>', 'session id')
     .option('--output-dir <dir>', 'output directory')
-    .action(async (options: { session?: string; outputDir?: string }) => {
+    .option('--list', 'list generated evidence packs without generating a new pack')
+    .option('--latest', 'show the latest generated evidence pack without generating a new pack')
+    .action(async (options: { session?: string; outputDir?: string; list?: boolean; latest?: boolean }) => {
+      if (options.list && options.latest) {
+        throw new ForgeDeskError('Use either --list or --latest, not both.')
+      }
+      if ((options.list || options.latest) && (options.session || options.outputDir)) {
+        throw new ForgeDeskError('Use --list or --latest without --session or --output-dir.')
+      }
+      if (options.list) {
+        console.log(await listEvidencePacks(cwd))
+        return
+      }
+      if (options.latest) {
+        console.log(await getLatestEvidencePack(cwd))
+        return
+      }
+
       const outputDir = await generateEvidence(cwd, {
         sessionId: options.session,
         outputDir: options.outputDir

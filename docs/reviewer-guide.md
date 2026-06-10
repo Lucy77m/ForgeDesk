@@ -5,6 +5,9 @@ It is not a substitute for code review.
 
 ## How To Read PR_EVIDENCE.md
 
+Find local evidence packs with `forgedesk evidence --list`, or show the most
+recent generated pack with `forgedesk evidence --latest`.
+
 Start with these sections:
 
 1. `Intent`: what the change claims to do.

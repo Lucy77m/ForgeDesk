@@ -23,6 +23,7 @@ node D:/ForgeDesk/dist/cli/index.js check "Record a manual verification step."
 node D:/ForgeDesk/dist/cli/index.js test --command "pnpm test"
 node D:/ForgeDesk/dist/cli/index.js test -- pnpm test
 node D:/ForgeDesk/dist/cli/index.js evidence
+node D:/ForgeDesk/dist/cli/index.js evidence --latest
 node D:/ForgeDesk/dist/cli/index.js done
 ```
 
@@ -39,7 +40,9 @@ From this repository:
 ```bash
 pnpm build
 node dist/cli/index.js sessions
+node dist/cli/index.js show
 node dist/cli/index.js status
+node dist/cli/index.js evidence --list
 ```
 
 The `.forgedesk/` directory is intentionally ignored by git. It keeps local
@@ -68,6 +71,7 @@ Common commands:
 
 ```bash
 node dist/cli/index.js sessions
+node dist/cli/index.js show
 node dist/cli/index.js show --session <id>
 node dist/cli/index.js done
 node dist/cli/index.js archive --session <id>

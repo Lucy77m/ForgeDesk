@@ -115,12 +115,10 @@ function formatTests(session: ChangeSession): string {
 }
 
 export async function showSession(cwd: string, sessionId: string | undefined): Promise<string> {
-  if (!sessionId) {
-    throw new ForgeDeskError('Show requires --session <id>.')
-  }
-
   const workspace = await loadWorkspace(cwd)
-  const session = await readSessionOrThrow(workspace.repoPath, sessionId)
+  const session = sessionId
+    ? await readSessionOrThrow(workspace.repoPath, sessionId)
+    : await getActiveSession(workspace)
 
   return [
     'ForgeDesk Session',
