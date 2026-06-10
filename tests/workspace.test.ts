@@ -6,9 +6,10 @@ import {
   loadWorkspace,
   pathExists,
   pathsFor,
+  resolveSession,
   sessionFile
 } from '../src/core/workspace.js'
-import { CONFIG_SCHEMA_VERSION, PROJECT_SCHEMA_VERSION } from '../src/types.js'
+import { CONFIG_SCHEMA_VERSION, PROJECT_SCHEMA_VERSION, SESSION_SCHEMA_VERSION } from '../src/types.js'
 import { cleanupDir, tempDir } from './helpers.js'
 
 const now = '2026-06-11T00:00:00.000Z'
@@ -38,6 +39,28 @@ function writeWorkspace(repo: string): void {
       {
         schemaVersion: CONFIG_SCHEMA_VERSION,
         activeSessionId: 'session-1',
+        createdAt: now,
+        updatedAt: now
+      },
+      null,
+      2
+    )}\n`,
+    'utf8'
+  )
+}
+
+function writeSession(repo: string, id: string, title: string): void {
+  writeFileSync(
+    sessionFile(repo, id),
+    `${JSON.stringify(
+      {
+        schemaVersion: SESSION_SCHEMA_VERSION,
+        id,
+        title,
+        status: 'active',
+        decisions: [],
+        risks: [],
+        tests: [],
         createdAt: now,
         updatedAt: now
       },
@@ -101,6 +124,35 @@ describe('workspace helpers', () => {
     expect(workspace.forgedeskDir).toBe(path.join(repo, '.forgedesk'))
     expect(workspace.project.name).toBe('demo')
     expect(workspace.config.activeSessionId).toBe('session-1')
+  })
+
+  it('resolves active and explicit sessions from a discovered workspace', async () => {
+    const repo = tempDir()
+    dirs.push(repo)
+    const child = path.join(repo, 'src', 'feature')
+    mkdirSync(child, { recursive: true })
+    writeWorkspace(repo)
+    writeSession(repo, 'session-1', 'Active session')
+    writeSession(repo, 'session-2', 'Explicit session')
+
+    const active = await resolveSession(child)
+    const explicit = await resolveSession(child, 'session-2')
+
+    expect(active.workspace.repoPath).toBe(repo)
+    expect(active.session.id).toBe('session-1')
+    expect(active.session.title).toBe('Active session')
+    expect(explicit.workspace.repoPath).toBe(repo)
+    expect(explicit.session.id).toBe('session-2')
+    expect(explicit.session.title).toBe('Explicit session')
+  })
+
+  it('reports unknown explicit sessions clearly', async () => {
+    const repo = tempDir()
+    dirs.push(repo)
+    writeWorkspace(repo)
+    writeSession(repo, 'session-1', 'Active session')
+
+    await expect(resolveSession(repo, 'missing-session')).rejects.toThrow('Unknown session: missing-session')
   })
 
   it('reports missing ForgeDesk workspaces clearly', async () => {

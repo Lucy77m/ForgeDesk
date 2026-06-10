@@ -7,6 +7,8 @@ import { ForgeDeskError } from './errors.js'
 import { assertSession, readChangeSession, readConfig, readProject } from './metadata.js'
 
 export const FORGEDESK_DIR = '.forgedesk'
+const PROJECT_NOT_FOUND_MESSAGE =
+  'Could not find a ForgeDesk project. Run "forgedesk init --repo ." from a git repository first.'
 
 export type Workspace = {
   repoPath: string
@@ -20,12 +22,26 @@ export type ResolvedSession = {
   session: ChangeSession
 }
 
+export type WorkspacePaths = {
+  forgedeskDir: string
+  projectFile: string
+  configFile: string
+  sessionsDir: string
+  evidenceDir: string
+  exportsDir: string
+  logsDir: string
+}
+
 export function resolveFrom(cwd: string, inputPath: string): string {
   return path.resolve(cwd, inputPath)
 }
 
-export function pathsFor(repoPath: string) {
-  const forgedeskDir = path.join(repoPath, FORGEDESK_DIR)
+function forgedeskDirFor(repoPath: string): string {
+  return path.join(repoPath, FORGEDESK_DIR)
+}
+
+export function pathsFor(repoPath: string): WorkspacePaths {
+  const forgedeskDir = forgedeskDirFor(repoPath)
   return {
     forgedeskDir,
     projectFile: path.join(forgedeskDir, 'project.json'),
@@ -50,6 +66,14 @@ export async function pathExists(filePath: string): Promise<boolean> {
   }
 }
 
+async function hasForgeDeskProject(repoPath: string): Promise<boolean> {
+  return pathExists(pathsFor(repoPath).projectFile)
+}
+
+function missingProjectError(): ForgeDeskError {
+  return new ForgeDeskError(PROJECT_NOT_FOUND_MESSAGE)
+}
+
 export async function ensureForgeDeskDirs(repoPath: string): Promise<void> {
   const paths = pathsFor(repoPath)
   await mkdir(paths.sessionsDir, { recursive: true })
@@ -62,29 +86,30 @@ export async function findRepoWithForgeDesk(startPath: string): Promise<string> 
   let current = path.resolve(startPath)
 
   while (true) {
-    if (await pathExists(pathsFor(current).projectFile)) {
+    if (await hasForgeDeskProject(current)) {
       return current
     }
 
     const parent = path.dirname(current)
     if (parent === current) {
-      throw new ForgeDeskError(
-        'Could not find a ForgeDesk project. Run "forgedesk init --repo ." from a git repository first.'
-      )
+      throw missingProjectError()
     }
     current = parent
   }
 }
 
-export async function loadWorkspace(cwd: string): Promise<Workspace> {
-  const repoPath = await findRepoWithForgeDesk(cwd)
-  const paths = pathsFor(repoPath)
+async function readWorkspace(repoPath: string, paths: WorkspacePaths): Promise<Workspace> {
   return {
     repoPath,
     forgedeskDir: paths.forgedeskDir,
     project: await readProject(paths.projectFile),
     config: await readConfig(paths.configFile)
   }
+}
+
+export async function loadWorkspace(cwd: string): Promise<Workspace> {
+  const repoPath = await findRepoWithForgeDesk(cwd)
+  return readWorkspace(repoPath, pathsFor(repoPath))
 }
 
 export async function writeProject(repoPath: string, project: Project): Promise<void> {
@@ -103,24 +128,40 @@ function isNotFoundError(error: unknown): boolean {
   return error instanceof Error && 'code' in error && error.code === 'ENOENT'
 }
 
+function unknownSessionError(sessionId: string): ForgeDeskError {
+  return new ForgeDeskError(`Unknown session: ${sessionId}`)
+}
+
 async function readSessionOrThrow(repoPath: string, sessionId: string): Promise<ChangeSession> {
   try {
     return await readSession(repoPath, sessionId)
   } catch (error) {
     if (isNotFoundError(error)) {
-      throw new ForgeDeskError(`Unknown session: ${sessionId}`)
+      throw unknownSessionError(sessionId)
     }
     throw error
   }
+}
+
+function activeSessionIdOrThrow(workspace: Workspace): string {
+  const activeSessionId = workspace.config.activeSessionId
+  if (!activeSessionId) {
+    throw new ForgeDeskError('No active change session. Run "forgedesk start --title <title>" first.')
+  }
+  return activeSessionId
+}
+
+function readResolvedSession(workspace: Workspace, sessionId?: string): Promise<ChangeSession> {
+  return sessionId
+    ? readSessionOrThrow(workspace.repoPath, sessionId)
+    : getActiveSession(workspace)
 }
 
 export async function resolveSession(cwd: string, sessionId?: string): Promise<ResolvedSession> {
   const workspace = await loadWorkspace(cwd)
   return {
     workspace,
-    session: sessionId
-      ? await readSessionOrThrow(workspace.repoPath, sessionId)
-      : await getActiveSession(workspace)
+    session: await readResolvedSession(workspace, sessionId)
   }
 }
 
@@ -158,10 +199,5 @@ export async function listSessions(repoPath: string): Promise<ChangeSession[]> {
 }
 
 export async function getActiveSession(workspace: Workspace): Promise<ChangeSession> {
-  const activeSessionId = workspace.config.activeSessionId
-  if (!activeSessionId) {
-    throw new ForgeDeskError('No active change session. Run "forgedesk start --title <title>" first.')
-  }
-
-  return readSession(workspace.repoPath, activeSessionId)
+  return readSession(workspace.repoPath, activeSessionIdOrThrow(workspace))
 }

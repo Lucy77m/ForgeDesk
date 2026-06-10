@@ -17,8 +17,6 @@ Focus on reliability, maintainability, and clearer local workflows.
 
 Improve the codebase without changing the product shape.
 
-- Add direct unit tests for `metadata.ts`, `format.ts`, workspace lookup, and
-  currently lightly covered templates.
 - Consider lightweight coverage reporting after the unit-test shape is clearer.
 - Consider a CI matrix for Windows, macOS, and supported Node.js versions after
   smoke is stable in CI.
