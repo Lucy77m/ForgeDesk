@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest'
+import { renderChangeSummary } from '../src/templates/change-summary.js'
 import { renderPrEvidence } from '../src/templates/pr-evidence.js'
+import { renderReviewPrompt } from '../src/templates/review-prompt.js'
 import { renderTestResults } from '../src/templates/test-results.js'
 import type { EvidenceBundle } from '../src/types.js'
 
@@ -116,5 +118,54 @@ describe('templates', () => {
     expect(rendered).toContain('Opened the generated PR evidence')
     expect(rendered).toContain('No command tests recorded.')
     expect(rendered).not.toContain('Tests were recorded but not run by ForgeDesk.')
+  })
+
+  it('renders a change summary with normalized files and test totals', () => {
+    const value = bundle()
+    value.session.intent = 'Summarize a local evidence change.'
+    value.session.tests = [
+      {
+        id: 'test-1',
+        command: 'pnpm test',
+        status: 'passed',
+        exitCode: 0
+      }
+    ]
+    value.gitSnapshot.modifiedFiles = ['src\\core\\workspace.ts']
+    value.gitSnapshot.untrackedFiles = ['tests/format.test.ts']
+
+    const rendered = renderChangeSummary(value)
+
+    expect(rendered).toContain('# Change Summary')
+    expect(rendered).toContain('Demo change')
+    expect(rendered).toContain('Summarize a local evidence change.')
+    expect(rendered).toContain('- src/core/workspace.ts')
+    expect(rendered).toContain('- tests/format.test.ts')
+    expect(rendered).toContain('1 executed (1 passed, 0 failed), 0 recorded only, 0 manual')
+  })
+
+  it('renders a review prompt with readiness and not-verified sections', () => {
+    const value = bundle()
+    value.session.intent = 'Review a complete evidence pack.'
+    value.session.tests = [
+      {
+        id: 'test-1',
+        command: 'pnpm test',
+        status: 'passed',
+        exitCode: 0
+      }
+    ]
+    value.gitSnapshot.addedFiles = ['docs\\reviewer-guide.md']
+
+    const rendered = renderReviewPrompt(value)
+
+    expect(rendered).toContain('# Review Prompt')
+    expect(rendered).toContain('- Branch: main')
+    expect(rendered).toContain('- Changed files: 1')
+    expect(rendered).toContain('## Review Readiness')
+    expect(rendered).toContain('- Intent: present')
+    expect(rendered).toContain('- docs/reviewer-guide.md')
+    expect(rendered).toContain('## Not Verified')
+    expect(rendered).toContain('- No known gaps recorded.')
   })
 })
