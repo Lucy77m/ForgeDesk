@@ -1,6 +1,7 @@
 import path from 'node:path'
 import type { ChangeSession } from '../types.js'
 import { displayPath } from '../templates/format.js'
+import { EVIDENCE_FILE_NAMES } from './constants.js'
 import { ForgeDeskError } from './errors.js'
 import { getActiveSession, loadWorkspace, pathExists, readSession } from './workspace.js'
 
@@ -17,14 +18,6 @@ export type ReadyReport = {
   blockers: string[]
   warnings: string[]
 }
-
-const evidenceFiles = [
-  'PR_EVIDENCE.md',
-  'CHANGE_SUMMARY.md',
-  'TEST_RESULTS.md',
-  'REVIEW_PROMPT.md',
-  'evidence.json'
-]
 
 function isNotFoundError(error: unknown): boolean {
   return error instanceof Error && 'code' in error && error.code === 'ENOENT'
@@ -54,12 +47,12 @@ async function getSession(cwd: string, sessionId: string | undefined): Promise<{
 
 async function missingEvidenceFiles(repoPath: string, session: ChangeSession): Promise<string[]> {
   if (!session.evidenceDir) {
-    return evidenceFiles
+    return [...EVIDENCE_FILE_NAMES]
   }
 
   const evidenceDir = path.resolve(repoPath, session.evidenceDir)
   const missing: string[] = []
-  for (const file of evidenceFiles) {
+  for (const file of EVIDENCE_FILE_NAMES) {
     if (!(await pathExists(path.join(evidenceDir, file)))) {
       missing.push(file)
     }

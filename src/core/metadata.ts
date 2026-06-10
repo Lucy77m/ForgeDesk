@@ -1,4 +1,5 @@
 import { readJson } from '../storage/json-store.js'
+import { displayPath } from '../templates/format.js'
 import {
   CONFIG_SCHEMA_VERSION,
   PROJECT_SCHEMA_VERSION,
@@ -10,10 +11,6 @@ import {
 import { ForgeDeskError } from './errors.js'
 
 type MetadataKind = 'project' | 'config' | 'session'
-
-function displayPath(filePath: string): string {
-  return filePath.replaceAll('\\', '/')
-}
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)

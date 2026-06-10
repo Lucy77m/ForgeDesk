@@ -1,6 +1,7 @@
 import { copyFile, mkdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { displayPath } from '../templates/format.js'
+import { EVIDENCE_FILE_NAMES } from './constants.js'
 import { ForgeDeskError } from './errors.js'
 import { getHandoffReport, renderHandoffReport } from './handoff.js'
 import { getActiveSession, loadWorkspace, pathExists, readSession, pathsFor } from './workspace.js'
@@ -24,14 +25,6 @@ export type ExportOptions = {
   sessionId?: string
   outputDir?: string
 }
-
-const evidenceFiles = [
-  'PR_EVIDENCE.md',
-  'CHANGE_SUMMARY.md',
-  'TEST_RESULTS.md',
-  'REVIEW_PROMPT.md',
-  'evidence.json'
-]
 
 function isNotFoundError(error: unknown): boolean {
   return error instanceof Error && 'code' in error && error.code === 'ENOENT'
@@ -61,7 +54,7 @@ async function getSession(cwd: string, sessionId: string | undefined) {
 
 async function assertEvidenceFiles(sourceDir: string): Promise<void> {
   const missing: string[] = []
-  for (const file of evidenceFiles) {
+  for (const file of EVIDENCE_FILE_NAMES) {
     if (!(await pathExists(path.join(sourceDir, file)))) {
       missing.push(file)
     }
@@ -91,7 +84,7 @@ export async function exportEvidencePack(cwd: string, options: ExportOptions = {
   await mkdir(outputDir, { recursive: true })
 
   const copiedFiles: string[] = []
-  for (const file of evidenceFiles) {
+  for (const file of EVIDENCE_FILE_NAMES) {
     await copyFile(path.join(sourceDir, file), path.join(outputDir, file))
     copiedFiles.push(displayPath(path.join(outputDir, file)))
   }

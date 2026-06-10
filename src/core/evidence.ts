@@ -7,6 +7,7 @@ import { renderChangeSummary } from '../templates/change-summary.js'
 import { renderPrEvidence } from '../templates/pr-evidence.js'
 import { renderReviewPrompt } from '../templates/review-prompt.js'
 import { renderTestResults } from '../templates/test-results.js'
+import { displayPath } from '../templates/format.js'
 import { ForgeDeskError } from './errors.js'
 import {
   getActiveSession,
@@ -24,10 +25,6 @@ export type GenerateEvidenceOptions = {
 }
 
 type SessionWithEvidence = ChangeSession & { evidenceDir: string }
-
-function displayPath(filePath: string): string {
-  return filePath.replaceAll('\\', '/')
-}
 
 function sessionsWithEvidence(sessions: ChangeSession[]): SessionWithEvidence[] {
   return sessions

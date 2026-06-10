@@ -1,6 +1,7 @@
 import path from 'node:path'
 import type { ChangeSession } from '../types.js'
 import { changedFileCount, displayPath, testSummary } from '../templates/format.js'
+import { EVIDENCE_FILE_NAMES } from './constants.js'
 import { ForgeDeskError } from './errors.js'
 import { getReadyReport, type ReadyReport } from './ready.js'
 import { getActiveSession, loadWorkspace, readSession } from './workspace.js'
@@ -26,14 +27,6 @@ export type HandoffReport = {
   }
   recommendedFiles: string[]
 }
-
-const evidenceFiles = [
-  'PR_EVIDENCE.md',
-  'TEST_RESULTS.md',
-  'REVIEW_PROMPT.md',
-  'CHANGE_SUMMARY.md',
-  'evidence.json'
-]
 
 function isNotFoundError(error: unknown): boolean {
   return error instanceof Error && 'code' in error && error.code === 'ENOENT'
@@ -66,7 +59,7 @@ function recommendedFiles(session: ChangeSession): string[] {
     return []
   }
 
-  return evidenceFiles.map((file) => displayPath(path.join(session.evidenceDir!, file)))
+  return EVIDENCE_FILE_NAMES.map((file) => displayPath(path.join(session.evidenceDir!, file)))
 }
 
 export async function getHandoffReport(cwd: string, sessionId?: string): Promise<HandoffReport> {

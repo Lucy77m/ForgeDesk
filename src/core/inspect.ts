@@ -2,6 +2,7 @@ import { stat } from 'node:fs/promises'
 import path from 'node:path'
 import type { ChangeSession } from '../types.js'
 import { displayPath } from '../templates/format.js'
+import { EVIDENCE_FILE_NAMES } from './constants.js'
 import { ForgeDeskError } from './errors.js'
 import { getReadyReport, type ReadyReport } from './ready.js'
 import { getActiveSession, loadWorkspace, pathExists, pathsFor, readSession } from './workspace.js'
@@ -37,15 +38,7 @@ export type InspectOptions = {
   target?: InspectTarget
 }
 
-const evidenceFiles = [
-  'PR_EVIDENCE.md',
-  'CHANGE_SUMMARY.md',
-  'TEST_RESULTS.md',
-  'REVIEW_PROMPT.md',
-  'evidence.json'
-]
-
-const exportFiles = [...evidenceFiles, 'HANDOFF.md']
+const exportFiles = [...EVIDENCE_FILE_NAMES, 'HANDOFF.md']
 
 function isNotFoundError(error: unknown): boolean {
   return error instanceof Error && 'code' in error && error.code === 'ENOENT'
@@ -85,8 +78,8 @@ function targetDirFor(repoPath: string, session: ChangeSession, target: InspectT
   return path.resolve(repoPath, session.evidenceDir)
 }
 
-function expectedFilesFor(target: InspectTarget): string[] {
-  return target === 'export' ? exportFiles : evidenceFiles
+function expectedFilesFor(target: InspectTarget): readonly string[] {
+  return target === 'export' ? exportFiles : EVIDENCE_FILE_NAMES
 }
 
 async function inspectFile(targetDir: string, name: string): Promise<InspectFile> {

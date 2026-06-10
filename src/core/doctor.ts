@@ -2,6 +2,8 @@ import { readdir } from 'node:fs/promises'
 import path from 'node:path'
 import type { ChangeSession } from '../types.js'
 import { readJson } from '../storage/json-store.js'
+import { displayPath } from '../templates/format.js'
+import { EVIDENCE_FILE_NAMES } from './constants.js'
 import { validateConfig, validateProject, validateSession } from './metadata.js'
 import { loadWorkspace, pathExists, pathsFor } from './workspace.js'
 
@@ -21,14 +23,6 @@ export type DoctorReport = {
   checks: DoctorCheck[]
 }
 
-const evidenceFiles = [
-  'PR_EVIDENCE.md',
-  'CHANGE_SUMMARY.md',
-  'TEST_RESULTS.md',
-  'REVIEW_PROMPT.md',
-  'evidence.json'
-]
-
 function statusFor(checks: DoctorCheck[]): DoctorStatus {
   if (checks.some((check) => check.status === 'error')) {
     return 'error'
@@ -41,10 +35,6 @@ function statusFor(checks: DoctorCheck[]): DoctorStatus {
 
 function check(name: string, status: DoctorStatus, message: string): DoctorCheck {
   return { name, status, message }
-}
-
-function displayPath(filePath: string): string {
-  return filePath.replaceAll('\\', '/')
 }
 
 async function readSessionFiles(repoPath: string, checks: DoctorCheck[]): Promise<ChangeSession[]> {
@@ -84,7 +74,7 @@ async function checkEvidence(repoPath: string, sessions: ChangeSession[], checks
 
   for (const session of sessionsWithEvidence) {
     const evidenceDir = path.resolve(repoPath, session.evidenceDir!)
-    for (const file of evidenceFiles) {
+    for (const file of EVIDENCE_FILE_NAMES) {
       if (!(await pathExists(path.join(evidenceDir, file)))) {
         checks.push(check('evidence', 'error', `${session.id}: missing ${file} in ${session.evidenceDir}.`))
       }

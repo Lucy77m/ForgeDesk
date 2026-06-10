@@ -1,4 +1,5 @@
 import type { ChangeSession } from '../types.js'
+import { displayPath } from '../templates/format.js'
 import { ForgeDeskError } from './errors.js'
 import {
   getActiveSession,
@@ -91,10 +92,6 @@ function listItems(items: string[]): string {
   return items.length > 0 ? items.map((item) => `- ${item}`).join('\n') : '- None'
 }
 
-function displayPath(filePath: string | undefined): string {
-  return filePath ? filePath.replaceAll('\\', '/') : 'not generated'
-}
-
 function formatTests(session: ChangeSession): string {
   if (session.tests.length === 0) {
     return '- None'
@@ -121,7 +118,7 @@ export async function showSession(cwd: string, sessionId: string | undefined): P
     `Title: ${session.title}`,
     `Status: ${session.status}`,
     `Intent: ${session.intent ?? 'Not recorded.'}`,
-    `Evidence: ${displayPath(session.evidenceDir)}`,
+    `Evidence: ${session.evidenceDir ? displayPath(session.evidenceDir) : 'not generated'}`,
     '',
     '## Decisions',
     listItems(session.decisions.map((decision) => decision.text)),
