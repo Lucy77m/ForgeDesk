@@ -89,6 +89,7 @@ forgedesk evidence
 See [docs/boundaries.md](docs/boundaries.md) for the v0.1 boundary contract.
 See [docs/reviewer-guide.md](docs/reviewer-guide.md) for how to inspect an
 evidence pack.
+See [docs/local-workflow.md](docs/local-workflow.md) for a local demo workflow.
 
 ## Project Status
 
