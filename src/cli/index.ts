@@ -2,6 +2,7 @@
 import { Command } from 'commander'
 import { pathToFileURL } from 'node:url'
 import { addDecision, addManualCheck, addRisk, initProject, setIntent, startSession } from '../core/session.js'
+import { getDoctorReport, renderDoctorReport } from '../core/doctor.js'
 import { generateEvidence, getLatestEvidencePack, listEvidencePacks } from '../core/evidence.js'
 import { ForgeDeskError } from '../core/errors.js'
 import { getStatus } from '../core/status.js'
@@ -119,6 +120,18 @@ export function buildProgram(cwd = process.cwd()): Command {
     .description('Show ForgeDesk and git status.')
     .action(async () => {
       console.log(await getStatus(cwd))
+    })
+
+  program
+    .command('doctor')
+    .description('Check local ForgeDesk project metadata and evidence files.')
+    .option('--json', 'print the doctor report as JSON')
+    .action(async (options: { json?: boolean }) => {
+      const report = await getDoctorReport(cwd)
+      console.log(options.json ? JSON.stringify(report, null, 2) : renderDoctorReport(report))
+      if (report.status === 'error') {
+        process.exitCode = 1
+      }
     })
 
   program

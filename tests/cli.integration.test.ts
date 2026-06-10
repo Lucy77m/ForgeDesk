@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
 import { cleanupDir, initEmptyGitRepo, initGitRepo, runCli, tempDir } from './helpers.js'
@@ -156,6 +156,38 @@ describe('cli integration', () => {
     const activeSessions = runCli(repo, ['sessions', '--status', 'active'])
     expect(activeSessions.stdout).toContain('Lifecycle first')
     expect(activeSessions.stdout).toContain('* ')
+  })
+
+  it('checks local project health with doctor', () => {
+    const repo = tempDir()
+    dirs.push(repo)
+    initGitRepo(repo)
+
+    expect(runCli(repo, ['init', '--repo', '.']).status).toBe(0)
+    const initialDoctor = runCli(repo, ['doctor'])
+    expect(initialDoctor.status).toBe(0)
+    expect(initialDoctor.stdout).toContain('ForgeDesk Doctor')
+    expect(initialDoctor.stdout).toContain('Status: warning')
+    expect(initialDoctor.stdout).toContain('No active session configured')
+
+    expect(runCli(repo, ['start', '--title', 'Doctor demo']).status).toBe(0)
+    expect(runCli(repo, ['intent', 'Exercise doctor command.']).status).toBe(0)
+    expect(runCli(repo, ['test', '--command', 'pnpm test']).status).toBe(0)
+    expect(runCli(repo, ['evidence']).status).toBe(0)
+
+    const doctorJson = runCli(repo, ['doctor', '--json'])
+    expect(doctorJson.status).toBe(0)
+    const report = JSON.parse(doctorJson.stdout)
+    expect(report.schemaVersion).toBe('forgedesk-doctor-v1')
+    expect(report.status).toBe('ok')
+    expect(report.checks.some((item: { name: string; status: string }) => item.name === 'evidence' && item.status === 'ok')).toBe(true)
+
+    const sessionId = JSON.parse(readFileSync(path.join(repo, '.forgedesk', 'config.json'), 'utf8')).activeSessionId
+    rmSync(path.join(repo, '.forgedesk', 'evidence', sessionId, 'PR_EVIDENCE.md'))
+    const brokenDoctor = runCli(repo, ['doctor'])
+    expect(brokenDoctor.status).not.toBe(0)
+    expect(brokenDoctor.stdout).toContain('Status: error')
+    expect(brokenDoctor.stdout).toContain('missing PR_EVIDENCE.md')
   })
 
   it('reports lifecycle command errors clearly', () => {

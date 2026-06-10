@@ -14,7 +14,7 @@ import {
   loadWorkspace,
   pathsFor,
   readSession,
-  writeSession
+  updateSession
 } from './workspace.js'
 import { writeFile } from 'node:fs/promises'
 
@@ -69,14 +69,13 @@ export async function generateEvidence(cwd: string, options: GenerateEvidenceOpt
   await writeFile(path.join(outputDir, 'REVIEW_PROMPT.md'), renderReviewPrompt(bundle), 'utf8')
   await writeJson(path.join(outputDir, 'evidence.json'), bundle)
 
-  const updatedSession: ChangeSession = {
-    ...session,
+  await updateSession(workspace.repoPath, session.id, (current) => ({
+    ...current,
     status: 'needs-review',
     gitSnapshot: snapshot,
     evidenceDir: path.relative(workspace.repoPath, outputDir),
     updatedAt: bundle.generatedAt
-  }
-  await writeSession(workspace.repoPath, updatedSession)
+  }))
 
   return outputDir
 }

@@ -8,6 +8,7 @@ import {
   loadWorkspace,
   pathsFor,
   resolveFrom,
+  updateSession,
   writeConfig,
   writeProject,
   writeSession
@@ -109,13 +110,11 @@ export async function startSession(title: string, cwd: string): Promise<ChangeSe
 export async function setIntent(text: string, cwd: string): Promise<ChangeSession> {
   const workspace = await loadWorkspace(cwd)
   const session = await getActiveSession(workspace)
-  const updated = {
-    ...session,
+  return updateSession(workspace.repoPath, session.id, (current) => ({
+    ...current,
     intent: requireText(text, 'Intent'),
     updatedAt: now()
-  }
-  await writeSession(workspace.repoPath, updated)
-  return updated
+  }))
 }
 
 export async function addDecision(text: string, cwd: string): Promise<ChangeSession> {
@@ -123,13 +122,11 @@ export async function addDecision(text: string, cwd: string): Promise<ChangeSess
   const session = await getActiveSession(workspace)
   const timestamp = now()
   const decisionText = requireText(text, 'Decision')
-  const updated = {
-    ...session,
-    decisions: [...session.decisions, { id: makeId('decision'), text: decisionText, createdAt: timestamp }],
+  return updateSession(workspace.repoPath, session.id, (current) => ({
+    ...current,
+    decisions: [...current.decisions, { id: makeId('decision'), text: decisionText, createdAt: timestamp }],
     updatedAt: timestamp
-  }
-  await writeSession(workspace.repoPath, updated)
-  return updated
+  }))
 }
 
 export async function addRisk(
@@ -141,13 +138,11 @@ export async function addRisk(
   const session = await getActiveSession(workspace)
   const timestamp = now()
   const riskText = requireText(text, 'Risk')
-  const updated = {
-    ...session,
-    risks: [...session.risks, { id: makeId('risk'), text: riskText, severity, createdAt: timestamp }],
+  return updateSession(workspace.repoPath, session.id, (current) => ({
+    ...current,
+    risks: [...current.risks, { id: makeId('risk'), text: riskText, severity, createdAt: timestamp }],
     updatedAt: timestamp
-  }
-  await writeSession(workspace.repoPath, updated)
-  return updated
+  }))
 }
 
 export async function addManualCheck(text: string, cwd: string): Promise<ChangeSession> {
@@ -155,14 +150,12 @@ export async function addManualCheck(text: string, cwd: string): Promise<ChangeS
   const session = await getActiveSession(workspace)
   const timestamp = now()
   const checkText = requireText(text, 'Manual check')
-  const updated = {
-    ...session,
+  return updateSession(workspace.repoPath, session.id, (current) => ({
+    ...current,
     manualChecks: [
-      ...(session.manualChecks ?? []),
+      ...(current.manualChecks ?? []),
       { id: makeId('check'), text: checkText, createdAt: timestamp }
     ],
     updatedAt: timestamp
-  }
-  await writeSession(workspace.repoPath, updated)
-  return updated
+  }))
 }

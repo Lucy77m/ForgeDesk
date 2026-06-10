@@ -24,6 +24,7 @@ node D:/ForgeDesk/dist/cli/index.js test --command "pnpm test"
 node D:/ForgeDesk/dist/cli/index.js test -- pnpm test
 node D:/ForgeDesk/dist/cli/index.js evidence
 node D:/ForgeDesk/dist/cli/index.js evidence --latest
+node D:/ForgeDesk/dist/cli/index.js doctor
 node D:/ForgeDesk/dist/cli/index.js done
 ```
 
@@ -42,6 +43,7 @@ pnpm build
 node dist/cli/index.js sessions
 node dist/cli/index.js show
 node dist/cli/index.js status
+node dist/cli/index.js doctor
 node dist/cli/index.js evidence --list
 ```
 
@@ -80,3 +82,9 @@ node dist/cli/index.js reopen --session <id>
 
 `done` means the local evidence workflow is complete. It does not mean the code
 is correct, reviewed, merged, released, or published.
+
+## Local Health Check
+
+Use `forgedesk doctor` to check whether ForgeDesk metadata, sessions, and
+recorded evidence files are readable and internally linked. Use
+`forgedesk doctor --json` when another local tool needs structured output.

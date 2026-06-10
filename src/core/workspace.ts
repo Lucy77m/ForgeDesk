@@ -2,7 +2,7 @@ import { access, mkdir, readdir } from 'node:fs/promises'
 import { constants } from 'node:fs'
 import path from 'node:path'
 import type { ChangeSession, Config, Project } from '../types.js'
-import { readJson, writeJson } from '../storage/json-store.js'
+import { readJson, updateJson, writeJson } from '../storage/json-store.js'
 import { ForgeDeskError } from './errors.js'
 
 export const FORGEDESK_DIR = '.forgedesk'
@@ -93,6 +93,14 @@ export async function readSession(repoPath: string, sessionId: string): Promise<
 
 export async function writeSession(repoPath: string, session: ChangeSession): Promise<void> {
   await writeJson(sessionFile(repoPath, session.id), session)
+}
+
+export async function updateSession(
+  repoPath: string,
+  sessionId: string,
+  updater: (session: ChangeSession) => ChangeSession | Promise<ChangeSession>
+): Promise<ChangeSession> {
+  return updateJson<ChangeSession>(sessionFile(repoPath, sessionId), updater)
 }
 
 export async function listSessions(repoPath: string): Promise<ChangeSession[]> {

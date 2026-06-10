@@ -68,6 +68,8 @@ forgedesk check "Record a manual verification check."
 forgedesk test --command "npm test"
 forgedesk test -- npm test
 forgedesk status
+forgedesk doctor
+forgedesk doctor --json
 forgedesk sessions
 forgedesk show
 forgedesk show --session <id>

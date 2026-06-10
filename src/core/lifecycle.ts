@@ -5,8 +5,8 @@ import {
   listSessions,
   loadWorkspace,
   readSession,
-  writeConfig,
-  writeSession
+  updateSession,
+  writeConfig
 } from './workspace.js'
 
 type SessionStatus = ChangeSession['status']
@@ -33,14 +33,11 @@ async function readSessionOrThrow(repoPath: string, sessionId: string): Promise<
 export async function markActiveSessionDone(cwd: string): Promise<ChangeSession> {
   const workspace = await loadWorkspace(cwd)
   const session = await getActiveSession(workspace)
-  const updated: ChangeSession = {
-    ...session,
+  return updateSession(workspace.repoPath, session.id, (current) => ({
+    ...current,
     status: 'done',
     updatedAt: now()
-  }
-
-  await writeSession(workspace.repoPath, updated)
-  return updated
+  }))
 }
 
 export async function archiveSession(cwd: string, sessionId: string | undefined): Promise<ChangeSession> {
@@ -50,13 +47,11 @@ export async function archiveSession(cwd: string, sessionId: string | undefined)
 
   const workspace = await loadWorkspace(cwd)
   const session = await readSessionOrThrow(workspace.repoPath, sessionId)
-  const updated: ChangeSession = {
-    ...session,
+  const updated = await updateSession(workspace.repoPath, session.id, (current) => ({
+    ...current,
     status: 'archived',
     updatedAt: now()
-  }
-
-  await writeSession(workspace.repoPath, updated)
+  }))
 
   if (workspace.config.activeSessionId === sessionId) {
     await writeConfig(workspace.repoPath, {
@@ -77,13 +72,12 @@ export async function reopenSession(cwd: string, sessionId: string | undefined):
   const workspace = await loadWorkspace(cwd)
   const session = await readSessionOrThrow(workspace.repoPath, sessionId)
   const timestamp = now()
-  const updated: ChangeSession = {
-    ...session,
+  const updated = await updateSession(workspace.repoPath, session.id, (current) => ({
+    ...current,
     status: 'active',
     updatedAt: timestamp
-  }
+  }))
 
-  await writeSession(workspace.repoPath, updated)
   await writeConfig(workspace.repoPath, {
     ...workspace.config,
     activeSessionId: sessionId,

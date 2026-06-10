@@ -3,7 +3,7 @@ import path from 'node:path'
 import { spawnSync } from 'node:child_process'
 import type { ChangeSession, TestRun } from '../types.js'
 import { ForgeDeskError } from './errors.js'
-import { getActiveSession, loadWorkspace, pathsFor, writeSession } from './workspace.js'
+import { getActiveSession, loadWorkspace, pathsFor, updateSession } from './workspace.js'
 
 function now(): string {
   return new Date().toISOString()
@@ -31,13 +31,11 @@ function toPortablePath(filePath: string): string {
 async function appendTest(cwd: string, testRun: TestRun): Promise<ChangeSession> {
   const workspace = await loadWorkspace(cwd)
   const session = await getActiveSession(workspace)
-  const updated = {
-    ...session,
-    tests: [...session.tests, testRun],
+  return updateSession(workspace.repoPath, session.id, (current) => ({
+    ...current,
+    tests: [...current.tests, testRun],
     updatedAt: now()
-  }
-  await writeSession(workspace.repoPath, updated)
-  return updated
+  }))
 }
 
 export async function recordTestCommand(command: string, cwd: string): Promise<ChangeSession> {
@@ -91,11 +89,9 @@ export async function runTestCommand(commandParts: string[], cwd: string): Promi
   }
 
   const session = await getActiveSession(workspace)
-  const updated = {
-    ...session,
-    tests: [...session.tests, testRun],
+  return updateSession(workspace.repoPath, session.id, (current) => ({
+    ...current,
+    tests: [...current.tests, testRun],
     updatedAt: finishedAt
-  }
-  await writeSession(workspace.repoPath, updated)
-  return updated
+  }))
 }
