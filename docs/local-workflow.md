@@ -28,6 +28,8 @@ node D:/ForgeDesk/dist/cli/index.js doctor
 node D:/ForgeDesk/dist/cli/index.js ready
 node D:/ForgeDesk/dist/cli/index.js handoff
 node D:/ForgeDesk/dist/cli/index.js export
+node D:/ForgeDesk/dist/cli/index.js inspect
+node D:/ForgeDesk/dist/cli/index.js inspect --export
 node D:/ForgeDesk/dist/cli/index.js done
 ```
 
@@ -50,6 +52,7 @@ node dist/cli/index.js doctor
 node dist/cli/index.js ready
 node dist/cli/index.js handoff
 node dist/cli/index.js export
+node dist/cli/index.js inspect
 node dist/cli/index.js evidence --list
 ```
 
@@ -106,3 +109,7 @@ evidence and does not call an AI provider.
 Use `forgedesk export` to copy the existing evidence pack and a generated
 `HANDOFF.md` into `.forgedesk/exports/<session-id>` or a chosen local directory.
 It does not upload, publish, compress, or regenerate evidence.
+
+Use `forgedesk inspect` to check which expected evidence files exist and how
+large they are. Use `forgedesk inspect --export` to inspect the default local
+export directory for the active session.

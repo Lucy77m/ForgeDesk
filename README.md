@@ -80,6 +80,10 @@ forgedesk export
 forgedesk export --session <id>
 forgedesk export --output-dir <dir>
 forgedesk export --json
+forgedesk inspect
+forgedesk inspect --session <id>
+forgedesk inspect --export
+forgedesk inspect --json
 forgedesk sessions
 forgedesk show
 forgedesk show --session <id>

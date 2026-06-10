@@ -313,6 +313,69 @@ describe('cli integration', () => {
     expect(existsSync(path.join(repo, 'handoff-export', 'HANDOFF.md'))).toBe(true)
   })
 
+  it('inspects evidence and export files for a session', () => {
+    const repo = tempDir()
+    dirs.push(repo)
+    initGitRepo(repo)
+    writeFileSync(path.join(repo, 'README.md'), '# Inspect demo\n', 'utf8')
+
+    expect(runCli(repo, ['init', '--repo', '.']).status).toBe(0)
+    expect(runCli(repo, ['start', '--title', 'Inspect first']).status).toBe(0)
+    const firstSessionId = JSON.parse(readFileSync(path.join(repo, '.forgedesk', 'config.json'), 'utf8')).activeSessionId
+    expect(runCli(repo, ['intent', 'Exercise inspect for an explicit session.']).status).toBe(0)
+    expect(runCli(repo, ['check', 'Reviewed evidence files.']).status).toBe(0)
+    expect(runCli(repo, ['evidence']).status).toBe(0)
+    expect(runCli(repo, ['export']).status).toBe(0)
+
+    expect(runCli(repo, ['start', '--title', 'Inspect second']).status).toBe(0)
+
+    const inspect = runCli(repo, ['inspect', '--session', firstSessionId])
+    expect(inspect.status).toBe(0)
+    expect(inspect.stdout).toContain('ForgeDesk Inspect')
+    expect(inspect.stdout).toContain('OK: yes')
+    expect(inspect.stdout).toContain('Target: evidence')
+    expect(inspect.stdout).toContain('PR_EVIDENCE.md')
+    expect(inspect.stdout).toContain('bytes')
+
+    const inspectJson = runCli(repo, ['inspect', '--session', firstSessionId, '--json'])
+    expect(inspectJson.status).toBe(0)
+    const report = JSON.parse(inspectJson.stdout)
+    expect(report.schemaVersion).toBe('forgedesk-inspect-v1')
+    expect(report.target).toBe('evidence')
+    expect(report.ok).toBe(true)
+    expect(report.files.some((file: { name: string; exists: boolean }) => file.name === 'PR_EVIDENCE.md' && file.exists)).toBe(true)
+
+    const exportInspect = runCli(repo, ['inspect', '--session', firstSessionId, '--export'])
+    expect(exportInspect.status).toBe(0)
+    expect(exportInspect.stdout).toContain('Target: export')
+    expect(exportInspect.stdout).toContain('HANDOFF.md')
+  })
+
+  it('reports inspect errors for missing evidence and missing files', () => {
+    const repo = tempDir()
+    dirs.push(repo)
+    initGitRepo(repo)
+
+    expect(runCli(repo, ['init', '--repo', '.']).status).toBe(0)
+    expect(runCli(repo, ['start', '--title', 'Inspect missing evidence']).status).toBe(0)
+
+    const missingEvidence = runCli(repo, ['inspect'])
+    expect(missingEvidence.status).not.toBe(0)
+    expect(missingEvidence.stderr).toContain('Cannot inspect because evidence has not been generated')
+
+    expect(runCli(repo, ['intent', 'Exercise inspect missing files.']).status).toBe(0)
+    expect(runCli(repo, ['check', 'Reviewed evidence files.']).status).toBe(0)
+    expect(runCli(repo, ['evidence']).status).toBe(0)
+    const sessionId = JSON.parse(readFileSync(path.join(repo, '.forgedesk', 'config.json'), 'utf8')).activeSessionId
+    rmSync(path.join(repo, '.forgedesk', 'evidence', sessionId, 'PR_EVIDENCE.md'))
+
+    const missingFile = runCli(repo, ['inspect'])
+    expect(missingFile.status).not.toBe(0)
+    expect(missingFile.stdout).toContain('OK: no')
+    expect(missingFile.stdout).toContain('missing: PR_EVIDENCE.md')
+    expect(missingFile.stdout).toContain('## Missing Files')
+  })
+
   it('reports export errors before evidence generation', () => {
     const repo = tempDir()
     dirs.push(repo)

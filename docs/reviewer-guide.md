@@ -18,6 +18,9 @@ the most useful evidence files for a reviewer or another AI window.
 Run `forgedesk export` when you want to copy the evidence pack and `HANDOFF.md`
 to a local directory for sharing outside `.forgedesk/`.
 
+Run `forgedesk inspect` when you want to confirm the expected evidence or export
+files exist before handing them to someone else.
+
 Start with these sections:
 
 1. `Intent`: what the change claims to do.

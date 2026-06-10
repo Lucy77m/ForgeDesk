@@ -7,6 +7,7 @@ import { generateEvidence, getLatestEvidencePack, listEvidencePacks } from '../c
 import { ForgeDeskError } from '../core/errors.js'
 import { exportEvidencePack, renderExportReport } from '../core/export.js'
 import { getHandoffReport, renderHandoffReport } from '../core/handoff.js'
+import { getInspectReport, renderInspectReport } from '../core/inspect.js'
 import { getReadyReport, renderReadyReport } from '../core/ready.js'
 import { getStatus } from '../core/status.js'
 import { recordTestCommand, runTestCommand } from '../core/test-runner.js'
@@ -172,6 +173,23 @@ export function buildProgram(cwd = process.cwd()): Command {
         outputDir: options.outputDir
       })
       console.log(options.json ? JSON.stringify(report, null, 2) : renderExportReport(report))
+    })
+
+  program
+    .command('inspect')
+    .description('Inspect local evidence or export files for a session.')
+    .option('--session <id>', 'session id; defaults to the active session')
+    .option('--export', 'inspect the default export directory instead of the evidence directory')
+    .option('--json', 'print the inspect report as JSON')
+    .action(async (options: { session?: string; export?: boolean; json?: boolean }) => {
+      const report = await getInspectReport(cwd, {
+        sessionId: options.session,
+        target: options.export ? 'export' : 'evidence'
+      })
+      console.log(options.json ? JSON.stringify(report, null, 2) : renderInspectReport(report))
+      if (!report.ok) {
+        process.exitCode = 1
+      }
     })
 
   program
