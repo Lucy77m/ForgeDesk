@@ -26,6 +26,7 @@ node D:/ForgeDesk/dist/cli/index.js evidence
 node D:/ForgeDesk/dist/cli/index.js evidence --latest
 node D:/ForgeDesk/dist/cli/index.js doctor
 node D:/ForgeDesk/dist/cli/index.js ready
+node D:/ForgeDesk/dist/cli/index.js handoff
 node D:/ForgeDesk/dist/cli/index.js done
 ```
 
@@ -46,6 +47,7 @@ node dist/cli/index.js show
 node dist/cli/index.js status
 node dist/cli/index.js doctor
 node dist/cli/index.js ready
+node dist/cli/index.js handoff
 node dist/cli/index.js evidence --list
 ```
 
@@ -94,3 +96,7 @@ recorded evidence files are readable and internally linked. Use
 Use `forgedesk ready` to check whether the active session has enough recorded
 evidence for handoff. It reports blockers and warnings, but it is not a code
 correctness, security, merge, or release verdict.
+
+Use `forgedesk handoff` to print a compact local summary for a reviewer, PR
+description, release note draft, or next AI window. It reads existing local
+evidence and does not call an AI provider.

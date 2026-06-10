@@ -224,6 +224,55 @@ describe('cli integration', () => {
     expect(brokenReady.stdout).toContain('Evidence pack is missing: TEST_RESULTS.md.')
   })
 
+  it('prints a local handoff summary for a session', () => {
+    const repo = tempDir()
+    dirs.push(repo)
+    initGitRepo(repo)
+    writeFileSync(path.join(repo, 'README.md'), '# Handoff demo\n', 'utf8')
+
+    expect(runCli(repo, ['init', '--repo', '.']).status).toBe(0)
+    expect(runCli(repo, ['start', '--title', 'Handoff demo']).status).toBe(0)
+    const sessionId = JSON.parse(readFileSync(path.join(repo, '.forgedesk', 'config.json'), 'utf8')).activeSessionId
+    expect(runCli(repo, ['intent', 'Exercise handoff command.']).status).toBe(0)
+    expect(runCli(repo, ['decision', 'Keep handoff as a read-only summary.']).status).toBe(0)
+    expect(runCli(repo, ['check', 'Reviewed the generated evidence files.']).status).toBe(0)
+    expect(runCli(repo, ['test', '--', 'node', '--version']).status).toBe(0)
+    expect(runCli(repo, ['evidence']).status).toBe(0)
+
+    const handoff = runCli(repo, ['handoff'])
+    expect(handoff.status).toBe(0)
+    expect(handoff.stdout).toContain('ForgeDesk Handoff')
+    expect(handoff.stdout).toContain('Ready: yes')
+    expect(handoff.stdout).toContain('Intent: Exercise handoff command.')
+    expect(handoff.stdout).toContain('PR_EVIDENCE.md')
+    expect(handoff.stdout).toContain('REVIEW_PROMPT.md')
+    expect(handoff.stdout).toContain('Changed files: 1')
+    expect(handoff.stdout).not.toContain('.forgedesk\\evidence')
+
+    const json = runCli(repo, ['handoff', '--session', sessionId, '--json'])
+    expect(json.status).toBe(0)
+    const report = JSON.parse(json.stdout)
+    expect(report.schemaVersion).toBe('forgedesk-handoff-v1')
+    expect(report.ready.ready).toBe(true)
+    expect(report.recommendedFiles).toContain('.forgedesk/evidence/' + sessionId + '/PR_EVIDENCE.md')
+  })
+
+  it('prints handoff blockers without requiring ready evidence', () => {
+    const repo = tempDir()
+    dirs.push(repo)
+    initGitRepo(repo)
+
+    expect(runCli(repo, ['init', '--repo', '.']).status).toBe(0)
+    expect(runCli(repo, ['start', '--title', 'Not ready handoff']).status).toBe(0)
+
+    const handoff = runCli(repo, ['handoff'])
+
+    expect(handoff.status).toBe(0)
+    expect(handoff.stdout).toContain('Ready: no')
+    expect(handoff.stdout).toContain('Intent is missing.')
+    expect(handoff.stdout).toContain('Generate evidence before handoff.')
+  })
+
   it('blocks readiness when a test command failed', () => {
     const repo = tempDir()
     dirs.push(repo)

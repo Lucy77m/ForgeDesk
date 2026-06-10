@@ -5,6 +5,7 @@ import { addDecision, addManualCheck, addRisk, initProject, setIntent, startSess
 import { getDoctorReport, renderDoctorReport } from '../core/doctor.js'
 import { generateEvidence, getLatestEvidencePack, listEvidencePacks } from '../core/evidence.js'
 import { ForgeDeskError } from '../core/errors.js'
+import { getHandoffReport, renderHandoffReport } from '../core/handoff.js'
 import { getReadyReport, renderReadyReport } from '../core/ready.js'
 import { getStatus } from '../core/status.js'
 import { recordTestCommand, runTestCommand } from '../core/test-runner.js'
@@ -146,6 +147,16 @@ export function buildProgram(cwd = process.cwd()): Command {
       if (!report.ready) {
         process.exitCode = 1
       }
+    })
+
+  program
+    .command('handoff')
+    .description('Print a local evidence handoff summary for a session.')
+    .option('--session <id>', 'session id; defaults to the active session')
+    .option('--json', 'print the handoff report as JSON')
+    .action(async (options: { session?: string; json?: boolean }) => {
+      const report = await getHandoffReport(cwd, options.session)
+      console.log(options.json ? JSON.stringify(report, null, 2) : renderHandoffReport(report))
     })
 
   program

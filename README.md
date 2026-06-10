@@ -73,6 +73,9 @@ forgedesk doctor --json
 forgedesk ready
 forgedesk ready --session <id>
 forgedesk ready --json
+forgedesk handoff
+forgedesk handoff --session <id>
+forgedesk handoff --json
 forgedesk sessions
 forgedesk show
 forgedesk show --session <id>

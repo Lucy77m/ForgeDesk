@@ -12,6 +12,9 @@ Run `forgedesk ready` to check whether the session has enough recorded evidence
 for handoff. `ready` reports blockers and warnings, but it does not decide
 whether the code is correct or safe.
 
+Run `forgedesk handoff` when you want a compact terminal summary that points to
+the most useful evidence files for a reviewer or another AI window.
+
 Start with these sections:
 
 1. `Intent`: what the change claims to do.
