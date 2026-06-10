@@ -12,7 +12,6 @@ Focus on reliability, maintainability, and clearer local workflows.
 
 - Extract shared helpers for timestamps and id generation where this reduces
   real repetition.
-- Add `pnpm smoke` to CI.
 - Keep GitHub releases source-only until npm publishing is intentionally
   prepared.
 
