@@ -52,6 +52,10 @@ ForgeDesk writes local output under:
 .forgedesk/evidence/<session-id>/
 ```
 
+Generating evidence marks that session as `needs-review`, so `forgedesk ready`
+and `forgedesk handoff` can treat it as prepared evidence rather than an active
+draft.
+
 ## Try ForgeDesk On Itself
 
 From this repository:

@@ -60,6 +60,8 @@ describe('cli integration', () => {
     expect(prEvidence).toContain('- README.md')
     expect(prEvidence).toContain('Opened the rendered evidence files.')
     expect(evidence.stdout).toContain('Generated evidence')
+    const session = JSON.parse(readFileSync(path.join(repo, '.forgedesk', 'sessions', `${sessionId}.json`), 'utf8'))
+    expect(session.status).toBe('needs-review')
 
     const customEvidence = runCli(repo, ['evidence', '--output-dir', 'custom-evidence'])
     expect(customEvidence.status).toBe(0)
@@ -147,8 +149,18 @@ describe('cli integration', () => {
 
     expect(runCli(repo, ['archive', '--session', firstSessionId]).status).toBe(0)
     expect(runCli(repo, ['sessions']).stdout).not.toContain('Lifecycle first')
+    const allSessions = runCli(repo, ['sessions', '--all'])
+    expect(allSessions.status).toBe(0)
+    expect(allSessions.stdout).toContain('Filter: all')
+    expect(allSessions.stdout).toContain('Lifecycle first')
+    expect(allSessions.stdout).toContain('| archived |')
     const archivedSessions = runCli(repo, ['sessions', '--status', 'archived'])
     expect(archivedSessions.stdout).toContain('Lifecycle first')
+    const archivedShow = runCli(repo, ['show', '--session', firstSessionId])
+    expect(archivedShow.status).toBe(0)
+    expect(archivedShow.stdout).toContain('Lifecycle first')
+    expect(archivedShow.stdout).toContain('Status: archived')
+    expect(archivedShow.stdout).toContain(firstSessionId)
 
     expect(runCli(repo, ['reopen', '--session', firstSessionId]).status).toBe(0)
     const config = JSON.parse(readFileSync(path.join(repo, '.forgedesk', 'config.json'), 'utf8'))
@@ -349,6 +361,33 @@ describe('cli integration', () => {
     expect(exportInspect.status).toBe(0)
     expect(exportInspect.stdout).toContain('Target: export')
     expect(exportInspect.stdout).toContain('HANDOFF.md')
+  })
+
+  it('finds the ForgeDesk workspace from a repository subdirectory', () => {
+    const repo = tempDir()
+    dirs.push(repo)
+    initGitRepo(repo)
+    const subdir = path.join(repo, 'packages', 'demo')
+    mkdirSync(subdir, { recursive: true })
+
+    expect(runCli(repo, ['init', '--repo', '.']).status).toBe(0)
+    expect(runCli(repo, ['start', '--title', 'Subdirectory workspace']).status).toBe(0)
+    expect(runCli(repo, ['intent', 'Exercise workspace discovery from a child directory.']).status).toBe(0)
+    expect(runCli(repo, ['check', 'Ran read-only commands from a child directory.']).status).toBe(0)
+    expect(runCli(repo, ['evidence']).status).toBe(0)
+
+    for (const args of [
+      ['status'],
+      ['sessions'],
+      ['show'],
+      ['ready'],
+      ['handoff'],
+      ['inspect']
+    ]) {
+      const result = runCli(subdir, args)
+      expect(result.status).toBe(0)
+      expect(result.stdout).toContain('Subdirectory workspace')
+    }
   })
 
   it('resolves active, explicit, and unknown sessions for handoff commands', () => {

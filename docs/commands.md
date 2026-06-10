@@ -54,6 +54,8 @@ forgedesk inspect --export
 | `forgedesk evidence --latest` | Show the latest generated evidence pack. | no |
 | `forgedesk evidence --list` | List sessions that have evidence paths. | no |
 
+Generating evidence marks the target session as `needs-review`.
+
 Generated evidence includes:
 
 ```text

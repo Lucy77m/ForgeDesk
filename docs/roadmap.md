@@ -12,10 +12,6 @@ Focus on reliability, maintainability, and clearer local workflows.
 
 - Extract shared helpers for timestamps and id generation where this reduces
   real repetition.
-- Document that `forgedesk evidence` automatically moves a session to
-  `needs-review`.
-- Add focused tests for metadata validation, `needs-review` transitions,
-  `sessions --all`, `show --session`, and child-directory workspace discovery.
 - Add `pnpm smoke` to CI.
 - Keep GitHub releases source-only until npm publishing is intentionally
   prepared.
