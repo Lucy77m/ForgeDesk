@@ -8,6 +8,7 @@ import {
   notVerified,
   passedTests,
   recordedOnlyTests,
+  renderChangedFiles,
   reviewReadiness,
   testSummary
 } from '../src/templates/format.js'
@@ -58,6 +59,38 @@ describe('format helpers', () => {
     }
 
     expect(changedFileCount(snapshot)).toBe(6)
+  })
+
+  it('renders changed file groups in status order', () => {
+    const snapshot: GitSnapshot = {
+      branch: 'main',
+      head: 'abc123',
+      isDirty: true,
+      modifiedFiles: ['src\\core\\workspace.ts'],
+      addedFiles: ['tests/format.test.ts'],
+      deletedFiles: ['old\\removed.ts'],
+      untrackedFiles: ['notes.md'],
+      recentCommits: [],
+      capturedAt: now
+    }
+
+    expect(renderChangedFiles(snapshot)).toBe(
+      [
+        '### Modified',
+        '- src/core/workspace.ts',
+        '',
+        '### Added',
+        '- tests/format.test.ts',
+        '',
+        '### Deleted',
+        '- old/removed.ts',
+        '',
+        '### Untracked',
+        '- notes.md'
+      ].join('\n')
+    )
+    expect(renderChangedFiles({ ...snapshot, modifiedFiles: [], addedFiles: [], deletedFiles: [], untrackedFiles: [] }))
+      .toBe('- None')
   })
 
   it('groups tests by recorded, executed, failed, and passed status', () => {
