@@ -5,6 +5,28 @@ All notable ForgeDesk changes are tracked here.
 ForgeDesk is not published to npm yet. Version entries describe the local source
 state and GitHub release preparation only.
 
+## v0.1.2 - 2026-06-10
+
+Release prep for local hardening after the v0.1.1 source release.
+
+### Improved
+
+- Centralized session resolution for `ready`, `handoff`, `export`, `inspect`,
+  and session lifecycle commands.
+- Preserved explicit session behavior so handoff-related commands do not fall
+  back to the active session after a session id is resolved.
+
+### Tests
+
+- Added integration coverage for active session, explicit session, and unknown
+  session behavior across handoff-related commands.
+
+### Boundaries
+
+- Still source-only and not published to npm.
+- No AI provider calls, Web UI, cloud sync, background automation, plugin
+  system, automatic commit, push, PR, tag, release, or npm publish behavior.
+
 ## v0.1.1 - 2026-06-10
 
 Release prep for the local CLI MVP.

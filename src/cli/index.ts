@@ -38,7 +38,7 @@ export function buildProgram(cwd = process.cwd()): Command {
   program
     .name('forgedesk')
     .description('A local evidence desk for AI-assisted code changes.')
-    .version('0.1.1')
+    .version('0.1.2')
 
   program
     .command('init')

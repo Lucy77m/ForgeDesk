@@ -1,6 +1,6 @@
 {
   "name": "forgedesk",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "A local evidence desk for AI-assisted code changes.",
   "type": "module",
   "packageManager": "pnpm@11.1.3",

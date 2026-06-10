@@ -2,7 +2,7 @@
 
 This roadmap is a planning reference, not a commitment list.
 
-ForgeDesk v0.1.1 is a local CLI MVP for evidence-first AI-assisted code
+ForgeDesk v0.1.2 is a local CLI MVP for evidence-first AI-assisted code
 changes. Future work should keep that boundary clear unless the project
 explicitly changes scope.
 
@@ -10,10 +10,8 @@ explicitly changes scope.
 
 Focus on reliability, maintainability, and clearer local workflows.
 
-- Lock the active session at the start of `forgedesk test --` so long-running
-  test results cannot be written to a different active session.
-- Extract shared helpers for evidence file names, session resolution, path
-  formatting, timestamps, and id generation where this reduces real repetition.
+- Extract shared helpers for timestamps and id generation where this reduces
+  real repetition.
 - Document that `forgedesk evidence` automatically moves a session to
   `needs-review`.
 - Add focused tests for metadata validation, `needs-review` transitions,
@@ -26,9 +24,6 @@ Focus on reliability, maintainability, and clearer local workflows.
 
 Improve the codebase without changing the product shape.
 
-- Reduce duplicated `getSession` / `isNotFoundError` logic across core modules.
-- Move repeated evidence file lists into one shared constant.
-- Reuse the existing `displayPath` helper instead of redefining it.
 - Add direct unit tests for `metadata.ts`, `format.ts`, workspace lookup, and
   currently lightly covered templates.
 - Consider lightweight coverage reporting after the unit-test shape is clearer.
