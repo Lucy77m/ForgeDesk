@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "A local evidence desk for AI-assisted code changes.",
   "type": "module",
+  "packageManager": "pnpm@11.1.3",
   "main": "dist/cli/index.js",
   "types": "dist/cli/index.d.ts",
   "bin": {

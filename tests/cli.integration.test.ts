@@ -45,6 +45,10 @@ describe('cli integration', () => {
     expect(prEvidence).toContain('Changed files: 1')
     expect(prEvidence).toContain('- README.md')
     expect(evidence.stdout).toContain('Generated evidence')
+
+    const customEvidence = runCli(repo, ['evidence', '--output-dir', 'custom-evidence'])
+    expect(customEvidence.status).toBe(0)
+    expect(existsSync(path.join(repo, 'custom-evidence', 'PR_EVIDENCE.md'))).toBe(true)
   })
 
   it('records failing command exit codes', () => {

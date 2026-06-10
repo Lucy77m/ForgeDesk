@@ -7,6 +7,20 @@ What was the intent? What files changed? What tests ran? What risks remain?
 
 ForgeDesk helps you turn a local git diff into a reviewable evidence pack.
 
+## Install
+
+ForgeDesk is an early local MVP. It is not published to npm yet.
+
+Try it from a local checkout:
+
+```bash
+git clone https://github.com/Lucy77m/ForgeDesk.git
+cd ForgeDesk
+pnpm install
+pnpm build
+node dist/cli/index.js --help
+```
+
 ## Quick Start
 
 ```bash
@@ -66,6 +80,11 @@ forgedesk evidence
 - It does not call an AI provider by default.
 - It does not commit, push, open PRs, or publish releases.
 - It does not upload your project.
+
+## Project Status
+
+ForgeDesk v0.1 is source-available on GitHub as an early local CLI MVP. It is
+not published to npm, and there is no official release tag yet.
 
 ## Development
 
