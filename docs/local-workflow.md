@@ -127,3 +127,18 @@ It does not upload, publish, compress, or regenerate evidence.
 Use `forgedesk inspect` to check which expected evidence files exist and how
 large they are. Use `forgedesk inspect --export` to inspect the default local
 export directory for the active session.
+
+## Local Smoke Check
+
+After building ForgeDesk, run:
+
+```bash
+pnpm smoke
+```
+
+The smoke script creates a temporary git repository and runs the compiled CLI
+through the evidence, readiness, handoff, export, and inspect flow. It removes
+the temporary repository when it finishes and does not push, publish, tag, or
+upload anything.
+
+See `docs/troubleshooting.md` when a local workflow command fails.

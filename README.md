@@ -94,6 +94,8 @@ See [docs/commands.md](docs/commands.md) for all CLI commands and side effects.
 See [docs/reviewer-guide.md](docs/reviewer-guide.md) for how to inspect an
 evidence pack.
 See [docs/local-workflow.md](docs/local-workflow.md) for a local demo workflow.
+See [docs/troubleshooting.md](docs/troubleshooting.md) for common local errors
+and fixes.
 
 ## Project Status
 
@@ -107,6 +109,7 @@ pnpm install
 pnpm typecheck
 pnpm test
 pnpm build
+pnpm smoke
 ```
 
 Run the CLI from source during development:
