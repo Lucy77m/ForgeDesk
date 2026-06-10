@@ -549,6 +549,51 @@ describe('cli integration', () => {
     expect(session.tests[0].logFile).not.toContain('\\')
   })
 
+  it('records executed tests on the session that was active when the command started', () => {
+    const repo = tempDir()
+    dirs.push(repo)
+    initGitRepo(repo)
+
+    expect(runCli(repo, ['init', '--repo', '.']).status).toBe(0)
+    expect(runCli(repo, ['start', '--title', 'First test session']).status).toBe(0)
+    const firstSessionId = JSON.parse(readFileSync(path.join(repo, '.forgedesk', 'config.json'), 'utf8'))
+      .activeSessionId
+
+    expect(runCli(repo, ['start', '--title', 'Second test session']).status).toBe(0)
+    const secondSessionId = JSON.parse(readFileSync(path.join(repo, '.forgedesk', 'config.json'), 'utf8'))
+      .activeSessionId
+    expect(runCli(repo, ['reopen', '--session', firstSessionId]).status).toBe(0)
+
+    writeFileSync(
+      path.join(repo, 'switch-active.js'),
+      [
+        "const fs = require('node:fs')",
+        "const path = require('node:path')",
+        "const configPath = path.join(process.cwd(), '.forgedesk', 'config.json')",
+        "const config = JSON.parse(fs.readFileSync(configPath, 'utf8'))",
+        `config.activeSessionId = ${JSON.stringify(secondSessionId)}`,
+        "fs.writeFileSync(configPath, `${JSON.stringify(config, null, 2)}\\n`, 'utf8')"
+      ].join('\n'),
+      'utf8'
+    )
+
+    const result = runCli(repo, ['test', '--', 'node', 'switch-active.js'])
+    expect(result.status).toBe(0)
+
+    const firstSession = JSON.parse(
+      readFileSync(path.join(repo, '.forgedesk', 'sessions', `${firstSessionId}.json`), 'utf8')
+    )
+    const secondSession = JSON.parse(
+      readFileSync(path.join(repo, '.forgedesk', 'sessions', `${secondSessionId}.json`), 'utf8')
+    )
+    const config = JSON.parse(readFileSync(path.join(repo, '.forgedesk', 'config.json'), 'utf8'))
+
+    expect(config.activeSessionId).toBe(secondSessionId)
+    expect(firstSession.tests).toHaveLength(1)
+    expect(firstSession.tests[0].command).toBe('node switch-active.js')
+    expect(secondSession.tests).toHaveLength(0)
+  })
+
   it('rejects invalid risk severity values', () => {
     const repo = tempDir()
     dirs.push(repo)

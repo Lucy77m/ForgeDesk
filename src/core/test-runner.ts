@@ -56,6 +56,8 @@ export async function runTestCommand(commandParts: string[], cwd: string): Promi
   }
 
   const workspace = await loadWorkspace(cwd)
+  const session = await getActiveSession(workspace)
+  const sessionId = session.id
   const command = commandParts.join(' ')
   const startedAt = now()
   const result = spawnSync(command, {
@@ -88,8 +90,7 @@ export async function runTestCommand(commandParts: string[], cwd: string): Promi
     logFile: toPortablePath(path.relative(workspace.repoPath, logFile))
   }
 
-  const session = await getActiveSession(workspace)
-  return updateSession(workspace.repoPath, session.id, (current) => ({
+  return updateSession(workspace.repoPath, sessionId, (current) => ({
     ...current,
     tests: [...current.tests, testRun],
     updatedAt: finishedAt
