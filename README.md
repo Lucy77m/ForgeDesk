@@ -69,6 +69,10 @@ forgedesk test --command "npm test"
 forgedesk test -- npm test
 forgedesk status
 forgedesk sessions
+forgedesk show --session <id>
+forgedesk done
+forgedesk archive --session <id>
+forgedesk reopen --session <id>
 forgedesk evidence
 ```
 

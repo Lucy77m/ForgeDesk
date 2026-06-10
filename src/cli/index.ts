@@ -7,8 +7,25 @@ import { ForgeDeskError } from '../core/errors.js'
 import { getStatus } from '../core/status.js'
 import { recordTestCommand, runTestCommand } from '../core/test-runner.js'
 import { getSessions } from '../core/sessions.js'
+import { archiveSession, markActiveSessionDone, reopenSession, showSession } from '../core/lifecycle.js'
+import type { ChangeSession } from '../types.js'
 
 const riskSeverities = ['low', 'medium', 'high'] as const
+const sessionStatuses = ['active', 'needs-review', 'done', 'archived'] as const
+
+function isSessionStatus(status: string): status is ChangeSession['status'] {
+  return sessionStatuses.includes(status as ChangeSession['status'])
+}
+
+function parseSessionStatus(status: string | undefined): ChangeSession['status'] | undefined {
+  if (!status) {
+    return undefined
+  }
+  if (!isSessionStatus(status)) {
+    throw new ForgeDeskError('Session status must be one of: active, needs-review, done, archived.')
+  }
+  return status
+}
 
 export function buildProgram(cwd = process.cwd()): Command {
   const program = new Command()
@@ -107,8 +124,47 @@ export function buildProgram(cwd = process.cwd()): Command {
   program
     .command('sessions')
     .description('List ForgeDesk change sessions.')
+    .option('--status <status>', 'filter by active, needs-review, done, or archived')
+    .option('--all', 'include archived sessions')
+    .action(async (options: { status?: string; all?: boolean }) => {
+      console.log(await getSessions(cwd, {
+        status: parseSessionStatus(options.status),
+        all: options.all
+      }))
+    })
+
+  program
+    .command('show')
+    .description('Show one ForgeDesk change session.')
+    .requiredOption('--session <id>', 'session id')
+    .action(async (options: { session: string }) => {
+      console.log(await showSession(cwd, options.session))
+    })
+
+  program
+    .command('done')
+    .description('Mark the active session as done.')
     .action(async () => {
-      console.log(await getSessions(cwd))
+      const session = await markActiveSessionDone(cwd)
+      console.log(`Marked session done: ${session.id}`)
+    })
+
+  program
+    .command('archive')
+    .description('Archive a session.')
+    .requiredOption('--session <id>', 'session id')
+    .action(async (options: { session: string }) => {
+      const session = await archiveSession(cwd, options.session)
+      console.log(`Archived session: ${session.id}`)
+    })
+
+  program
+    .command('reopen')
+    .description('Reopen a done or archived session and make it active.')
+    .requiredOption('--session <id>', 'session id')
+    .action(async (options: { session: string }) => {
+      const session = await reopenSession(cwd, options.session)
+      console.log(`Reopened session: ${session.id}`)
     })
 
   program

@@ -35,3 +35,9 @@ unrelated refactors.
 Evidence can show what was recorded and executed. It cannot prove that the code
 is correct, secure, complete, or ready to merge. The maintainer still owns the
 final judgment.
+
+## Session Status
+
+A session marked `done` only means the local evidence workflow was completed by
+the user. It is not a correctness, security, merge, release, or publication
+verdict.

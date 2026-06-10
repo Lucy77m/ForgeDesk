@@ -23,6 +23,7 @@ node D:/ForgeDesk/dist/cli/index.js check "Record a manual verification step."
 node D:/ForgeDesk/dist/cli/index.js test --command "pnpm test"
 node D:/ForgeDesk/dist/cli/index.js test -- pnpm test
 node D:/ForgeDesk/dist/cli/index.js evidence
+node D:/ForgeDesk/dist/cli/index.js done
 ```
 
 ForgeDesk writes local output under:
@@ -54,3 +55,24 @@ Start with:
 
 Use the evidence to review scope, tests, manual checks, risks, and known gaps.
 Do not treat it as proof that the change is correct.
+
+## Session Lifecycle
+
+ForgeDesk sessions can move through a small local lifecycle:
+
+```text
+active -> needs-review -> done -> archived
+```
+
+Common commands:
+
+```bash
+node dist/cli/index.js sessions
+node dist/cli/index.js show --session <id>
+node dist/cli/index.js done
+node dist/cli/index.js archive --session <id>
+node dist/cli/index.js reopen --session <id>
+```
+
+`done` means the local evidence workflow is complete. It does not mean the code
+is correct, reviewed, merged, released, or published.

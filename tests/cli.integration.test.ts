@@ -101,6 +101,72 @@ describe('cli integration', () => {
     expect(prEvidence).not.toContain('Second change')
   })
 
+  it('supports session lifecycle and show output', () => {
+    const repo = tempDir()
+    dirs.push(repo)
+    initGitRepo(repo)
+    writeFileSync(path.join(repo, 'README.md'), '# Lifecycle demo\n', 'utf8')
+
+    expect(runCli(repo, ['init', '--repo', '.']).status).toBe(0)
+    expect(runCli(repo, ['start', '--title', 'Lifecycle first']).status).toBe(0)
+    const firstSessionId = JSON.parse(readFileSync(path.join(repo, '.forgedesk', 'config.json'), 'utf8'))
+      .activeSessionId
+    expect(runCli(repo, ['intent', 'Exercise session lifecycle.']).status).toBe(0)
+    expect(runCli(repo, ['check', 'Read generated evidence files.']).status).toBe(0)
+    expect(runCli(repo, ['test', '--command', 'pnpm test']).status).toBe(0)
+    expect(runCli(repo, ['evidence']).status).toBe(0)
+
+    const show = runCli(repo, ['show', '--session', firstSessionId])
+    expect(show.status).toBe(0)
+    expect(show.stdout).toContain('ForgeDesk Session')
+    expect(show.stdout).toContain('Exercise session lifecycle.')
+    expect(show.stdout).toContain('Read generated evidence files.')
+    expect(show.stdout).toContain('Evidence: .forgedesk')
+    expect(show.stdout).not.toContain('.forgedesk\\evidence')
+
+    expect(runCli(repo, ['done']).status).toBe(0)
+    const doneSessions = runCli(repo, ['sessions', '--status', 'done'])
+    expect(doneSessions.status).toBe(0)
+    expect(doneSessions.stdout).toContain('Lifecycle first')
+    expect(doneSessions.stdout).toContain('| done |')
+
+    expect(runCli(repo, ['archive', '--session', firstSessionId]).status).toBe(0)
+    expect(runCli(repo, ['sessions']).stdout).not.toContain('Lifecycle first')
+    const archivedSessions = runCli(repo, ['sessions', '--status', 'archived'])
+    expect(archivedSessions.stdout).toContain('Lifecycle first')
+
+    expect(runCli(repo, ['reopen', '--session', firstSessionId]).status).toBe(0)
+    const config = JSON.parse(readFileSync(path.join(repo, '.forgedesk', 'config.json'), 'utf8'))
+    expect(config.activeSessionId).toBe(firstSessionId)
+    const activeSessions = runCli(repo, ['sessions', '--status', 'active'])
+    expect(activeSessions.stdout).toContain('Lifecycle first')
+    expect(activeSessions.stdout).toContain('* ')
+  })
+
+  it('reports lifecycle command errors clearly', () => {
+    const repo = tempDir()
+    dirs.push(repo)
+    initGitRepo(repo)
+
+    expect(runCli(repo, ['init', '--repo', '.']).status).toBe(0)
+
+    const showMissing = runCli(repo, ['show'])
+    expect(showMissing.status).not.toBe(0)
+    expect(showMissing.stderr).toContain("required option '--session")
+
+    const archiveMissing = runCli(repo, ['archive'])
+    expect(archiveMissing.status).not.toBe(0)
+    expect(archiveMissing.stderr).toContain("required option '--session")
+
+    const unknown = runCli(repo, ['reopen', '--session', 'missing-session'])
+    expect(unknown.status).not.toBe(0)
+    expect(unknown.stderr).toContain('Unknown session')
+
+    const badStatus = runCli(repo, ['sessions', '--status', 'closed'])
+    expect(badStatus.status).not.toBe(0)
+    expect(badStatus.stderr).toContain('Session status must be one of')
+  })
+
   it('records failing command exit codes', () => {
     const repo = tempDir()
     dirs.push(repo)
