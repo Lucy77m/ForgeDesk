@@ -40,11 +40,11 @@ forgedesk evidence
 
 ```text
 .forgedesk/evidence/<session-id>/
-├── PR_EVIDENCE.md
-├── CHANGE_SUMMARY.md
-├── TEST_RESULTS.md
-├── REVIEW_PROMPT.md
-└── evidence.json
+|-- PR_EVIDENCE.md
+|-- CHANGE_SUMMARY.md
+|-- TEST_RESULTS.md
+|-- REVIEW_PROMPT.md
+`-- evidence.json
 ```
 
 ## Dogfood Example
@@ -96,11 +96,12 @@ evidence pack.
 See [docs/local-workflow.md](docs/local-workflow.md) for a local demo workflow.
 See [docs/troubleshooting.md](docs/troubleshooting.md) for common local errors
 and fixes.
+See [CHANGELOG.md](CHANGELOG.md) for local source version notes.
 
 ## Project Status
 
-ForgeDesk v0.1 is source-available on GitHub as an early local CLI MVP. It is
-not published to npm.
+ForgeDesk v0.1.1 is prepared as a source-available local CLI MVP. It is not
+published to npm.
 
 ## Development
 

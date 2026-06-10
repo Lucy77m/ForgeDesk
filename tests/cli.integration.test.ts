@@ -20,7 +20,7 @@ describe('cli integration', () => {
     const result = runCli(repo, ['--version'])
 
     expect(result.status).toBe(0)
-    expect(result.stdout.trim()).toBe('0.1.0')
+    expect(result.stdout.trim()).toBe('0.1.1')
   })
 
   it('runs the full evidence workflow', () => {
