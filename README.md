@@ -65,35 +65,15 @@ forgedesk intent "Record the user-facing goal."
 forgedesk decision "Record an implementation decision."
 forgedesk risk "Record a risk or review focus."
 forgedesk check "Record a manual verification check."
-forgedesk test --command "npm test"
 forgedesk test -- npm test
-forgedesk status
-forgedesk doctor
-forgedesk doctor --json
-forgedesk ready
-forgedesk ready --session <id>
-forgedesk ready --json
-forgedesk handoff
-forgedesk handoff --session <id>
-forgedesk handoff --json
-forgedesk export
-forgedesk export --session <id>
-forgedesk export --output-dir <dir>
-forgedesk export --json
-forgedesk inspect
-forgedesk inspect --session <id>
-forgedesk inspect --export
-forgedesk inspect --json
-forgedesk sessions
-forgedesk show
-forgedesk show --session <id>
-forgedesk done
-forgedesk archive --session <id>
-forgedesk reopen --session <id>
 forgedesk evidence
-forgedesk evidence --latest
-forgedesk evidence --list
+forgedesk ready
+forgedesk handoff
+forgedesk export
+forgedesk inspect --export
 ```
+
+See [docs/commands.md](docs/commands.md) for the full command reference.
 
 ## What ForgeDesk Does
 
@@ -110,6 +90,7 @@ forgedesk evidence --list
 - It does not upload your project.
 
 See [docs/boundaries.md](docs/boundaries.md) for the v0.1 boundary contract.
+See [docs/commands.md](docs/commands.md) for all CLI commands and side effects.
 See [docs/reviewer-guide.md](docs/reviewer-guide.md) for how to inspect an
 evidence pack.
 See [docs/local-workflow.md](docs/local-workflow.md) for a local demo workflow.

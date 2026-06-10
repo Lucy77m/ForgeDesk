@@ -5,21 +5,10 @@ It is not a substitute for code review.
 
 ## How To Read PR_EVIDENCE.md
 
-Find local evidence packs with `forgedesk evidence --list`, or show the most
-recent generated pack with `forgedesk evidence --latest`.
-
-Run `forgedesk ready` to check whether the session has enough recorded evidence
-for handoff. `ready` reports blockers and warnings, but it does not decide
-whether the code is correct or safe.
-
-Run `forgedesk handoff` when you want a compact terminal summary that points to
-the most useful evidence files for a reviewer or another AI window.
-
-Run `forgedesk export` when you want to copy the evidence pack and `HANDOFF.md`
-to a local directory for sharing outside `.forgedesk/`.
-
-Run `forgedesk inspect` when you want to confirm the expected evidence or export
-files exist before handing them to someone else.
+Use `forgedesk ready`, `forgedesk handoff`, `forgedesk export`, and
+`forgedesk inspect` to check and package local evidence before handoff. These
+commands organize evidence; they do not decide whether the code is correct or
+safe.
 
 Start with these sections:
 

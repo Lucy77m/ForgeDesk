@@ -11,25 +11,38 @@ pnpm install
 pnpm build
 ```
 
-Create or open another git repository, then run the compiled CLI:
+Create or open another git repository, then initialize ForgeDesk:
 
 ```bash
 node D:/ForgeDesk/dist/cli/index.js init --repo .
 node D:/ForgeDesk/dist/cli/index.js start --title "Describe the change"
+```
+
+Record the change evidence:
+
+```bash
 node D:/ForgeDesk/dist/cli/index.js intent "Explain what this change should accomplish."
 node D:/ForgeDesk/dist/cli/index.js decision "Record a relevant implementation decision."
 node D:/ForgeDesk/dist/cli/index.js risk "Record a review focus or remaining risk." --severity low
 node D:/ForgeDesk/dist/cli/index.js check "Record a manual verification step."
 node D:/ForgeDesk/dist/cli/index.js test --command "pnpm test"
 node D:/ForgeDesk/dist/cli/index.js test -- pnpm test
+```
+
+Generate, check, and export the evidence:
+
+```bash
 node D:/ForgeDesk/dist/cli/index.js evidence
-node D:/ForgeDesk/dist/cli/index.js evidence --latest
-node D:/ForgeDesk/dist/cli/index.js doctor
 node D:/ForgeDesk/dist/cli/index.js ready
 node D:/ForgeDesk/dist/cli/index.js handoff
 node D:/ForgeDesk/dist/cli/index.js export
 node D:/ForgeDesk/dist/cli/index.js inspect
 node D:/ForgeDesk/dist/cli/index.js inspect --export
+```
+
+Use lifecycle commands when the local evidence workflow is complete:
+
+```bash
 node D:/ForgeDesk/dist/cli/index.js done
 ```
 
@@ -66,6 +79,7 @@ Start with:
 - `PR_EVIDENCE.md`
 - `TEST_RESULTS.md`
 - `REVIEW_PROMPT.md`
+- `HANDOFF.md` if you ran `forgedesk export`
 
 Use the evidence to review scope, tests, manual checks, risks, and known gaps.
 Do not treat it as proof that the change is correct.
