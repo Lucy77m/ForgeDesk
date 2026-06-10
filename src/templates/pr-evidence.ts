@@ -1,5 +1,12 @@
 import type { EvidenceBundle } from '../types.js'
-import { listOrNone, notVerified, renderChangedFiles, renderTest } from './format.js'
+import {
+  executedTests,
+  listOrNone,
+  notVerified,
+  recordedOnlyTests,
+  renderChangedFiles,
+  renderTestGroup
+} from './format.js'
 
 export function renderPrEvidence(bundle: EvidenceBundle): string {
   const { session, gitSnapshot } = bundle
@@ -40,7 +47,13 @@ ${listOrNone(session.risks.map((risk) => `${risk.severity ? `[${risk.severity}] 
 
 ## Tests
 
-${session.tests.length > 0 ? session.tests.map(renderTest).join('\n') : '- None'}
+### Executed Tests
+
+${renderTestGroup(executedTests(session.tests))}
+
+### Recorded Only
+
+${renderTestGroup(recordedOnlyTests(session.tests))}
 
 ## Not Verified
 

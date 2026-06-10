@@ -30,6 +30,15 @@ forgedesk evidence
 └── evidence.json
 ```
 
+## Dogfood Example
+
+ForgeDesk is used on its own repository. A typical dogfood session records a
+small local change, captures `pnpm typecheck`, `pnpm test`, and `pnpm build`,
+then generates a reviewable evidence pack under `.forgedesk/evidence/`.
+
+The goal is not to prove the code is perfect. The goal is to make the change
+intent, changed files, test evidence, and remaining risks easy to inspect.
+
 ## Commands
 
 ```bash
@@ -78,4 +87,10 @@ Run the compiled CLI after building:
 
 ```bash
 node dist/cli/index.js --help
+```
+
+Check the package contents without publishing:
+
+```bash
+pnpm pack --pack-destination <temp-dir>
 ```

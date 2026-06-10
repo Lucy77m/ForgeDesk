@@ -24,6 +24,10 @@ function summarizeOutput(output: string): string {
   return `${trimmed.slice(0, 1800)}\n\n... output truncated ...\n\n${trimmed.slice(-1800)}`
 }
 
+function toPortablePath(filePath: string): string {
+  return filePath.replaceAll('\\', '/')
+}
+
 async function appendTest(cwd: string, testRun: TestRun): Promise<ChangeSession> {
   const workspace = await loadWorkspace(cwd)
   const session = await getActiveSession(workspace)
@@ -83,7 +87,7 @@ export async function runTestCommand(commandParts: string[], cwd: string): Promi
     startedAt,
     finishedAt,
     summary: summarizeOutput(`${combinedOutput}${errorMessage}`),
-    logFile: path.relative(workspace.repoPath, logFile)
+    logFile: toPortablePath(path.relative(workspace.repoPath, logFile))
   }
 
   const session = await getActiveSession(workspace)

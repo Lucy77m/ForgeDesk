@@ -1,26 +1,26 @@
 import type { EvidenceBundle } from '../types.js'
-import { renderTest } from './format.js'
+import { displayPath, executedTests, failedTests, recordedOnlyTests, renderTestGroup } from './format.js'
 
 export function renderTestResults(bundle: EvidenceBundle): string {
   const tests = bundle.session.tests
 
   return `# Test Results
 
-## Commands
+## Executed Tests
 
-${tests.length > 0 ? tests.map(renderTest).join('\n') : '- None'}
+${renderTestGroup(executedTests(tests))}
 
-## Results
+## Recorded Only
 
-${tests.length > 0 ? tests.map((test) => `- ${test.status}: \`${test.command}\``).join('\n') : '- None'}
+${renderTestGroup(recordedOnlyTests(tests))}
 
 ## Failures
 
-${tests.some((test) => test.status === 'failed') ? tests.filter((test) => test.status === 'failed').map((test) => `- \`${test.command}\` exited ${test.exitCode}`).join('\n') : '- None'}
+${failedTests(tests).length > 0 ? failedTests(tests).map((test) => `- \`${test.command}\` exited ${test.exitCode}`).join('\n') : '- None'}
 
 ## Logs
 
-${tests.some((test) => test.logFile) ? tests.filter((test) => test.logFile).map((test) => `- ${test.logFile}`).join('\n') : '- None'}
+${tests.some((test) => test.logFile) ? tests.filter((test) => test.logFile).map((test) => `- ${displayPath(test.logFile!)}`).join('\n') : '- None'}
 
 ## Manual Checks
 

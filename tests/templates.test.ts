@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { renderPrEvidence } from '../src/templates/pr-evidence.js'
+import { renderTestResults } from '../src/templates/test-results.js'
 import type { EvidenceBundle } from '../src/types.js'
 
 function bundle(): EvidenceBundle {
@@ -46,5 +47,30 @@ describe('templates', () => {
     expect(rendered).toContain('Not recorded.')
     expect(rendered).toContain('No tests recorded.')
     expect(rendered).toContain('# PR Evidence')
+  })
+
+  it('groups recorded and executed tests and normalizes log paths', () => {
+    const value = bundle()
+    value.session.tests = [
+      {
+        id: 'test-1',
+        command: 'pnpm test',
+        status: 'recorded'
+      },
+      {
+        id: 'test-2',
+        command: 'pnpm test',
+        status: 'passed',
+        exitCode: 0,
+        logFile: '.forgedesk\\logs\\test-2.log'
+      }
+    ]
+
+    const rendered = renderTestResults(value)
+
+    expect(rendered).toContain('## Executed Tests')
+    expect(rendered).toContain('## Recorded Only')
+    expect(rendered).toContain('.forgedesk/logs/test-2.log')
+    expect(rendered).not.toContain('.forgedesk\\logs')
   })
 })

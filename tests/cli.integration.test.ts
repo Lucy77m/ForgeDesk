@@ -62,6 +62,8 @@ describe('cli integration', () => {
     const session = JSON.parse(readFileSync(sessionFile, 'utf8'))
     expect(session.tests[0].status).toBe('failed')
     expect(session.tests[0].exitCode).toBe(2)
+    expect(session.tests[0].logFile).toContain('.forgedesk/logs/')
+    expect(session.tests[0].logFile).not.toContain('\\')
   })
 
   it('reports non-git init errors clearly', () => {
