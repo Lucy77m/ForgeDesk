@@ -6,6 +6,7 @@ import { generateEvidence } from '../core/evidence.js'
 import { ForgeDeskError } from '../core/errors.js'
 import { getStatus } from '../core/status.js'
 import { recordTestCommand, runTestCommand } from '../core/test-runner.js'
+import { getSessions } from '../core/sessions.js'
 
 const riskSeverities = ['low', 'medium', 'high'] as const
 
@@ -92,6 +93,13 @@ export function buildProgram(cwd = process.cwd()): Command {
     .description('Show ForgeDesk and git status.')
     .action(async () => {
       console.log(await getStatus(cwd))
+    })
+
+  program
+    .command('sessions')
+    .description('List ForgeDesk change sessions.')
+    .action(async () => {
+      console.log(await getSessions(cwd))
     })
 
   program

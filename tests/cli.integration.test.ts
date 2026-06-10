@@ -77,6 +77,13 @@ describe('cli integration', () => {
 
     expect(runCli(repo, ['start', '--title', 'Second change']).status).toBe(0)
 
+    const sessions = runCli(repo, ['sessions'])
+    expect(sessions.status).toBe(0)
+    expect(sessions.stdout).toContain('ForgeDesk Sessions')
+    expect(sessions.stdout).toContain('First change')
+    expect(sessions.stdout).toContain('Second change')
+    expect(sessions.stdout).toContain('* ')
+
     const result = runCli(repo, [
       'evidence',
       '--session',

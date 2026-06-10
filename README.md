@@ -67,6 +67,7 @@ forgedesk risk "Record a risk or review focus."
 forgedesk test --command "npm test"
 forgedesk test -- npm test
 forgedesk status
+forgedesk sessions
 forgedesk evidence
 ```
 
