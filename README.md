@@ -101,7 +101,7 @@ See [CHANGELOG.md](CHANGELOG.md) for local source version notes.
 
 ## Project Status
 
-ForgeDesk v0.1.3 is prepared as a source-available local CLI MVP. It is not
+ForgeDesk v0.1.4 is prepared as a source-available local CLI MVP. It is not
 published to npm.
 
 ## Development

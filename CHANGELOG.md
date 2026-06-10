@@ -5,6 +5,29 @@ All notable ForgeDesk changes are tracked here.
 ForgeDesk is not published to npm yet. Version entries describe the local source
 state and GitHub release preparation only.
 
+## v0.1.4 - 2026-06-11
+
+Release prep for v0.2 maintainability hardening after v0.1.3.
+
+### Improved
+
+- Shared timestamp and id generation helpers across session and test-runner
+  flows.
+- Simplified metadata validation, format rendering helpers, and workspace
+  discovery/session-resolution internals without changing CLI behavior.
+- Updated the roadmap after closing the completed v0.2 direct unit-test item.
+
+### Tests
+
+- Added direct unit coverage for metadata validation, format helpers, workspace
+  lookup/session resolution, and lightly covered evidence templates.
+
+### Boundaries
+
+- Still source-only and not published to npm.
+- No AI provider calls, Web UI, cloud sync, background automation, plugin
+  system, automatic commit, push, PR, tag, release, or npm publish behavior.
+
 ## v0.1.3 - 2026-06-11
 
 Release prep for the v0.1.x local hardening follow-up after v0.1.2.
