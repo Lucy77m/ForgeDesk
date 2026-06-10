@@ -5,7 +5,7 @@ import { displayPath } from '../templates/format.js'
 import { EVIDENCE_FILE_NAMES } from './constants.js'
 import { ForgeDeskError } from './errors.js'
 import { getReadyReport, type ReadyReport } from './ready.js'
-import { getActiveSession, loadWorkspace, pathExists, pathsFor, readSession } from './workspace.js'
+import { pathExists, pathsFor, resolveSession } from './workspace.js'
 
 type InspectTarget = 'evidence' | 'export'
 
@@ -40,32 +40,6 @@ export type InspectOptions = {
 
 const exportFiles = [...EVIDENCE_FILE_NAMES, 'HANDOFF.md']
 
-function isNotFoundError(error: unknown): boolean {
-  return error instanceof Error && 'code' in error && error.code === 'ENOENT'
-}
-
-async function getSession(cwd: string, sessionId: string | undefined) {
-  const workspace = await loadWorkspace(cwd)
-  if (!sessionId) {
-    return {
-      workspace,
-      session: await getActiveSession(workspace)
-    }
-  }
-
-  try {
-    return {
-      workspace,
-      session: await readSession(workspace.repoPath, sessionId)
-    }
-  } catch (error) {
-    if (isNotFoundError(error)) {
-      throw new ForgeDeskError(`Unknown session: ${sessionId}`)
-    }
-    throw error
-  }
-}
-
 function targetDirFor(repoPath: string, session: ChangeSession, target: InspectTarget): string {
   if (target === 'export') {
     return path.join(pathsFor(repoPath).exportsDir, session.id)
@@ -96,7 +70,7 @@ async function inspectFile(targetDir: string, name: string): Promise<InspectFile
 
 export async function getInspectReport(cwd: string, options: InspectOptions = {}): Promise<InspectReport> {
   const target = options.target ?? 'evidence'
-  const { workspace, session } = await getSession(cwd, options.sessionId)
+  const { workspace, session } = await resolveSession(cwd, options.sessionId)
   const targetDir = targetDirFor(workspace.repoPath, session, target)
 
   if (!(await pathExists(targetDir))) {

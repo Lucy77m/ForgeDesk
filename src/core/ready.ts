@@ -2,8 +2,7 @@ import path from 'node:path'
 import type { ChangeSession } from '../types.js'
 import { displayPath } from '../templates/format.js'
 import { EVIDENCE_FILE_NAMES } from './constants.js'
-import { ForgeDeskError } from './errors.js'
-import { getActiveSession, loadWorkspace, pathExists, readSession } from './workspace.js'
+import { pathExists, resolveSession } from './workspace.js'
 
 export type ReadyReport = {
   schemaVersion: 'forgedesk-ready-v1'
@@ -17,32 +16,6 @@ export type ReadyReport = {
   }
   blockers: string[]
   warnings: string[]
-}
-
-function isNotFoundError(error: unknown): boolean {
-  return error instanceof Error && 'code' in error && error.code === 'ENOENT'
-}
-
-async function getSession(cwd: string, sessionId: string | undefined): Promise<{ repoPath: string; session: ChangeSession }> {
-  const workspace = await loadWorkspace(cwd)
-  if (!sessionId) {
-    return {
-      repoPath: workspace.repoPath,
-      session: await getActiveSession(workspace)
-    }
-  }
-
-  try {
-    return {
-      repoPath: workspace.repoPath,
-      session: await readSession(workspace.repoPath, sessionId)
-    }
-  } catch (error) {
-    if (isNotFoundError(error)) {
-      throw new ForgeDeskError(`Unknown session: ${sessionId}`)
-    }
-    throw error
-  }
 }
 
 async function missingEvidenceFiles(repoPath: string, session: ChangeSession): Promise<string[]> {
@@ -61,7 +34,8 @@ async function missingEvidenceFiles(repoPath: string, session: ChangeSession): P
 }
 
 export async function getReadyReport(cwd: string, sessionId?: string): Promise<ReadyReport> {
-  const { repoPath, session } = await getSession(cwd, sessionId)
+  const { workspace, session } = await resolveSession(cwd, sessionId)
+  const repoPath = workspace.repoPath
   const blockers: string[] = []
   const warnings: string[] = []
 

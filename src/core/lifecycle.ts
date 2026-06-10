@@ -2,10 +2,9 @@ import type { ChangeSession } from '../types.js'
 import { displayPath } from '../templates/format.js'
 import { ForgeDeskError } from './errors.js'
 import {
-  getActiveSession,
   listSessions,
   loadWorkspace,
-  readSession,
+  resolveSession,
   updateSession,
   writeConfig
 } from './workspace.js'
@@ -16,24 +15,8 @@ function now(): string {
   return new Date().toISOString()
 }
 
-function isNotFoundError(error: unknown): boolean {
-  return error instanceof Error && 'code' in error && error.code === 'ENOENT'
-}
-
-async function readSessionOrThrow(repoPath: string, sessionId: string): Promise<ChangeSession> {
-  try {
-    return await readSession(repoPath, sessionId)
-  } catch (error) {
-    if (isNotFoundError(error)) {
-      throw new ForgeDeskError(`Unknown session: ${sessionId}`)
-    }
-    throw error
-  }
-}
-
 export async function markActiveSessionDone(cwd: string): Promise<ChangeSession> {
-  const workspace = await loadWorkspace(cwd)
-  const session = await getActiveSession(workspace)
+  const { workspace, session } = await resolveSession(cwd)
   return updateSession(workspace.repoPath, session.id, (current) => ({
     ...current,
     status: 'done',
@@ -46,8 +29,7 @@ export async function archiveSession(cwd: string, sessionId: string | undefined)
     throw new ForgeDeskError('Archive requires --session <id>.')
   }
 
-  const workspace = await loadWorkspace(cwd)
-  const session = await readSessionOrThrow(workspace.repoPath, sessionId)
+  const { workspace, session } = await resolveSession(cwd, sessionId)
   const updated = await updateSession(workspace.repoPath, session.id, (current) => ({
     ...current,
     status: 'archived',
@@ -70,8 +52,7 @@ export async function reopenSession(cwd: string, sessionId: string | undefined):
     throw new ForgeDeskError('Reopen requires --session <id>.')
   }
 
-  const workspace = await loadWorkspace(cwd)
-  const session = await readSessionOrThrow(workspace.repoPath, sessionId)
+  const { workspace, session } = await resolveSession(cwd, sessionId)
   const timestamp = now()
   const updated = await updateSession(workspace.repoPath, session.id, (current) => ({
     ...current,
@@ -106,10 +87,7 @@ function formatTests(session: ChangeSession): string {
 }
 
 export async function showSession(cwd: string, sessionId: string | undefined): Promise<string> {
-  const workspace = await loadWorkspace(cwd)
-  const session = sessionId
-    ? await readSessionOrThrow(workspace.repoPath, sessionId)
-    : await getActiveSession(workspace)
+  const { session } = await resolveSession(cwd, sessionId)
 
   return [
     'ForgeDesk Session',

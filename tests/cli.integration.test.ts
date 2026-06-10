@@ -351,6 +351,56 @@ describe('cli integration', () => {
     expect(exportInspect.stdout).toContain('HANDOFF.md')
   })
 
+  it('resolves active, explicit, and unknown sessions for handoff commands', () => {
+    const repo = tempDir()
+    dirs.push(repo)
+    initGitRepo(repo)
+
+    expect(runCli(repo, ['init', '--repo', '.']).status).toBe(0)
+    expect(runCli(repo, ['start', '--title', 'First resolved session']).status).toBe(0)
+    const firstSessionId = JSON.parse(readFileSync(path.join(repo, '.forgedesk', 'config.json'), 'utf8'))
+      .activeSessionId
+    expect(runCli(repo, ['intent', 'Exercise explicit session resolution.']).status).toBe(0)
+    expect(runCli(repo, ['check', 'Reviewed generated evidence.']).status).toBe(0)
+    expect(runCli(repo, ['evidence']).status).toBe(0)
+    expect(runCli(repo, ['export']).status).toBe(0)
+
+    expect(runCli(repo, ['start', '--title', 'Second active session']).status).toBe(0)
+    const secondSessionId = JSON.parse(readFileSync(path.join(repo, '.forgedesk', 'config.json'), 'utf8'))
+      .activeSessionId
+
+    const activeReady = runCli(repo, ['ready'])
+    expect(activeReady.status).not.toBe(0)
+    expect(activeReady.stdout).toContain(`Session ID: ${secondSessionId}`)
+    expect(activeReady.stdout).not.toContain(`Session ID: ${firstSessionId}`)
+
+    for (const args of [
+      ['ready', '--session', firstSessionId],
+      ['handoff', '--session', firstSessionId],
+      ['export', '--session', firstSessionId, '--output-dir', 'first-session-export'],
+      ['inspect', '--session', firstSessionId, '--export'],
+      ['show', '--session', firstSessionId]
+    ]) {
+      const result = runCli(repo, args)
+      expect(result.status).toBe(0)
+      expect(result.stdout).toContain(firstSessionId)
+      expect(result.stdout).not.toContain(secondSessionId)
+    }
+
+    for (const args of [
+      ['ready', '--session', 'missing-session'],
+      ['handoff', '--session', 'missing-session'],
+      ['export', '--session', 'missing-session'],
+      ['inspect', '--session', 'missing-session'],
+      ['show', '--session', 'missing-session'],
+      ['reopen', '--session', 'missing-session']
+    ]) {
+      const result = runCli(repo, args)
+      expect(result.status).not.toBe(0)
+      expect(result.stderr).toContain('Unknown session: missing-session')
+    }
+  })
+
   it('reports inspect errors for missing evidence and missing files', () => {
     const repo = tempDir()
     dirs.push(repo)

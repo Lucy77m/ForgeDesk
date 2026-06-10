@@ -15,6 +15,11 @@ export type Workspace = {
   config: Config
 }
 
+export type ResolvedSession = {
+  workspace: Workspace
+  session: ChangeSession
+}
+
 export function resolveFrom(cwd: string, inputPath: string): string {
   return path.resolve(cwd, inputPath)
 }
@@ -92,6 +97,31 @@ export async function writeConfig(repoPath: string, config: Config): Promise<voi
 
 export async function readSession(repoPath: string, sessionId: string): Promise<ChangeSession> {
   return readChangeSession(sessionFile(repoPath, sessionId))
+}
+
+function isNotFoundError(error: unknown): boolean {
+  return error instanceof Error && 'code' in error && error.code === 'ENOENT'
+}
+
+async function readSessionOrThrow(repoPath: string, sessionId: string): Promise<ChangeSession> {
+  try {
+    return await readSession(repoPath, sessionId)
+  } catch (error) {
+    if (isNotFoundError(error)) {
+      throw new ForgeDeskError(`Unknown session: ${sessionId}`)
+    }
+    throw error
+  }
+}
+
+export async function resolveSession(cwd: string, sessionId?: string): Promise<ResolvedSession> {
+  const workspace = await loadWorkspace(cwd)
+  return {
+    workspace,
+    session: sessionId
+      ? await readSessionOrThrow(workspace.repoPath, sessionId)
+      : await getActiveSession(workspace)
+  }
 }
 
 export async function writeSession(repoPath: string, session: ChangeSession): Promise<void> {

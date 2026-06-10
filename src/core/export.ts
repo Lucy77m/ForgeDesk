@@ -4,7 +4,7 @@ import { displayPath } from '../templates/format.js'
 import { EVIDENCE_FILE_NAMES } from './constants.js'
 import { ForgeDeskError } from './errors.js'
 import { getHandoffReport, renderHandoffReport } from './handoff.js'
-import { getActiveSession, loadWorkspace, pathExists, readSession, pathsFor } from './workspace.js'
+import { pathExists, pathsFor, resolveSession } from './workspace.js'
 
 export type ExportReport = {
   schemaVersion: 'forgedesk-export-v1'
@@ -26,32 +26,6 @@ export type ExportOptions = {
   outputDir?: string
 }
 
-function isNotFoundError(error: unknown): boolean {
-  return error instanceof Error && 'code' in error && error.code === 'ENOENT'
-}
-
-async function getSession(cwd: string, sessionId: string | undefined) {
-  const workspace = await loadWorkspace(cwd)
-  if (!sessionId) {
-    return {
-      workspace,
-      session: await getActiveSession(workspace)
-    }
-  }
-
-  try {
-    return {
-      workspace,
-      session: await readSession(workspace.repoPath, sessionId)
-    }
-  } catch (error) {
-    if (isNotFoundError(error)) {
-      throw new ForgeDeskError(`Unknown session: ${sessionId}`)
-    }
-    throw error
-  }
-}
-
 async function assertEvidenceFiles(sourceDir: string): Promise<void> {
   const missing: string[] = []
   for (const file of EVIDENCE_FILE_NAMES) {
@@ -70,7 +44,7 @@ function defaultOutputDir(repoPath: string, sessionId: string): string {
 }
 
 export async function exportEvidencePack(cwd: string, options: ExportOptions = {}): Promise<ExportReport> {
-  const { workspace, session } = await getSession(cwd, options.sessionId)
+  const { workspace, session } = await resolveSession(cwd, options.sessionId)
   if (!session.evidenceDir) {
     throw new ForgeDeskError('Cannot export because evidence has not been generated. Run "forgedesk evidence" first.')
   }

@@ -2,9 +2,8 @@ import path from 'node:path'
 import type { ChangeSession } from '../types.js'
 import { changedFileCount, displayPath, testSummary } from '../templates/format.js'
 import { EVIDENCE_FILE_NAMES } from './constants.js'
-import { ForgeDeskError } from './errors.js'
 import { getReadyReport, type ReadyReport } from './ready.js'
-import { getActiveSession, loadWorkspace, readSession } from './workspace.js'
+import { resolveSession } from './workspace.js'
 
 export type HandoffReport = {
   schemaVersion: 'forgedesk-handoff-v1'
@@ -28,32 +27,6 @@ export type HandoffReport = {
   recommendedFiles: string[]
 }
 
-function isNotFoundError(error: unknown): boolean {
-  return error instanceof Error && 'code' in error && error.code === 'ENOENT'
-}
-
-async function getSession(cwd: string, sessionId: string | undefined): Promise<{ repoPath: string; session: ChangeSession }> {
-  const workspace = await loadWorkspace(cwd)
-  if (!sessionId) {
-    return {
-      repoPath: workspace.repoPath,
-      session: await getActiveSession(workspace)
-    }
-  }
-
-  try {
-    return {
-      repoPath: workspace.repoPath,
-      session: await readSession(workspace.repoPath, sessionId)
-    }
-  } catch (error) {
-    if (isNotFoundError(error)) {
-      throw new ForgeDeskError(`Unknown session: ${sessionId}`)
-    }
-    throw error
-  }
-}
-
 function recommendedFiles(session: ChangeSession): string[] {
   if (!session.evidenceDir) {
     return []
@@ -63,8 +36,9 @@ function recommendedFiles(session: ChangeSession): string[] {
 }
 
 export async function getHandoffReport(cwd: string, sessionId?: string): Promise<HandoffReport> {
-  const { repoPath, session } = await getSession(cwd, sessionId)
-  const ready = await getReadyReport(cwd, sessionId)
+  const { workspace, session } = await resolveSession(cwd, sessionId)
+  const repoPath = workspace.repoPath
+  const ready = await getReadyReport(cwd, session.id)
 
   return {
     schemaVersion: 'forgedesk-handoff-v1',
