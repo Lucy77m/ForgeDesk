@@ -64,6 +64,7 @@ forgedesk start --title "Describe the change"
 forgedesk intent "Record the user-facing goal."
 forgedesk decision "Record an implementation decision."
 forgedesk risk "Record a risk or review focus."
+forgedesk check "Record a manual verification check."
 forgedesk test --command "npm test"
 forgedesk test -- npm test
 forgedesk status

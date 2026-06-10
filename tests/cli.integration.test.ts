@@ -34,6 +34,7 @@ describe('cli integration', () => {
     expect(runCli(repo, ['intent', 'Explain the demo readme change.']).status).toBe(0)
     expect(runCli(repo, ['decision', 'Keep the change documentation-only.']).status).toBe(0)
     expect(runCli(repo, ['risk', 'README wording may need review.', '--severity', 'low']).status).toBe(0)
+    expect(runCli(repo, ['check', 'Opened the rendered evidence files.']).status).toBe(0)
     expect(runCli(repo, ['test', '--command', 'npm test']).status).toBe(0)
     expect(runCli(repo, ['test', '--', 'node', '--version']).status).toBe(0)
 
@@ -57,6 +58,7 @@ describe('cli integration', () => {
     const prEvidence = readFileSync(path.join(evidenceDir, 'PR_EVIDENCE.md'), 'utf8')
     expect(prEvidence).toContain('Changed files: 1')
     expect(prEvidence).toContain('- README.md')
+    expect(prEvidence).toContain('Opened the rendered evidence files.')
     expect(evidence.stdout).toContain('Generated evidence')
 
     const customEvidence = runCli(repo, ['evidence', '--output-dir', 'custom-evidence'])
@@ -168,6 +170,7 @@ describe('cli integration', () => {
       ['intent', 'Need a session'],
       ['decision', 'Need a session'],
       ['risk', 'Need a session'],
+      ['check', 'Need a session'],
       ['test', '--command', 'npm test']
     ]) {
       const result = runCli(repo, args)

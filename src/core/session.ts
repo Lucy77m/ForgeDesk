@@ -139,3 +139,19 @@ export async function addRisk(
   await writeSession(workspace.repoPath, updated)
   return updated
 }
+
+export async function addManualCheck(text: string, cwd: string): Promise<ChangeSession> {
+  const workspace = await loadWorkspace(cwd)
+  const session = await getActiveSession(workspace)
+  const timestamp = now()
+  const updated = {
+    ...session,
+    manualChecks: [
+      ...(session.manualChecks ?? []),
+      { id: makeId('check'), text: text.trim(), createdAt: timestamp }
+    ],
+    updatedAt: timestamp
+  }
+  await writeSession(workspace.repoPath, updated)
+  return updated
+}

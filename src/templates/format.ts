@@ -66,7 +66,9 @@ export function testSummary(session: ChangeSession): string {
   const recorded = recordedOnlyTests(session.tests).length
   const executed = executedTests(session.tests).length
 
-  return `${executed} executed (${passed} passed, ${failed} failed), ${recorded} recorded only`
+  const manual = session.manualChecks?.length ?? 0
+
+  return `${executed} executed (${passed} passed, ${failed} failed), ${recorded} recorded only, ${manual} manual`
 }
 
 export function reviewReadiness(session: ChangeSession): string[] {
@@ -97,13 +99,15 @@ export function notVerified(session: ChangeSession): string[] {
   if (!session.intent) {
     gaps.push('Intent is missing.')
   }
-  if (session.tests.length === 0) {
-    gaps.push('No tests recorded.')
+  if (session.tests.length === 0 && (session.manualChecks?.length ?? 0) === 0) {
+    gaps.push('No test evidence recorded.')
+  } else if (session.tests.length === 0) {
+    gaps.push('No command tests recorded.')
   }
   if (session.tests.some((test) => test.status === 'failed')) {
     gaps.push('At least one test command failed.')
   }
-  if (session.tests.every((test) => test.status === 'recorded')) {
+  if (session.tests.length > 0 && session.tests.every((test) => test.status === 'recorded')) {
     gaps.push('Tests were recorded but not run by ForgeDesk.')
   }
   if (session.risks.length > 0) {

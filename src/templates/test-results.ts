@@ -1,5 +1,5 @@
 import type { EvidenceBundle } from '../types.js'
-import { displayPath, executedTests, failedTests, recordedOnlyTests, renderTestGroup } from './format.js'
+import { displayPath, executedTests, failedTests, listOrNone, recordedOnlyTests, renderTestGroup } from './format.js'
 
 export function renderTestResults(bundle: EvidenceBundle): string {
   const tests = bundle.session.tests
@@ -24,6 +24,6 @@ ${tests.some((test) => test.logFile) ? tests.filter((test) => test.logFile).map(
 
 ## Manual Checks
 
-- None recorded.
+${listOrNone((bundle.session.manualChecks ?? []).map((check) => check.text))}
 `
 }

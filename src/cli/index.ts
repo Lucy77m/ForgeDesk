@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { Command } from 'commander'
 import { pathToFileURL } from 'node:url'
-import { addDecision, addRisk, initProject, setIntent, startSession } from '../core/session.js'
+import { addDecision, addManualCheck, addRisk, initProject, setIntent, startSession } from '../core/session.js'
 import { generateEvidence } from '../core/evidence.js'
 import { ForgeDeskError } from '../core/errors.js'
 import { getStatus } from '../core/status.js'
@@ -67,6 +67,15 @@ export function buildProgram(cwd = process.cwd()): Command {
       }
       const session = await addRisk(text, cwd, options.severity)
       console.log(`Recorded risk. Total risks: ${session.risks.length}`)
+    })
+
+  program
+    .command('check')
+    .description('Record a manual verification check for the active session.')
+    .argument('<text>', 'manual check text')
+    .action(async (text: string) => {
+      const session = await addManualCheck(text, cwd)
+      console.log(`Recorded manual check. Total manual checks: ${session.manualChecks?.length ?? 0}`)
     })
 
   program

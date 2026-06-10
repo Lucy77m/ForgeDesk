@@ -56,6 +56,10 @@ ${renderTestGroup(executedTests(session.tests))}
 
 ${renderTestGroup(recordedOnlyTests(session.tests))}
 
+### Manual Checks
+
+${listOrNone((session.manualChecks ?? []).map((check) => check.text))}
+
 ## Not Verified
 
 ${listOrNone(notVerified(session), 'No known gaps recorded.')}

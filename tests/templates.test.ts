@@ -45,7 +45,7 @@ describe('templates', () => {
     const rendered = renderPrEvidence(bundle())
 
     expect(rendered).toContain('Not recorded.')
-    expect(rendered).toContain('No tests recorded.')
+    expect(rendered).toContain('No test evidence recorded.')
     expect(rendered).toContain('## Review Readiness')
     expect(rendered).toContain('- Intent: missing')
     expect(rendered).toContain('# PR Evidence')
@@ -93,9 +93,28 @@ describe('templates', () => {
     const rendered = renderPrEvidence(value)
 
     expect(rendered).toContain('- Intent: present')
-    expect(rendered).toContain('- Tests: 1 executed (1 passed, 0 failed), 0 recorded only')
+    expect(rendered).toContain('- Tests: 1 executed (1 passed, 0 failed), 0 recorded only, 0 manual')
     expect(rendered).toContain('- No known gaps recorded.')
     expect(rendered).toContain('- docs/guide.md')
     expect(rendered).toContain('[truncated]')
+  })
+
+  it('renders manual checks in evidence', () => {
+    const value = bundle()
+    value.session.intent = 'Document manual verification.'
+    value.session.manualChecks = [
+      {
+        id: 'check-1',
+        text: 'Opened the generated PR evidence and verified the review readiness section.',
+        createdAt: '2026-06-10T00:00:00.000Z'
+      }
+    ]
+
+    const rendered = renderPrEvidence(value)
+
+    expect(rendered).toContain('### Manual Checks')
+    expect(rendered).toContain('Opened the generated PR evidence')
+    expect(rendered).toContain('No command tests recorded.')
+    expect(rendered).not.toContain('Tests were recorded but not run by ForgeDesk.')
   })
 })

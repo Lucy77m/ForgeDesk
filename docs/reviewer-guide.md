@@ -11,7 +11,7 @@ Start with these sections:
 2. `Git Summary`: branch, HEAD, dirty state, and changed file count.
 3. `Review Readiness`: a quick scan of intent, tests, decisions, risks, and known gaps.
 4. `Files Changed`: the review scope.
-5. `Tests`: what was run, what was only recorded, and where logs are stored.
+5. `Tests`: what was run, what was only recorded, manual checks, and where logs are stored.
 6. `Not Verified`: the explicit review gaps.
 
 ## What To Check
@@ -19,6 +19,7 @@ Start with these sections:
 - Does the diff match the stated intent?
 - Are changed files limited to the claimed scope?
 - Are tests relevant to the change?
+- Are manual checks concrete enough to be useful?
 - Are failed or missing tests acknowledged?
 - Are risks specific enough to guide review?
 - Is anything important hidden outside the evidence pack?

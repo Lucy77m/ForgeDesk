@@ -24,6 +24,7 @@ export type ChangeSession = {
   decisions: Decision[]
   risks: Risk[]
   tests: TestRun[]
+  manualChecks?: ManualCheck[]
   gitSnapshot?: GitSnapshot
   evidenceDir?: string
   createdAt: string
@@ -40,6 +41,12 @@ export type Risk = {
   id: string
   text: string
   severity?: 'low' | 'medium' | 'high'
+  createdAt: string
+}
+
+export type ManualCheck = {
+  id: string
+  text: string
   createdAt: string
 }
 

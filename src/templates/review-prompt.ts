@@ -35,6 +35,7 @@ ${renderChangedFiles(gitSnapshot)}
 - Does the diff match the stated intent?
 - Are there unexpected file changes?
 - Are the tests relevant?
+- Are manual checks specific and believable?
 - Are unverified risks clearly listed?
 - Do not expand into unrelated refactors.
 

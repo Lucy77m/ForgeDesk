@@ -39,6 +39,7 @@ export async function getStatus(cwd: string): Promise<string> {
   const passedTests = activeSession?.tests.filter((test) => test.status === 'passed').length ?? 0
   const failedTests = activeSession?.tests.filter((test) => test.status === 'failed').length ?? 0
   const recordedTests = activeSession?.tests.filter((test) => test.status === 'recorded').length ?? 0
+  const manualChecks = activeSession?.manualChecks?.length ?? 0
 
   return [
     'ForgeDesk Status',
@@ -64,6 +65,7 @@ export async function getStatus(cwd: string): Promise<string> {
     `Decisions: ${activeSession?.decisions.length ?? 0}`,
     `Risks: ${activeSession?.risks.length ?? 0}`,
     `Tests: ${passedTests} passed, ${failedTests} failed, ${recordedTests} recorded`,
+    `Manual checks: ${manualChecks}`,
     '',
     '## Next',
     nextAction(activeSession)
