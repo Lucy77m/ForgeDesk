@@ -76,6 +76,10 @@ forgedesk ready --json
 forgedesk handoff
 forgedesk handoff --session <id>
 forgedesk handoff --json
+forgedesk export
+forgedesk export --session <id>
+forgedesk export --output-dir <dir>
+forgedesk export --json
 forgedesk sessions
 forgedesk show
 forgedesk show --session <id>

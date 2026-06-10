@@ -273,6 +273,60 @@ describe('cli integration', () => {
     expect(handoff.stdout).toContain('Generate evidence before handoff.')
   })
 
+  it('exports a local evidence pack with a handoff file', () => {
+    const repo = tempDir()
+    dirs.push(repo)
+    initGitRepo(repo)
+    writeFileSync(path.join(repo, 'README.md'), '# Export demo\n', 'utf8')
+
+    expect(runCli(repo, ['init', '--repo', '.']).status).toBe(0)
+    expect(runCli(repo, ['start', '--title', 'Export demo']).status).toBe(0)
+    const sessionId = JSON.parse(readFileSync(path.join(repo, '.forgedesk', 'config.json'), 'utf8')).activeSessionId
+    expect(runCli(repo, ['intent', 'Exercise export command.']).status).toBe(0)
+    expect(runCli(repo, ['check', 'Reviewed the generated evidence files.']).status).toBe(0)
+    expect(runCli(repo, ['test', '--', 'node', '--version']).status).toBe(0)
+    expect(runCli(repo, ['evidence']).status).toBe(0)
+
+    const result = runCli(repo, ['export'])
+    expect(result.status).toBe(0)
+    expect(result.stdout).toContain('ForgeDesk Export')
+    expect(result.stdout).toContain('Ready: yes')
+    expect(result.stdout).toContain('HANDOFF.md')
+
+    const defaultExportDir = path.join(repo, '.forgedesk', 'exports', sessionId)
+    expect(existsSync(path.join(defaultExportDir, 'PR_EVIDENCE.md'))).toBe(true)
+    expect(existsSync(path.join(defaultExportDir, 'TEST_RESULTS.md'))).toBe(true)
+    expect(existsSync(path.join(defaultExportDir, 'REVIEW_PROMPT.md'))).toBe(true)
+    expect(existsSync(path.join(defaultExportDir, 'CHANGE_SUMMARY.md'))).toBe(true)
+    expect(existsSync(path.join(defaultExportDir, 'evidence.json'))).toBe(true)
+    const handoff = readFileSync(path.join(defaultExportDir, 'HANDOFF.md'), 'utf8')
+    expect(handoff).toContain('ForgeDesk Handoff')
+    expect(handoff).toContain('Exercise export command.')
+
+    const custom = runCli(repo, ['export', '--session', sessionId, '--output-dir', 'handoff-export', '--json'])
+    expect(custom.status).toBe(0)
+    const report = JSON.parse(custom.stdout)
+    expect(report.schemaVersion).toBe('forgedesk-export-v1')
+    expect(report.ready).toBe(true)
+    expect(report.outputDir).toContain('handoff-export')
+    expect(report.files.some((file: string) => file.endsWith('/HANDOFF.md'))).toBe(true)
+    expect(existsSync(path.join(repo, 'handoff-export', 'HANDOFF.md'))).toBe(true)
+  })
+
+  it('reports export errors before evidence generation', () => {
+    const repo = tempDir()
+    dirs.push(repo)
+    initGitRepo(repo)
+
+    expect(runCli(repo, ['init', '--repo', '.']).status).toBe(0)
+    expect(runCli(repo, ['start', '--title', 'Missing export evidence']).status).toBe(0)
+
+    const result = runCli(repo, ['export'])
+
+    expect(result.status).not.toBe(0)
+    expect(result.stderr).toContain('Cannot export because evidence has not been generated')
+  })
+
   it('blocks readiness when a test command failed', () => {
     const repo = tempDir()
     dirs.push(repo)

@@ -27,6 +27,7 @@ node D:/ForgeDesk/dist/cli/index.js evidence --latest
 node D:/ForgeDesk/dist/cli/index.js doctor
 node D:/ForgeDesk/dist/cli/index.js ready
 node D:/ForgeDesk/dist/cli/index.js handoff
+node D:/ForgeDesk/dist/cli/index.js export
 node D:/ForgeDesk/dist/cli/index.js done
 ```
 
@@ -48,6 +49,7 @@ node dist/cli/index.js status
 node dist/cli/index.js doctor
 node dist/cli/index.js ready
 node dist/cli/index.js handoff
+node dist/cli/index.js export
 node dist/cli/index.js evidence --list
 ```
 
@@ -100,3 +102,7 @@ correctness, security, merge, or release verdict.
 Use `forgedesk handoff` to print a compact local summary for a reviewer, PR
 description, release note draft, or next AI window. It reads existing local
 evidence and does not call an AI provider.
+
+Use `forgedesk export` to copy the existing evidence pack and a generated
+`HANDOFF.md` into `.forgedesk/exports/<session-id>` or a chosen local directory.
+It does not upload, publish, compress, or regenerate evidence.

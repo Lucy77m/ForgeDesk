@@ -15,6 +15,9 @@ whether the code is correct or safe.
 Run `forgedesk handoff` when you want a compact terminal summary that points to
 the most useful evidence files for a reviewer or another AI window.
 
+Run `forgedesk export` when you want to copy the evidence pack and `HANDOFF.md`
+to a local directory for sharing outside `.forgedesk/`.
+
 Start with these sections:
 
 1. `Intent`: what the change claims to do.

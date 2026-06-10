@@ -5,6 +5,7 @@ import { addDecision, addManualCheck, addRisk, initProject, setIntent, startSess
 import { getDoctorReport, renderDoctorReport } from '../core/doctor.js'
 import { generateEvidence, getLatestEvidencePack, listEvidencePacks } from '../core/evidence.js'
 import { ForgeDeskError } from '../core/errors.js'
+import { exportEvidencePack, renderExportReport } from '../core/export.js'
 import { getHandoffReport, renderHandoffReport } from '../core/handoff.js'
 import { getReadyReport, renderReadyReport } from '../core/ready.js'
 import { getStatus } from '../core/status.js'
@@ -157,6 +158,20 @@ export function buildProgram(cwd = process.cwd()): Command {
     .action(async (options: { session?: string; json?: boolean }) => {
       const report = await getHandoffReport(cwd, options.session)
       console.log(options.json ? JSON.stringify(report, null, 2) : renderHandoffReport(report))
+    })
+
+  program
+    .command('export')
+    .description('Copy a local evidence pack to an export directory.')
+    .option('--session <id>', 'session id; defaults to the active session')
+    .option('--output-dir <dir>', 'output directory; defaults to .forgedesk/exports/<session-id>')
+    .option('--json', 'print the export report as JSON')
+    .action(async (options: { session?: string; outputDir?: string; json?: boolean }) => {
+      const report = await exportEvidencePack(cwd, {
+        sessionId: options.session,
+        outputDir: options.outputDir
+      })
+      console.log(options.json ? JSON.stringify(report, null, 2) : renderExportReport(report))
     })
 
   program

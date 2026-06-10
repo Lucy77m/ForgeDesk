@@ -26,6 +26,7 @@ export function pathsFor(repoPath: string) {
     configFile: path.join(forgedeskDir, 'config.json'),
     sessionsDir: path.join(forgedeskDir, 'sessions'),
     evidenceDir: path.join(forgedeskDir, 'evidence'),
+    exportsDir: path.join(forgedeskDir, 'exports'),
     logsDir: path.join(forgedeskDir, 'logs')
   }
 }
@@ -47,6 +48,7 @@ export async function ensureForgeDeskDirs(repoPath: string): Promise<void> {
   const paths = pathsFor(repoPath)
   await mkdir(paths.sessionsDir, { recursive: true })
   await mkdir(paths.evidenceDir, { recursive: true })
+  await mkdir(paths.exportsDir, { recursive: true })
   await mkdir(paths.logsDir, { recursive: true })
 }
 
