@@ -37,6 +37,13 @@ export function initGitRepo(repoPath: string): void {
   git(repoPath, ['commit', '-m', 'initial commit'])
 }
 
+export function initEmptyGitRepo(repoPath: string): void {
+  mkdirSync(repoPath, { recursive: true })
+  git(repoPath, ['init'])
+  git(repoPath, ['config', 'user.email', 'forgedesk@example.test'])
+  git(repoPath, ['config', 'user.name', 'ForgeDesk Test'])
+}
+
 export function runCli(repoPath: string, args: string[]) {
   const cliPath = path.join(projectRoot, 'src', 'cli', 'index.ts')
   const tsxLoader = pathToFileURL(path.join(projectRoot, 'node_modules', 'tsx', 'dist', 'loader.mjs')).href

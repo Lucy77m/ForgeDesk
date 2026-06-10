@@ -23,6 +23,9 @@ node dist/cli/index.js --help
 
 ## Quick Start
 
+After building from a local checkout, replace `forgedesk` with
+`node dist/cli/index.js` until the package is published.
+
 ```bash
 forgedesk init --repo .
 forgedesk start --title "Fix OAuth redirect"
@@ -81,10 +84,12 @@ forgedesk evidence
 - It does not commit, push, open PRs, or publish releases.
 - It does not upload your project.
 
+See [docs/boundaries.md](docs/boundaries.md) for the v0.1 boundary contract.
+
 ## Project Status
 
 ForgeDesk v0.1 is source-available on GitHub as an early local CLI MVP. It is
-not published to npm, and there is no official release tag yet.
+not published to npm.
 
 ## Development
 

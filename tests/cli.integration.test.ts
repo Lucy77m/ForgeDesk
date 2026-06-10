@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
-import { cleanupDir, initGitRepo, runCli, tempDir } from './helpers.js'
+import { cleanupDir, initEmptyGitRepo, initGitRepo, runCli, tempDir } from './helpers.js'
 
 describe('cli integration', () => {
   const dirs: string[] = []
@@ -10,6 +10,17 @@ describe('cli integration', () => {
     for (const dir of dirs.splice(0)) {
       cleanupDir(dir)
     }
+  })
+
+  it('prints the CLI version', () => {
+    const repo = tempDir()
+    dirs.push(repo)
+    mkdirSync(repo, { recursive: true })
+
+    const result = runCli(repo, ['--version'])
+
+    expect(result.status).toBe(0)
+    expect(result.stdout.trim()).toBe('0.1.0')
   })
 
   it('runs the full evidence workflow', () => {
@@ -79,5 +90,52 @@ describe('cli integration', () => {
 
     expect(result.status).not.toBe(0)
     expect(result.stderr).toContain('not a git repository')
+  })
+
+  it('reports missing ForgeDesk project errors clearly', () => {
+    const repo = tempDir()
+    dirs.push(repo)
+    initGitRepo(repo)
+
+    const status = runCli(repo, ['status'])
+    const evidence = runCli(repo, ['evidence'])
+
+    expect(status.status).not.toBe(0)
+    expect(status.stderr).toContain('Could not find a ForgeDesk project')
+    expect(evidence.status).not.toBe(0)
+    expect(evidence.stderr).toContain('Could not find a ForgeDesk project')
+  })
+
+  it('reports missing active session errors clearly', () => {
+    const repo = tempDir()
+    dirs.push(repo)
+    initGitRepo(repo)
+
+    expect(runCli(repo, ['init', '--repo', '.']).status).toBe(0)
+
+    for (const args of [
+      ['intent', 'Need a session'],
+      ['decision', 'Need a session'],
+      ['risk', 'Need a session'],
+      ['test', '--command', 'npm test']
+    ]) {
+      const result = runCli(repo, args)
+      expect(result.status).not.toBe(0)
+      expect(result.stderr).toContain('No active change session')
+    }
+  })
+
+  it('supports status in a git repo with no commits', () => {
+    const repo = tempDir()
+    dirs.push(repo)
+    initEmptyGitRepo(repo)
+
+    expect(runCli(repo, ['init', '--repo', '.']).status).toBe(0)
+    expect(runCli(repo, ['start', '--title', 'Unborn head demo']).status).toBe(0)
+
+    const status = runCli(repo, ['status'])
+
+    expect(status.status).toBe(0)
+    expect(status.stdout).toContain('HEAD: unborn')
   })
 })
