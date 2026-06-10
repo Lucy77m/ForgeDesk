@@ -1,0 +1,6 @@
+node_modules/
+dist/
+coverage/
+.forgedesk/
+.DS_Store
+*.log
