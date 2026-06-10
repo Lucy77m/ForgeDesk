@@ -85,6 +85,8 @@ forgedesk evidence
 - It does not upload your project.
 
 See [docs/boundaries.md](docs/boundaries.md) for the v0.1 boundary contract.
+See [docs/reviewer-guide.md](docs/reviewer-guide.md) for how to inspect an
+evidence pack.
 
 ## Project Status
 

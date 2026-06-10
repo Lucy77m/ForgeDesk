@@ -46,6 +46,8 @@ describe('templates', () => {
 
     expect(rendered).toContain('Not recorded.')
     expect(rendered).toContain('No tests recorded.')
+    expect(rendered).toContain('## Review Readiness')
+    expect(rendered).toContain('- Intent: missing')
     expect(rendered).toContain('# PR Evidence')
   })
 
@@ -72,5 +74,28 @@ describe('templates', () => {
     expect(rendered).toContain('## Recorded Only')
     expect(rendered).toContain('.forgedesk/logs/test-2.log')
     expect(rendered).not.toContain('.forgedesk\\logs')
+  })
+
+  it('renders a clean no-gap readiness state when evidence is complete', () => {
+    const value = bundle()
+    value.session.intent = 'Ship a focused documentation update.'
+    value.session.tests = [
+      {
+        id: 'test-1',
+        command: 'pnpm test',
+        status: 'passed',
+        exitCode: 0,
+        summary: `${'ok '.repeat(400)}done`
+      }
+    ]
+    value.gitSnapshot.modifiedFiles = ['docs\\guide.md']
+
+    const rendered = renderPrEvidence(value)
+
+    expect(rendered).toContain('- Intent: present')
+    expect(rendered).toContain('- Tests: 1 executed (1 passed, 0 failed), 0 recorded only')
+    expect(rendered).toContain('- No known gaps recorded.')
+    expect(rendered).toContain('- docs/guide.md')
+    expect(rendered).toContain('[truncated]')
   })
 })

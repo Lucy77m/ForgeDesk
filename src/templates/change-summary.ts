@@ -1,5 +1,5 @@
 import type { EvidenceBundle } from '../types.js'
-import { listOrNone } from './format.js'
+import { displayPath, listOrNone, testSummary } from './format.js'
 
 export function renderChangeSummary(bundle: EvidenceBundle): string {
   const { session, gitSnapshot } = bundle
@@ -22,7 +22,7 @@ ${session.intent || 'Not recorded.'}
 
 ## Main Files
 
-${listOrNone(mainFiles)}
+${listOrNone(mainFiles.map(displayPath))}
 
 ## Behavior Impact
 
@@ -31,5 +31,9 @@ Not recorded.
 ## Compatibility Notes
 
 Not recorded.
+
+## Test Evidence
+
+${testSummary(session)}
 `
 }

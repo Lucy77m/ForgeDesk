@@ -39,7 +39,9 @@ describe('cli integration', () => {
 
     const status = runCli(repo, ['status'])
     expect(status.status).toBe(0)
+    expect(status.stdout).toContain('ForgeDesk Status')
     expect(status.stdout).toContain('Intent: present')
+    expect(status.stdout).toContain('## Next')
 
     const evidence = runCli(repo, ['evidence'])
     expect(evidence.status).toBe(0)
@@ -62,6 +64,34 @@ describe('cli integration', () => {
     expect(existsSync(path.join(repo, 'custom-evidence', 'PR_EVIDENCE.md'))).toBe(true)
   })
 
+  it('generates evidence for an explicit session id', () => {
+    const repo = tempDir()
+    dirs.push(repo)
+    initGitRepo(repo)
+
+    expect(runCli(repo, ['init', '--repo', '.']).status).toBe(0)
+    expect(runCli(repo, ['start', '--title', 'First change']).status).toBe(0)
+    const firstSessionId = JSON.parse(readFileSync(path.join(repo, '.forgedesk', 'config.json'), 'utf8'))
+      .activeSessionId
+    expect(runCli(repo, ['intent', 'Review the first change.']).status).toBe(0)
+
+    expect(runCli(repo, ['start', '--title', 'Second change']).status).toBe(0)
+
+    const result = runCli(repo, [
+      'evidence',
+      '--session',
+      firstSessionId,
+      '--output-dir',
+      'first-session-evidence'
+    ])
+
+    expect(result.status).toBe(0)
+    const prEvidence = readFileSync(path.join(repo, 'first-session-evidence', 'PR_EVIDENCE.md'), 'utf8')
+    expect(prEvidence).toContain('First change')
+    expect(prEvidence).toContain('Review the first change.')
+    expect(prEvidence).not.toContain('Second change')
+  })
+
   it('records failing command exit codes', () => {
     const repo = tempDir()
     dirs.push(repo)
@@ -79,6 +109,20 @@ describe('cli integration', () => {
     expect(session.tests[0].exitCode).toBe(2)
     expect(session.tests[0].logFile).toContain('.forgedesk/logs/')
     expect(session.tests[0].logFile).not.toContain('\\')
+  })
+
+  it('rejects invalid risk severity values', () => {
+    const repo = tempDir()
+    dirs.push(repo)
+    initGitRepo(repo)
+
+    expect(runCli(repo, ['init', '--repo', '.']).status).toBe(0)
+    expect(runCli(repo, ['start', '--title', 'Severity demo']).status).toBe(0)
+
+    const result = runCli(repo, ['risk', 'Invalid severity', '--severity', 'critical'])
+
+    expect(result.status).not.toBe(0)
+    expect(result.stderr).toContain('Risk severity must be one of')
   })
 
   it('reports non-git init errors clearly', () => {
@@ -137,5 +181,6 @@ describe('cli integration', () => {
 
     expect(status.status).toBe(0)
     expect(status.stdout).toContain('HEAD: unborn')
+    expect(status.stdout).toContain('Next')
   })
 })

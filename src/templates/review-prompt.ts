@@ -1,5 +1,5 @@
 import type { EvidenceBundle } from '../types.js'
-import { listOrNone, notVerified, renderChangedFiles } from './format.js'
+import { changedFileCount, listOrNone, notVerified, renderChangedFiles, reviewReadiness } from './format.js'
 
 export function renderReviewPrompt(bundle: EvidenceBundle): string {
   const { session, gitSnapshot } = bundle
@@ -20,9 +20,11 @@ Only review the files and behavior related to this change.
 
 - Branch: ${gitSnapshot.branch}
 - HEAD: ${gitSnapshot.head}
-- Tests: ${session.tests.length}
-- Decisions: ${session.decisions.length}
-- Risks: ${session.risks.length}
+- Changed files: ${changedFileCount(gitSnapshot)}
+
+## Review Readiness
+
+${listOrNone(reviewReadiness(session))}
 
 ## Files
 
@@ -38,6 +40,6 @@ ${renderChangedFiles(gitSnapshot)}
 
 ## Not Verified
 
-${listOrNone(notVerified(session))}
+${listOrNone(notVerified(session), 'No known gaps recorded.')}
 `
 }

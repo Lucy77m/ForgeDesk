@@ -7,6 +7,8 @@ import { ForgeDeskError } from '../core/errors.js'
 import { getStatus } from '../core/status.js'
 import { recordTestCommand, runTestCommand } from '../core/test-runner.js'
 
+const riskSeverities = ['low', 'medium', 'high'] as const
+
 export function buildProgram(cwd = process.cwd()): Command {
   const program = new Command()
 
@@ -59,6 +61,9 @@ export function buildProgram(cwd = process.cwd()): Command {
     .argument('<text>', 'risk text')
     .option('--severity <severity>', 'low, medium, or high')
     .action(async (text: string, options: { severity?: 'low' | 'medium' | 'high' }) => {
+      if (options.severity && !riskSeverities.includes(options.severity)) {
+        throw new ForgeDeskError('Risk severity must be one of: low, medium, high.')
+      }
       const session = await addRisk(text, cwd, options.severity)
       console.log(`Recorded risk. Total risks: ${session.risks.length}`)
     })

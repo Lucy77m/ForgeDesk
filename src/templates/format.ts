@@ -1,7 +1,7 @@
 import type { ChangeSession, GitSnapshot, TestRun } from '../types.js'
 
-export function listOrNone(items: string[]): string {
-  return items.length > 0 ? items.map((item) => `- ${item}`).join('\n') : '- None'
+export function listOrNone(items: string[], emptyText = 'None'): string {
+  return items.length > 0 ? items.map((item) => `- ${item}`).join('\n') : `- ${emptyText}`
 }
 
 export function displayPath(filePath: string): string {
@@ -17,9 +17,18 @@ export function renderTest(test: TestRun): string {
     lines.push(`  - log: ${displayPath(test.logFile)}`)
   }
   if (test.summary) {
-    lines.push(`  - summary: ${test.summary.replace(/\r?\n/g, ' ')}`)
+    lines.push(`  - summary: ${compactText(test.summary)}`)
   }
   return lines.join('\n')
+}
+
+export function compactText(value: string, maxLength = 700): string {
+  const compacted = value.replace(/\s+/g, ' ').trim()
+  if (compacted.length <= maxLength) {
+    return compacted
+  }
+
+  return `${compacted.slice(0, maxLength - 15)} ... [truncated]`
 }
 
 export function renderTestGroup(tests: TestRun[]): string {
@@ -36,6 +45,40 @@ export function executedTests(tests: TestRun[]): TestRun[] {
 
 export function failedTests(tests: TestRun[]): TestRun[] {
   return tests.filter((test) => test.status === 'failed')
+}
+
+export function passedTests(tests: TestRun[]): TestRun[] {
+  return tests.filter((test) => test.status === 'passed')
+}
+
+export function changedFileCount(snapshot: GitSnapshot): number {
+  return (
+    snapshot.modifiedFiles.length +
+    snapshot.addedFiles.length +
+    snapshot.deletedFiles.length +
+    snapshot.untrackedFiles.length
+  )
+}
+
+export function testSummary(session: ChangeSession): string {
+  const passed = passedTests(session.tests).length
+  const failed = failedTests(session.tests).length
+  const recorded = recordedOnlyTests(session.tests).length
+  const executed = executedTests(session.tests).length
+
+  return `${executed} executed (${passed} passed, ${failed} failed), ${recorded} recorded only`
+}
+
+export function reviewReadiness(session: ChangeSession): string[] {
+  const gaps = notVerified(session)
+
+  return [
+    `Intent: ${session.intent ? 'present' : 'missing'}`,
+    `Tests: ${testSummary(session)}`,
+    `Decisions: ${session.decisions.length}`,
+    `Risks: ${session.risks.length}`,
+    `Known gaps: ${gaps.length > 0 ? gaps.length : 'none recorded'}`
+  ]
 }
 
 export function renderChangedFiles(snapshot: GitSnapshot): string {
@@ -64,7 +107,7 @@ export function notVerified(session: ChangeSession): string[] {
     gaps.push('Tests were recorded but not run by ForgeDesk.')
   }
   if (session.risks.length > 0) {
-    gaps.push('Review listed risks before merge or release.')
+    gaps.push('Recorded risks need review before merge or release.')
   }
   return gaps
 }
