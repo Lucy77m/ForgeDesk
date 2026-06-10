@@ -11,106 +11,114 @@ import {
 import { ForgeDeskError } from './errors.js'
 
 type MetadataKind = 'project' | 'config' | 'session'
+type ValidationRule = (value: Record<string, unknown>) => string | undefined
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
 
-function requiredString(value: Record<string, unknown>, key: string): string | undefined {
-  return typeof value[key] === 'string' && value[key].trim() ? undefined : `${key} must be a non-empty string`
+function requiredString(key: string): ValidationRule {
+  return (value) =>
+    typeof value[key] === 'string' && value[key].trim() ? undefined : `${key} must be a non-empty string`
 }
 
-function optionalString(value: Record<string, unknown>, key: string): string | undefined {
-  return value[key] === undefined || typeof value[key] === 'string' ? undefined : `${key} must be a string`
+function optionalString(key: string): ValidationRule {
+  return (value) => value[key] === undefined || typeof value[key] === 'string' ? undefined : `${key} must be a string`
 }
 
-function requiredArray(value: Record<string, unknown>, key: string): string | undefined {
-  return Array.isArray(value[key]) ? undefined : `${key} must be an array`
+function requiredArray(key: string): ValidationRule {
+  return (value) => Array.isArray(value[key]) ? undefined : `${key} must be an array`
 }
 
-function assertRecord(value: unknown, kind: MetadataKind, filePath: string): Record<string, unknown> {
-  if (!isRecord(value)) {
-    throw new ForgeDeskError(`Invalid ForgeDesk ${kind} metadata at ${displayPath(filePath)}: JSON must be an object.`)
+function sessionStatus(value: Record<string, unknown>): string | undefined {
+  return ['active', 'needs-review', 'done', 'archived'].includes(String(value.status))
+    ? undefined
+    : 'status must be one of active, needs-review, done, archived'
+}
+
+function firstValidationError(value: Record<string, unknown>, rules: ValidationRule[]): string | undefined {
+  for (const rule of rules) {
+    const error = rule(value)
+    if (error) {
+      return error
+    }
   }
-  return value
+  return undefined
 }
 
-function assertNoValidationError(error: string | undefined, kind: MetadataKind, filePath: string): void {
-  if (error) {
-    throw new ForgeDeskError(`Invalid ForgeDesk ${kind} metadata at ${displayPath(filePath)}: ${error}.`)
-  }
-}
-
-export function validateProject(value: unknown): string | undefined {
+function validateMetadata(value: unknown, schemaVersion: string, rules: ValidationRule[]): string | undefined {
   if (!isRecord(value)) {
     return 'JSON must be an object'
   }
-  if (value.schemaVersion !== PROJECT_SCHEMA_VERSION) {
-    return `schemaVersion must be ${PROJECT_SCHEMA_VERSION}`
+  if (value.schemaVersion !== schemaVersion) {
+    return `schemaVersion must be ${schemaVersion}`
   }
-  return (
-    requiredString(value, 'name') ??
-    requiredString(value, 'repoPath') ??
-    optionalString(value, 'goal') ??
-    optionalString(value, 'defaultBranch') ??
-    requiredString(value, 'createdAt') ??
-    requiredString(value, 'updatedAt')
-  )
+  return firstValidationError(value, rules)
+}
+
+function invalidMetadataError(kind: MetadataKind, filePath: string, error: string): ForgeDeskError {
+  return new ForgeDeskError(`Invalid ForgeDesk ${kind} metadata at ${displayPath(filePath)}: ${error}.`)
+}
+
+function assertMetadata<T>(
+  value: unknown,
+  kind: MetadataKind,
+  filePath: string,
+  validateValue: (value: unknown) => string | undefined
+): T {
+  const error = validateValue(value)
+  if (error) {
+    throw invalidMetadataError(kind, filePath, error)
+  }
+  return value as T
+}
+
+const projectRules = [
+  requiredString('name'),
+  requiredString('repoPath'),
+  optionalString('goal'),
+  optionalString('defaultBranch'),
+  requiredString('createdAt'),
+  requiredString('updatedAt')
+]
+
+const configRules = [optionalString('activeSessionId'), requiredString('createdAt'), requiredString('updatedAt')]
+
+const sessionRules = [
+  sessionStatus,
+  requiredString('id'),
+  requiredString('title'),
+  requiredArray('decisions'),
+  requiredArray('risks'),
+  requiredArray('tests'),
+  optionalString('intent'),
+  optionalString('evidenceDir'),
+  requiredString('createdAt'),
+  requiredString('updatedAt')
+]
+
+export function validateProject(value: unknown): string | undefined {
+  return validateMetadata(value, PROJECT_SCHEMA_VERSION, projectRules)
 }
 
 export function validateConfig(value: unknown): string | undefined {
-  if (!isRecord(value)) {
-    return 'JSON must be an object'
-  }
-  if (value.schemaVersion !== CONFIG_SCHEMA_VERSION) {
-    return `schemaVersion must be ${CONFIG_SCHEMA_VERSION}`
-  }
-  return (
-    optionalString(value, 'activeSessionId') ??
-    requiredString(value, 'createdAt') ??
-    requiredString(value, 'updatedAt')
-  )
+  return validateMetadata(value, CONFIG_SCHEMA_VERSION, configRules)
 }
 
 export function validateSession(value: unknown): string | undefined {
-  if (!isRecord(value)) {
-    return 'JSON must be an object'
-  }
-  if (value.schemaVersion !== SESSION_SCHEMA_VERSION) {
-    return `schemaVersion must be ${SESSION_SCHEMA_VERSION}`
-  }
-  if (!['active', 'needs-review', 'done', 'archived'].includes(String(value.status))) {
-    return 'status must be one of active, needs-review, done, archived'
-  }
-  return (
-    requiredString(value, 'id') ??
-    requiredString(value, 'title') ??
-    requiredArray(value, 'decisions') ??
-    requiredArray(value, 'risks') ??
-    requiredArray(value, 'tests') ??
-    optionalString(value, 'intent') ??
-    optionalString(value, 'evidenceDir') ??
-    requiredString(value, 'createdAt') ??
-    requiredString(value, 'updatedAt')
-  )
+  return validateMetadata(value, SESSION_SCHEMA_VERSION, sessionRules)
 }
 
 export function assertProject(value: unknown, filePath: string): Project {
-  const record = assertRecord(value, 'project', filePath)
-  assertNoValidationError(validateProject(record), 'project', filePath)
-  return record as Project
+  return assertMetadata(value, 'project', filePath, validateProject)
 }
 
 export function assertConfig(value: unknown, filePath: string): Config {
-  const record = assertRecord(value, 'config', filePath)
-  assertNoValidationError(validateConfig(record), 'config', filePath)
-  return record as Config
+  return assertMetadata(value, 'config', filePath, validateConfig)
 }
 
 export function assertSession(value: unknown, filePath: string): ChangeSession {
-  const record = assertRecord(value, 'session', filePath)
-  assertNoValidationError(validateSession(record), 'session', filePath)
-  return record as ChangeSession
+  return assertMetadata(value, 'session', filePath, validateSession)
 }
 
 async function readMetadata<T>(
