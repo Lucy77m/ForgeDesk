@@ -1,6 +1,7 @@
 import type { ChangeSession } from '../types.js'
 import { displayPath } from '../templates/format.js'
 import { ForgeDeskError } from './errors.js'
+import { nowIso } from './ids.js'
 import {
   listSessions,
   loadWorkspace,
@@ -11,16 +12,12 @@ import {
 
 type SessionStatus = ChangeSession['status']
 
-function now(): string {
-  return new Date().toISOString()
-}
-
 export async function markActiveSessionDone(cwd: string): Promise<ChangeSession> {
   const { workspace, session } = await resolveSession(cwd)
   return updateSession(workspace.repoPath, session.id, (current) => ({
     ...current,
     status: 'done',
-    updatedAt: now()
+    updatedAt: nowIso()
   }))
 }
 
@@ -33,7 +30,7 @@ export async function archiveSession(cwd: string, sessionId: string | undefined)
   const updated = await updateSession(workspace.repoPath, session.id, (current) => ({
     ...current,
     status: 'archived',
-    updatedAt: now()
+    updatedAt: nowIso()
   }))
 
   if (workspace.config.activeSessionId === sessionId) {
@@ -53,7 +50,7 @@ export async function reopenSession(cwd: string, sessionId: string | undefined):
   }
 
   const { workspace, session } = await resolveSession(cwd, sessionId)
-  const timestamp = now()
+  const timestamp = nowIso()
   const updated = await updateSession(workspace.repoPath, session.id, (current) => ({
     ...current,
     status: 'active',

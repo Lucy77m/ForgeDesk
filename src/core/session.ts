@@ -10,6 +10,7 @@ import {
 } from '../types.js'
 import { gitRoot, isGitRepo, runGit } from '../git/snapshot.js'
 import { ForgeDeskError } from './errors.js'
+import { makeId, nowIso } from './ids.js'
 import {
   ensureForgeDeskDirs,
   getActiveSession,
@@ -21,28 +22,6 @@ import {
   writeProject,
   writeSession
 } from './workspace.js'
-
-function now(): string {
-  return new Date().toISOString()
-}
-
-function idPrefix(): string {
-  return new Date().toISOString().replace(/[-:TZ.]/g, '').slice(0, 14)
-}
-
-function slugify(value: string): string {
-  return value
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 40)
-}
-
-function makeId(label: string): string {
-  const slug = slugify(label) || 'session'
-  const suffix = Math.random().toString(36).slice(2, 8)
-  return `${idPrefix()}-${slug}-${suffix}`
-}
 
 function requireText(value: string, label: string): string {
   const trimmed = value.trim()
@@ -63,7 +42,7 @@ export async function initProject(repoInput: string, cwd: string): Promise<Proje
   const paths = pathsFor(repoPath)
   await ensureForgeDeskDirs(repoPath)
 
-  const timestamp = now()
+  const timestamp = nowIso()
   const defaultBranch = runGit(repoPath, ['branch', '--show-current']) || undefined
   const project: Project = {
     schemaVersion: PROJECT_SCHEMA_VERSION,
@@ -92,7 +71,7 @@ export async function startSession(title: string, cwd: string): Promise<ChangeSe
   }
 
   const workspace = await loadWorkspace(cwd)
-  const timestamp = now()
+  const timestamp = nowIso()
   const session: ChangeSession = {
     schemaVersion: SESSION_SCHEMA_VERSION,
     id: makeId(title),
@@ -121,14 +100,14 @@ export async function setIntent(text: string, cwd: string): Promise<ChangeSessio
   return updateSession(workspace.repoPath, session.id, (current) => ({
     ...current,
     intent: requireText(text, 'Intent'),
-    updatedAt: now()
+    updatedAt: nowIso()
   }))
 }
 
 export async function addDecision(text: string, cwd: string): Promise<ChangeSession> {
   const workspace = await loadWorkspace(cwd)
   const session = await getActiveSession(workspace)
-  const timestamp = now()
+  const timestamp = nowIso()
   const decisionText = requireText(text, 'Decision')
   return updateSession(workspace.repoPath, session.id, (current) => ({
     ...current,
@@ -144,7 +123,7 @@ export async function addRisk(
 ): Promise<ChangeSession> {
   const workspace = await loadWorkspace(cwd)
   const session = await getActiveSession(workspace)
-  const timestamp = now()
+  const timestamp = nowIso()
   const riskText = requireText(text, 'Risk')
   return updateSession(workspace.repoPath, session.id, (current) => ({
     ...current,
@@ -156,7 +135,7 @@ export async function addRisk(
 export async function addManualCheck(text: string, cwd: string): Promise<ChangeSession> {
   const workspace = await loadWorkspace(cwd)
   const session = await getActiveSession(workspace)
-  const timestamp = now()
+  const timestamp = nowIso()
   const checkText = requireText(text, 'Manual check')
   return updateSession(workspace.repoPath, session.id, (current) => ({
     ...current,

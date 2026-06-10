@@ -3,17 +3,8 @@ import path from 'node:path'
 import { spawnSync } from 'node:child_process'
 import type { ChangeSession, TestRun } from '../types.js'
 import { ForgeDeskError } from './errors.js'
+import { makeTestId, nowIso } from './ids.js'
 import { getActiveSession, loadWorkspace, pathsFor, updateSession } from './workspace.js'
-
-function now(): string {
-  return new Date().toISOString()
-}
-
-function makeTestId(): string {
-  return `test-${new Date().toISOString().replace(/[-:TZ.]/g, '').slice(0, 14)}-${Math.random()
-    .toString(36)
-    .slice(2, 8)}`
-}
 
 function summarizeOutput(output: string): string {
   const trimmed = output.trim()
@@ -34,7 +25,7 @@ async function appendTest(cwd: string, testRun: TestRun): Promise<ChangeSession>
   return updateSession(workspace.repoPath, session.id, (current) => ({
     ...current,
     tests: [...current.tests, testRun],
-    updatedAt: now()
+    updatedAt: nowIso()
   }))
 }
 
@@ -59,14 +50,14 @@ export async function runTestCommand(commandParts: string[], cwd: string): Promi
   const session = await getActiveSession(workspace)
   const sessionId = session.id
   const command = commandParts.join(' ')
-  const startedAt = now()
+  const startedAt = nowIso()
   const result = spawnSync(command, {
     cwd: workspace.repoPath,
     encoding: 'utf8',
     shell: true,
     windowsHide: true
   })
-  const finishedAt = now()
+  const finishedAt = nowIso()
 
   const stdout = result.stdout ?? ''
   const stderr = result.stderr ?? ''
