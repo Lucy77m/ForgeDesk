@@ -2,8 +2,9 @@ import { access, mkdir, readdir } from 'node:fs/promises'
 import { constants } from 'node:fs'
 import path from 'node:path'
 import type { ChangeSession, Config, Project } from '../types.js'
-import { readJson, updateJson, writeJson } from '../storage/json-store.js'
+import { updateJson, writeJson } from '../storage/json-store.js'
 import { ForgeDeskError } from './errors.js'
+import { assertSession, readChangeSession, readConfig, readProject } from './metadata.js'
 
 export const FORGEDESK_DIR = '.forgedesk'
 
@@ -76,8 +77,8 @@ export async function loadWorkspace(cwd: string): Promise<Workspace> {
   return {
     repoPath,
     forgedeskDir: paths.forgedeskDir,
-    project: await readJson<Project>(paths.projectFile),
-    config: await readJson<Config>(paths.configFile)
+    project: await readProject(paths.projectFile),
+    config: await readConfig(paths.configFile)
   }
 }
 
@@ -90,7 +91,7 @@ export async function writeConfig(repoPath: string, config: Config): Promise<voi
 }
 
 export async function readSession(repoPath: string, sessionId: string): Promise<ChangeSession> {
-  return readJson<ChangeSession>(sessionFile(repoPath, sessionId))
+  return readChangeSession(sessionFile(repoPath, sessionId))
 }
 
 export async function writeSession(repoPath: string, session: ChangeSession): Promise<void> {
@@ -102,7 +103,12 @@ export async function updateSession(
   sessionId: string,
   updater: (session: ChangeSession) => ChangeSession | Promise<ChangeSession>
 ): Promise<ChangeSession> {
-  return updateJson<ChangeSession>(sessionFile(repoPath, sessionId), updater)
+  const filePath = sessionFile(repoPath, sessionId)
+  return updateJson<ChangeSession>(filePath, async (value) => {
+    const current = assertSession(value, filePath)
+    const next = await updater(current)
+    return assertSession(next, filePath)
+  })
 }
 
 export async function listSessions(repoPath: string): Promise<ChangeSession[]> {
@@ -115,7 +121,7 @@ export async function listSessions(repoPath: string): Promise<ChangeSession[]> {
   const sessions = await Promise.all(
     files
       .filter((file) => file.endsWith('.json'))
-      .map((file) => readJson<ChangeSession>(path.join(dir, file)))
+      .map((file) => readChangeSession(path.join(dir, file)))
   )
 
   return sessions.sort((a, b) => a.createdAt.localeCompare(b.createdAt))

@@ -113,6 +113,34 @@ forgedesk export
 forgedesk inspect --export
 ```
 
+## Metadata Is Invalid Or Corrupted
+
+Errors like these mean a local `.forgedesk/*.json` file is malformed or does
+not match the current v0.1 schema:
+
+```text
+Could not read ForgeDesk project metadata
+Invalid ForgeDesk session metadata
+schemaVersion must be forgedesk-session-v1
+```
+
+First run:
+
+```bash
+forgedesk doctor
+```
+
+If the error names `project.json` or `config.json`, the safest recovery is often
+to move the broken `.forgedesk/` directory aside and reinitialize the repository:
+
+```bash
+forgedesk init --repo .
+```
+
+If the error names one file under `.forgedesk/sessions/`, inspect that session
+file locally. Do not paste private project details, secrets, or token-like
+values into external tools while debugging metadata.
+
 ## Ready Says No
 
 `forgedesk ready` is an evidence completeness check, not a correctness verdict.

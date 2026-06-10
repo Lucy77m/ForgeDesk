@@ -2,6 +2,7 @@ import { readdir } from 'node:fs/promises'
 import path from 'node:path'
 import type { ChangeSession } from '../types.js'
 import { readJson } from '../storage/json-store.js'
+import { validateConfig, validateProject, validateSession } from './metadata.js'
 import { loadWorkspace, pathExists, pathsFor } from './workspace.js'
 
 type DoctorStatus = 'ok' | 'warning' | 'error'
@@ -44,34 +45,6 @@ function check(name: string, status: DoctorStatus, message: string): DoctorCheck
 
 function displayPath(filePath: string): string {
   return filePath.replaceAll('\\', '/')
-}
-
-function isObject(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null
-}
-
-function validateSession(value: unknown): string | undefined {
-  if (!isObject(value)) {
-    return 'session JSON is not an object'
-  }
-  if (value.schemaVersion !== 'forgedesk-session-v1') {
-    return 'session schemaVersion is invalid'
-  }
-  if (typeof value.id !== 'string' || !value.id.trim()) {
-    return 'session id is missing'
-  }
-  if (typeof value.title !== 'string' || !value.title.trim()) {
-    return 'session title is missing'
-  }
-  if (!['active', 'needs-review', 'done', 'archived'].includes(String(value.status))) {
-    return 'session status is invalid'
-  }
-  for (const key of ['decisions', 'risks', 'tests']) {
-    if (!Array.isArray(value[key])) {
-      return `session ${key} must be an array`
-    }
-  }
-  return undefined
 }
 
 async function readSessionFiles(repoPath: string, checks: DoctorCheck[]): Promise<ChangeSession[]> {
@@ -127,19 +100,21 @@ export async function getDoctorReport(cwd: string): Promise<DoctorReport> {
   const workspace = await loadWorkspace(cwd)
   const paths = pathsFor(workspace.repoPath)
   const checks: DoctorCheck[] = []
+  const projectValidationError = validateProject(workspace.project)
+  const configValidationError = validateConfig(workspace.config)
 
   checks.push(
     check(
       'project',
-      workspace.project.schemaVersion === 'forgedesk-project-v1' ? 'ok' : 'error',
-      `Project metadata loaded for ${workspace.project.name}.`
+      projectValidationError ? 'error' : 'ok',
+      projectValidationError ?? `Project metadata loaded for ${workspace.project.name}.`
     )
   )
   checks.push(
     check(
       'config',
-      workspace.config.schemaVersion === 'forgedesk-config-v1' ? 'ok' : 'error',
-      'Config metadata loaded.'
+      configValidationError ? 'error' : 'ok',
+      configValidationError ?? 'Config metadata loaded.'
     )
   )
 

@@ -1,5 +1,13 @@
 import path from 'node:path'
-import type { ChangeSession, Config, Project, Risk } from '../types.js'
+import {
+  CONFIG_SCHEMA_VERSION,
+  PROJECT_SCHEMA_VERSION,
+  SESSION_SCHEMA_VERSION,
+  type ChangeSession,
+  type Config,
+  type Project,
+  type Risk
+} from '../types.js'
 import { gitRoot, isGitRepo, runGit } from '../git/snapshot.js'
 import { ForgeDeskError } from './errors.js'
 import {
@@ -58,7 +66,7 @@ export async function initProject(repoInput: string, cwd: string): Promise<Proje
   const timestamp = now()
   const defaultBranch = runGit(repoPath, ['branch', '--show-current']) || undefined
   const project: Project = {
-    schemaVersion: 'forgedesk-project-v1',
+    schemaVersion: PROJECT_SCHEMA_VERSION,
     name: path.basename(repoPath),
     repoPath,
     defaultBranch,
@@ -66,7 +74,7 @@ export async function initProject(repoInput: string, cwd: string): Promise<Proje
     updatedAt: timestamp
   }
   const config: Config = {
-    schemaVersion: 'forgedesk-config-v1',
+    schemaVersion: CONFIG_SCHEMA_VERSION,
     createdAt: timestamp,
     updatedAt: timestamp
   }
@@ -86,7 +94,7 @@ export async function startSession(title: string, cwd: string): Promise<ChangeSe
   const workspace = await loadWorkspace(cwd)
   const timestamp = now()
   const session: ChangeSession = {
-    schemaVersion: 'forgedesk-session-v1',
+    schemaVersion: SESSION_SCHEMA_VERSION,
     id: makeId(title),
     title: title.trim(),
     status: 'active',

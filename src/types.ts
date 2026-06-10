@@ -1,5 +1,10 @@
+export const PROJECT_SCHEMA_VERSION = 'forgedesk-project-v1'
+export const CONFIG_SCHEMA_VERSION = 'forgedesk-config-v1'
+export const SESSION_SCHEMA_VERSION = 'forgedesk-session-v1'
+export const EVIDENCE_SCHEMA_VERSION = 'forgedesk-evidence-v1'
+
 export type Project = {
-  schemaVersion: 'forgedesk-project-v1'
+  schemaVersion: typeof PROJECT_SCHEMA_VERSION
   name: string
   repoPath: string
   goal?: string
@@ -9,14 +14,14 @@ export type Project = {
 }
 
 export type Config = {
-  schemaVersion: 'forgedesk-config-v1'
+  schemaVersion: typeof CONFIG_SCHEMA_VERSION
   activeSessionId?: string
   createdAt: string
   updatedAt: string
 }
 
 export type ChangeSession = {
-  schemaVersion: 'forgedesk-session-v1'
+  schemaVersion: typeof SESSION_SCHEMA_VERSION
   id: string
   title: string
   status: 'active' | 'needs-review' | 'done' | 'archived'
@@ -78,7 +83,7 @@ export type GitSnapshot = {
 }
 
 export type EvidenceBundle = {
-  schemaVersion: 'forgedesk-evidence-v1'
+  schemaVersion: typeof EVIDENCE_SCHEMA_VERSION
   generatedAt: string
   project: Project
   session: ChangeSession

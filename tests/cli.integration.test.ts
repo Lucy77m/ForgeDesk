@@ -436,6 +436,100 @@ describe('cli integration', () => {
     expect(emptyEvidence.stderr).toContain('No ForgeDesk evidence packs yet')
   })
 
+  it('reports invalid project metadata clearly', () => {
+    const repo = tempDir()
+    dirs.push(repo)
+    initGitRepo(repo)
+
+    expect(runCli(repo, ['init', '--repo', '.']).status).toBe(0)
+    writeFileSync(path.join(repo, '.forgedesk', 'project.json'), '{ invalid json', 'utf8')
+
+    const result = runCli(repo, ['status'])
+
+    expect(result.status).not.toBe(0)
+    expect(result.stderr).toContain('Could not read ForgeDesk project metadata')
+    expect(result.stderr).toContain('invalid JSON')
+  })
+
+  it('reports invalid config metadata clearly', () => {
+    const repo = tempDir()
+    dirs.push(repo)
+    initGitRepo(repo)
+
+    expect(runCli(repo, ['init', '--repo', '.']).status).toBe(0)
+    const configPath = path.join(repo, '.forgedesk', 'config.json')
+    const config = JSON.parse(readFileSync(configPath, 'utf8'))
+    writeFileSync(configPath, JSON.stringify({ ...config, schemaVersion: 'forgedesk-config-v0' }, null, 2), 'utf8')
+
+    const result = runCli(repo, ['status'])
+
+    expect(result.status).not.toBe(0)
+    expect(result.stderr).toContain('Invalid ForgeDesk config metadata')
+    expect(result.stderr).toContain('schemaVersion must be forgedesk-config-v1')
+  })
+
+  it('reports invalid session schema clearly', () => {
+    const repo = tempDir()
+    dirs.push(repo)
+    initGitRepo(repo)
+
+    expect(runCli(repo, ['init', '--repo', '.']).status).toBe(0)
+    expect(runCli(repo, ['start', '--title', 'Invalid schema demo']).status).toBe(0)
+    const sessionId = JSON.parse(readFileSync(path.join(repo, '.forgedesk', 'config.json'), 'utf8')).activeSessionId
+    const sessionPath = path.join(repo, '.forgedesk', 'sessions', `${sessionId}.json`)
+    const session = JSON.parse(readFileSync(sessionPath, 'utf8'))
+    writeFileSync(sessionPath, JSON.stringify({ ...session, schemaVersion: 'forgedesk-session-v0' }, null, 2), 'utf8')
+
+    const result = runCli(repo, ['show'])
+
+    expect(result.status).not.toBe(0)
+    expect(result.stderr).toContain('Invalid ForgeDesk session metadata')
+    expect(result.stderr).toContain('schemaVersion must be forgedesk-session-v1')
+  })
+
+  it('reports missing required session fields clearly', () => {
+    const repo = tempDir()
+    dirs.push(repo)
+    initGitRepo(repo)
+
+    expect(runCli(repo, ['init', '--repo', '.']).status).toBe(0)
+    expect(runCli(repo, ['start', '--title', 'Missing field demo']).status).toBe(0)
+    const sessionId = JSON.parse(readFileSync(path.join(repo, '.forgedesk', 'config.json'), 'utf8')).activeSessionId
+    const sessionPath = path.join(repo, '.forgedesk', 'sessions', `${sessionId}.json`)
+    const session = JSON.parse(readFileSync(sessionPath, 'utf8'))
+    delete session.tests
+    writeFileSync(sessionPath, JSON.stringify(session, null, 2), 'utf8')
+
+    const result = runCli(repo, ['show'])
+
+    expect(result.status).not.toBe(0)
+    expect(result.stderr).toContain('Invalid ForgeDesk session metadata')
+    expect(result.stderr).toContain('tests must be an array')
+  })
+
+  it('reads session metadata when optional fields are absent', () => {
+    const repo = tempDir()
+    dirs.push(repo)
+    initGitRepo(repo)
+
+    expect(runCli(repo, ['init', '--repo', '.']).status).toBe(0)
+    expect(runCli(repo, ['start', '--title', 'Optional fields demo']).status).toBe(0)
+    const sessionId = JSON.parse(readFileSync(path.join(repo, '.forgedesk', 'config.json'), 'utf8')).activeSessionId
+    const sessionPath = path.join(repo, '.forgedesk', 'sessions', `${sessionId}.json`)
+    const session = JSON.parse(readFileSync(sessionPath, 'utf8'))
+    delete session.intent
+    delete session.manualChecks
+    delete session.gitSnapshot
+    delete session.evidenceDir
+    writeFileSync(sessionPath, JSON.stringify(session, null, 2), 'utf8')
+
+    const result = runCli(repo, ['show'])
+
+    expect(result.status).toBe(0)
+    expect(result.stdout).toContain('Optional fields demo')
+    expect(result.stdout).toContain('Intent: Not recorded.')
+  })
+
   it('records failing command exit codes', () => {
     const repo = tempDir()
     dirs.push(repo)

@@ -1,6 +1,6 @@
 import { mkdir } from 'node:fs/promises'
 import path from 'node:path'
-import type { ChangeSession, EvidenceBundle } from '../types.js'
+import { EVIDENCE_SCHEMA_VERSION, type ChangeSession, type EvidenceBundle } from '../types.js'
 import { captureGitSnapshot } from '../git/snapshot.js'
 import { writeJson } from '../storage/json-store.js'
 import { renderChangeSummary } from '../templates/change-summary.js'
@@ -51,7 +51,7 @@ export async function generateEvidence(cwd: string, options: GenerateEvidenceOpt
 
   const snapshot = captureGitSnapshot(workspace.repoPath)
   const bundle: EvidenceBundle = {
-    schemaVersion: 'forgedesk-evidence-v1',
+    schemaVersion: EVIDENCE_SCHEMA_VERSION,
     generatedAt: new Date().toISOString(),
     project: workspace.project,
     session: { ...session, gitSnapshot: snapshot },
