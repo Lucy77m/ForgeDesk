@@ -70,6 +70,9 @@ forgedesk test -- npm test
 forgedesk status
 forgedesk doctor
 forgedesk doctor --json
+forgedesk ready
+forgedesk ready --session <id>
+forgedesk ready --json
 forgedesk sessions
 forgedesk show
 forgedesk show --session <id>

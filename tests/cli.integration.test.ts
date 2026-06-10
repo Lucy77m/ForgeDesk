@@ -190,6 +190,58 @@ describe('cli integration', () => {
     expect(brokenDoctor.stdout).toContain('missing PR_EVIDENCE.md')
   })
 
+  it('checks evidence readiness for handoff', () => {
+    const repo = tempDir()
+    dirs.push(repo)
+    initGitRepo(repo)
+
+    expect(runCli(repo, ['init', '--repo', '.']).status).toBe(0)
+    expect(runCli(repo, ['start', '--title', 'Ready demo']).status).toBe(0)
+
+    const notReady = runCli(repo, ['ready'])
+    expect(notReady.status).not.toBe(0)
+    expect(notReady.stdout).toContain('ForgeDesk Ready')
+    expect(notReady.stdout).toContain('Ready: no')
+    expect(notReady.stdout).toContain('Intent is missing.')
+    expect(notReady.stdout).toContain('Evidence has not been generated.')
+
+    expect(runCli(repo, ['intent', 'Exercise ready command.']).status).toBe(0)
+    expect(runCli(repo, ['check', 'Opened the generated evidence files.']).status).toBe(0)
+    expect(runCli(repo, ['evidence']).status).toBe(0)
+
+    const readyJson = runCli(repo, ['ready', '--json'])
+    expect(readyJson.status).toBe(0)
+    const report = JSON.parse(readyJson.stdout)
+    expect(report.schemaVersion).toBe('forgedesk-ready-v1')
+    expect(report.ready).toBe(true)
+    expect(report.warnings).toContain('No command tests recorded; readiness relies on manual checks.')
+
+    const sessionId = JSON.parse(readFileSync(path.join(repo, '.forgedesk', 'config.json'), 'utf8')).activeSessionId
+    rmSync(path.join(repo, '.forgedesk', 'evidence', sessionId, 'TEST_RESULTS.md'))
+    const brokenReady = runCli(repo, ['ready', '--session', sessionId])
+    expect(brokenReady.status).not.toBe(0)
+    expect(brokenReady.stdout).toContain('Ready: no')
+    expect(brokenReady.stdout).toContain('Evidence pack is missing: TEST_RESULTS.md.')
+  })
+
+  it('blocks readiness when a test command failed', () => {
+    const repo = tempDir()
+    dirs.push(repo)
+    initGitRepo(repo)
+
+    expect(runCli(repo, ['init', '--repo', '.']).status).toBe(0)
+    expect(runCli(repo, ['start', '--title', 'Failed ready demo']).status).toBe(0)
+    expect(runCli(repo, ['intent', 'Record a failed test.']).status).toBe(0)
+    expect(runCli(repo, ['test', '--', 'node', '-e', '"process.exit(2)"']).status).toBe(0)
+    expect(runCli(repo, ['evidence']).status).toBe(0)
+
+    const ready = runCli(repo, ['ready'])
+
+    expect(ready.status).not.toBe(0)
+    expect(ready.stdout).toContain('Ready: no')
+    expect(ready.stdout).toContain('At least one test command failed.')
+  })
+
   it('reports lifecycle command errors clearly', () => {
     const repo = tempDir()
     dirs.push(repo)

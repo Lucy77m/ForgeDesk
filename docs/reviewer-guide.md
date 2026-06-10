@@ -8,6 +8,10 @@ It is not a substitute for code review.
 Find local evidence packs with `forgedesk evidence --list`, or show the most
 recent generated pack with `forgedesk evidence --latest`.
 
+Run `forgedesk ready` to check whether the session has enough recorded evidence
+for handoff. `ready` reports blockers and warnings, but it does not decide
+whether the code is correct or safe.
+
 Start with these sections:
 
 1. `Intent`: what the change claims to do.
