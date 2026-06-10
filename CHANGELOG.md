@@ -5,6 +5,29 @@ All notable ForgeDesk changes are tracked here.
 ForgeDesk is not published to npm yet. Version entries describe the local source
 state and GitHub release preparation only.
 
+## v0.1.3 - 2026-06-11
+
+Release prep for the v0.1.x local hardening follow-up after v0.1.2.
+
+### Improved
+
+- Added the existing local smoke workflow to GitHub Actions after build and
+  before package packing.
+- Documented that `forgedesk evidence` marks the target session as
+  `needs-review`.
+- Updated the roadmap after closing completed v0.1.x testing and CI items.
+
+### Tests
+
+- Added integration coverage for `needs-review` evidence transitions,
+  `sessions --all`, `show --session`, and child-directory workspace discovery.
+
+### Boundaries
+
+- Still source-only and not published to npm.
+- No AI provider calls, Web UI, cloud sync, background automation, plugin
+  system, automatic commit, push, PR, tag, release, or npm publish behavior.
+
 ## v0.1.2 - 2026-06-10
 
 Release prep for local hardening after the v0.1.1 source release.

@@ -2,7 +2,7 @@
 
 This roadmap is a planning reference, not a commitment list.
 
-ForgeDesk v0.1.2 is a local CLI MVP for evidence-first AI-assisted code
+ForgeDesk v0.1.3 is a local CLI MVP for evidence-first AI-assisted code
 changes. Future work should keep that boundary clear unless the project
 explicitly changes scope.
 
