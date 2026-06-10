@@ -13,9 +13,11 @@ Do not expand v0.1 into a full local project dashboard.
 
 Before planning or editing, read:
 
-- `ForgeDesk_v0.1_Evidence_First_Plan.md`
+- `docs/boundaries.md`
+- `README.md`
 
-Use that file as the product boundary for v0.1.
+Use `docs/boundaries.md` as the product boundary for v0.1.
+Earlier planning drafts are not part of the repository source of truth.
 
 ## v0.1 Scope
 
