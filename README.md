@@ -96,6 +96,7 @@ evidence pack.
 See [docs/local-workflow.md](docs/local-workflow.md) for a local demo workflow.
 See [docs/troubleshooting.md](docs/troubleshooting.md) for common local errors
 and fixes.
+See [docs/roadmap.md](docs/roadmap.md) for the long-term planning reference.
 See [CHANGELOG.md](CHANGELOG.md) for local source version notes.
 
 ## Project Status
