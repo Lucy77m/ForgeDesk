@@ -66,3 +66,16 @@ pnpm typecheck
 pnpm test
 pnpm build
 ```
+
+Run the CLI from source during development:
+
+```bash
+pnpm dev -- --help
+pnpm dev -- init --repo .
+```
+
+Run the compiled CLI after building:
+
+```bash
+node dist/cli/index.js --help
+```
