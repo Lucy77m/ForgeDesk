@@ -13,6 +13,8 @@ Release preparation for the first npm-published local run-button CLI.
 - Updated package and CLI versions for the npm-published release.
 - Updated README install instructions for `npm install -g forgedesk` while
   preserving local-checkout development instructions.
+- Corrected the cross-platform CI matrix to Node.js 22 and 24 because
+  `pnpm@11.1.3` requires Node.js 22.13 or newer for the development pipeline.
 - Updated the roadmap toward post-publish onboarding and review-context relief.
 
 ### Tests

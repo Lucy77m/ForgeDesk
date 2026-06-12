@@ -21,6 +21,9 @@ pnpm pack --pack-destination <temp-dir>
 npm publish --dry-run
 ```
 
+Local development and CI use `pnpm@11.1.3`, which requires Node.js 22.13 or
+newer. The published CLI runtime supports Node.js 20 and newer.
+
 Before a real npm publish, confirm:
 
 - `package.json` and the CLI version match the release version.

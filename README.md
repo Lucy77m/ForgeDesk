@@ -128,6 +128,9 @@ GitHub source release plan.
 
 ## Development
 
+The published CLI supports Node.js 20 and newer. Local development uses
+`pnpm@11.1.3`, which requires Node.js 22.13 or newer.
+
 ```bash
 pnpm install
 pnpm typecheck
