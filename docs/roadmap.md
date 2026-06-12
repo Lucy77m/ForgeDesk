@@ -11,7 +11,8 @@ automation.
 
 Turn the manual evidence workflow into a one-command local capture experience.
 
-- Make `forgedesk auto` the primary entry point for local changes.
+- Make `forgedesk next` the primary run button for safe local workflow steps.
+- Keep `forgedesk auto` as the explicit entry point for local change capture.
 - Automatically create or reuse a session for the current git diff.
 - Generate draft title/intent, changed-file summary, risk hints, `SUMMARY.md`,
   `PR_BODY.md`, `REVIEW_CONTEXT.md`, `TEST_EVIDENCE.md`, and the existing

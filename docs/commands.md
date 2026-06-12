@@ -6,16 +6,16 @@ the target repository unless a command explicitly runs a test process.
 ## Recommended Workflow
 
 ```bash
-forgedesk auto --no-run
-forgedesk review-context --copy
-forgedesk pr --copy
+forgedesk next
 ```
 
-`auto` is the primary entry point for local auto-capture. Manual commands remain
-available for advanced control:
+`next` is the primary run button for local auto-capture and handoff prep. It
+advances one safe local step at a time. Manual commands remain available for
+advanced control:
 
 ```bash
 forgedesk init --repo .
+forgedesk next
 forgedesk start --title "Describe the change"
 forgedesk intent "Record the user-facing goal."
 forgedesk decision "Record an implementation decision."
@@ -30,6 +30,18 @@ forgedesk handoff
 forgedesk export
 forgedesk inspect --export
 ```
+
+## Run Button
+
+| Command | Purpose | Writes local data |
+|---|---|---|
+| `forgedesk next` | Run the next safe local ForgeDesk step. | yes |
+| `forgedesk next --json` | Print the next-step report as JSON. | yes |
+
+`next` may auto-capture local changes, generate evidence, check readiness, or
+export a ready evidence pack. It does not run tests, call an AI provider, modify
+product code, commit, push, open PRs, tag, release, publish, or run in the
+background.
 
 ## Auto Capture
 

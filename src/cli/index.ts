@@ -10,6 +10,7 @@ import { ForgeDeskError } from '../core/errors.js'
 import { exportEvidencePack, renderExportReport } from '../core/export.js'
 import { getHandoffReport, renderHandoffReport } from '../core/handoff.js'
 import { getInspectReport, renderInspectReport } from '../core/inspect.js'
+import { getNextReport, renderNextReport } from '../core/next.js'
 import { getReadyReport, renderReadyReport } from '../core/ready.js'
 import { getReviewOutput } from '../core/review-output.js'
 import { getStatus } from '../core/status.js'
@@ -138,6 +139,18 @@ export function buildProgram(cwd = process.cwd()): Command {
     .description('Show ForgeDesk and git status.')
     .action(async () => {
       console.log(await getStatus(cwd))
+    })
+
+  program
+    .command('next')
+    .description('Run the next safe local ForgeDesk step.')
+    .option('--json', 'print the next-step report as JSON')
+    .action(async (options: { json?: boolean }) => {
+      const report = await getNextReport(cwd)
+      console.log(options.json ? JSON.stringify(report, null, 2) : renderNextReport(report))
+      if (report.action === 'blocked') {
+        process.exitCode = 1
+      }
     })
 
   program

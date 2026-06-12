@@ -33,9 +33,7 @@ After building from a local checkout, replace `forgedesk` with
 
 ```bash
 echo "Local change" >> README.md
-forgedesk auto --no-run
-forgedesk review-context --copy
-forgedesk pr --copy
+forgedesk next
 ```
 
 ## Output
@@ -56,8 +54,9 @@ forgedesk pr --copy
 ## Dogfood Example
 
 ForgeDesk is used on its own repository. A typical dogfood session captures a
-local change, records `pnpm typecheck`, `pnpm test`, and `pnpm build`, then
-generates review-ready material under `.forgedesk/evidence/`.
+local change with `forgedesk next`, records `pnpm typecheck`, `pnpm test`, and
+`pnpm build`, then uses `forgedesk next` again to generate, check, and export
+review-ready material.
 
 The goal is not to prove the code is perfect. The goal is to make the change
 intent, changed files, test evidence, and remaining risks easy to inspect.
@@ -66,6 +65,7 @@ intent, changed files, test evidence, and remaining risks easy to inspect.
 
 ```bash
 forgedesk init --repo .
+forgedesk next
 forgedesk auto --no-run
 forgedesk review-context
 forgedesk pr
