@@ -60,6 +60,12 @@ recommended next steps, and a `Commands` section with copyable local commands.
 When failed tests block export, `next` points to `forgedesk fix-context` before
 asking you to run the button again.
 
+`next --json` includes `reason` and `recommendation` fields. The reason is a
+stable local state label such as `dirty-no-session`, `missing-evidence`,
+`stale-evidence`, `missing-tests`, `failed-tests`, `ready-to-export`, or
+`exported`; the recommendation is the single next step ForgeDesk would put in
+front of a human.
+
 ## Auto Capture
 
 | Command | Purpose | Writes local data |

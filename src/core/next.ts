@@ -11,6 +11,15 @@ import { getReadyReport } from './ready.js'
 import { getActiveSession, loadWorkspace, pathExists, pathsFor, type Workspace } from './workspace.js'
 
 export type NextAction = 'auto-capture' | 'generate-evidence' | 'blocked' | 'export'
+export type NextReason =
+  | 'dirty-no-session'
+  | 'missing-evidence'
+  | 'stale-evidence'
+  | 'missing-tests'
+  | 'failed-tests'
+  | 'not-ready'
+  | 'ready-to-export'
+  | 'exported'
 
 export type NextOptions = {
   dryRun?: boolean
@@ -29,6 +38,8 @@ export type NextReport = {
   dryRun: boolean
   repoPath: string
   summary: string
+  reason: NextReason
+  recommendation: string
   evidenceFresh?: boolean
   session?: NextSession
   outputDir?: string
@@ -119,24 +130,35 @@ async function tryActiveSession(workspace: Workspace): Promise<ChangeSession | u
 
 function baseReport(
   action: NextAction,
+  reason: NextReason,
   repoPath: string,
   dryRun: boolean,
-  summary: string
+  summary: string,
+  recommendation: string
 ): Omit<NextReport, 'blockers' | 'warnings' | 'next' | 'commands'> {
   return {
     schemaVersion: 'forgedesk-next-v1',
     generatedAt: new Date().toISOString(),
     action,
+    reason,
     dryRun,
     repoPath,
-    summary
+    summary,
+    recommendation
   }
 }
 
 async function autoCapture(cwd: string, repoPath: string, dryRun: boolean, session?: ChangeSession): Promise<NextReport> {
   if (dryRun) {
     return {
-      ...baseReport('auto-capture', repoPath, true, 'ForgeDesk would capture local git changes and prepare review material.'),
+      ...baseReport(
+        'auto-capture',
+        'dirty-no-session',
+        repoPath,
+        true,
+        'ForgeDesk would capture local git changes and prepare review material.',
+        'Run "forgedesk next" to auto-capture local changes.'
+      ),
       session: session ? sessionSummary(session) : undefined,
       blockers: [],
       warnings: ['Dry run only. No files were written.'],
@@ -147,7 +169,14 @@ async function autoCapture(cwd: string, repoPath: string, dryRun: boolean, sessi
 
   const report = await runAutoCapture(cwd, { noRun: true })
   return {
-    ...baseReport('auto-capture', repoPath, false, 'Captured local changes and prepared review material.'),
+    ...baseReport(
+      'auto-capture',
+      'dirty-no-session',
+      repoPath,
+      false,
+      'Captured local changes and prepared review material.',
+      'Run or record tests, then run "forgedesk next" again.'
+    ),
     session: report.session,
     outputDir: report.outputDir,
     blockers: [],
@@ -201,11 +230,13 @@ export async function getNextReport(cwd: string, options: NextOptions = {}): Pro
       return {
         ...baseReport(
           'generate-evidence',
+          session.evidenceDir ? 'stale-evidence' : 'missing-evidence',
           workspace.repoPath,
           true,
           session.evidenceDir
             ? 'ForgeDesk would refresh stale evidence for the current local diff.'
-            : 'ForgeDesk would generate or refresh the local evidence pack.'
+            : 'ForgeDesk would generate or refresh the local evidence pack.',
+          'Run "forgedesk next" to generate evidence.'
         ),
         session: sessionSummary(session),
         outputDir: defaultOutputDir,
@@ -221,7 +252,14 @@ export async function getNextReport(cwd: string, options: NextOptions = {}): Pro
 
     const outputDir = await generateEvidence(cwd, { sessionId: session.id })
     return {
-      ...baseReport('generate-evidence', workspace.repoPath, false, 'Generated or refreshed the local evidence pack.'),
+      ...baseReport(
+        'generate-evidence',
+        session.evidenceDir ? 'stale-evidence' : 'missing-evidence',
+        workspace.repoPath,
+        false,
+        'Generated or refreshed the local evidence pack.',
+        'Run "forgedesk next" again.'
+      ),
       session: {
         ...sessionSummary(session),
         status: 'needs-review'
@@ -238,8 +276,19 @@ export async function getNextReport(cwd: string, options: NextOptions = {}): Pro
   const ready = await getReadyReport(cwd, session.id)
   if (!ready.ready) {
     const failedTestBlocker = ready.blockers.some((blocker) => blocker.toLowerCase().includes('test command failed'))
+    const missingTestsBlocker = ready.blockers.some((blocker) => blocker.toLowerCase().includes('no test evidence'))
+    const recommendation = failedTestBlocker
+      ? 'Run "forgedesk fix-context", address the failure, then run "forgedesk next" again.'
+      : 'Address the blockers above, then run "forgedesk next" again.'
     return {
-      ...baseReport('blocked', workspace.repoPath, dryRun, 'Evidence exists, but readiness blockers prevent export.'),
+      ...baseReport(
+        'blocked',
+        failedTestBlocker ? 'failed-tests' : missingTestsBlocker ? 'missing-tests' : 'not-ready',
+        workspace.repoPath,
+        dryRun,
+        'Evidence exists, but readiness blockers prevent export.',
+        recommendation
+      ),
       session: ready.session,
       ready: false,
       blockers: ready.blockers,
@@ -253,7 +302,14 @@ export async function getNextReport(cwd: string, options: NextOptions = {}): Pro
 
   if (dryRun) {
     return {
-      ...baseReport('export', workspace.repoPath, true, 'ForgeDesk would export the ready evidence pack.'),
+      ...baseReport(
+        'export',
+        'ready-to-export',
+        workspace.repoPath,
+        true,
+        'ForgeDesk would export the ready evidence pack.',
+        'Run "forgedesk next" to export the ready evidence pack.'
+      ),
       session: sessionSummary(session),
       outputDir: displayPath(path.join(pathsFor(workspace.repoPath).exportsDir, session.id)),
       ready: true,
@@ -266,7 +322,14 @@ export async function getNextReport(cwd: string, options: NextOptions = {}): Pro
 
   const exported = await exportEvidencePack(cwd, { sessionId: session.id })
   return {
-    ...baseReport('export', workspace.repoPath, false, 'Exported the ready evidence pack.'),
+    ...baseReport(
+      'export',
+      'exported',
+      workspace.repoPath,
+      false,
+      'Exported the ready evidence pack.',
+      'Open the export directory, or run "forgedesk review-context" / "forgedesk pr".'
+    ),
     session: {
       id: exported.session.id,
       title: exported.session.title,
@@ -288,6 +351,8 @@ export function renderNextReport(report: NextReport): string {
     report.summary,
     '',
     `Action: ${report.action}`,
+    `Reason: ${report.reason}`,
+    `Recommended next: ${report.recommendation}`,
     `Dry run: ${report.dryRun ? 'yes' : 'no'}`,
     `Repo: ${displayPath(report.repoPath)}`,
     report.session ? `Session: ${report.session.title}` : undefined,

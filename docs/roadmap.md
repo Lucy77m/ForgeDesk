@@ -2,7 +2,7 @@
 
 This roadmap is a planning reference, not a commitment list.
 
-ForgeDesk v0.2.5 is a local auto-capture CLI for evidence-first AI-assisted
+ForgeDesk v0.2.6 is a local auto-capture CLI for evidence-first AI-assisted
 code changes. The next direction is run-button hardening: making local workflow
 steps easier to preview, execute, and hand off while keeping ForgeDesk out of AI
 review, cloud sync, and irreversible automation.
@@ -14,6 +14,8 @@ Make the automatic local workflow boringly reliable and easier for humans.
 - Make `forgedesk next` the primary run button for safe local workflow steps.
 - Support `forgedesk next --dry-run` as a safe button preview.
 - Detect stale evidence with local diff fingerprints before export.
+- Explain `forgedesk next` decisions with stable reasons and one recommended
+  next step.
 - Keep `forgedesk auto` as the explicit entry point for local change capture.
 - Automatically create or reuse a session for the current git diff.
 - Generate bounded fix context when tests fail.

@@ -4,6 +4,36 @@ All notable ForgeDesk changes are tracked here.
 
 Version entries describe source, GitHub release, and npm publishing state.
 
+## v0.2.6 - 2026-06-13
+
+Run-button UX polish for clearer next-step decisions.
+
+### Improved
+
+- Added a stable `reason` field to `forgedesk next --json` reports so local
+  tools and humans can distinguish dirty capture, missing evidence, stale
+  evidence, missing tests, failed tests, ready export, and completed export.
+- Added a `recommendation` field to `forgedesk next --json` and surfaced the
+  same recommendation near the top of human-readable `next` output.
+- Updated blocked and export output to show `Reason` and `Recommended next`
+  before the detailed sections, reducing the "what now?" scan cost.
+
+### Tests
+
+- Extended integration coverage for `next` reason and recommendation values
+  across auto-capture, stale evidence, failed tests, export preview, and export.
+
+### Publishing
+
+- GitHub source release only.
+- No npm publish in this version.
+
+### Boundaries
+
+- No AI provider calls, Web UI, cloud sync, background automation, plugin
+  system, automatic code fixing, automatic commit, push, PR, tag, release, or
+  npm publish behavior inside ForgeDesk.
+
 ## v0.2.5 - 2026-06-13
 
 Evidence freshness hardening for the local run-button workflow.

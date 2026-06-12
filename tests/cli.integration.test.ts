@@ -20,7 +20,7 @@ describe('cli integration', () => {
     const result = runCli(repo, ['--version'])
 
     expect(result.status).toBe(0)
-    expect(result.stdout.trim()).toBe('0.2.5')
+    expect(result.stdout.trim()).toBe('0.2.6')
   })
 
   it('auto-captures a local change without running checks', () => {
@@ -88,6 +88,8 @@ describe('cli integration', () => {
     const report = JSON.parse(result.stdout)
     expect(report.schemaVersion).toBe('forgedesk-next-v1')
     expect(report.action).toBe('auto-capture')
+    expect(report.reason).toBe('dirty-no-session')
+    expect(report.recommendation).toContain('Run or record tests')
     expect(report.summary).toContain('Captured local changes')
     expect(report.commands).toContain('forgedesk test -- <command>')
     expect(report.commands).toContain('forgedesk next')
@@ -111,6 +113,8 @@ describe('cli integration', () => {
     const report = JSON.parse(result.stdout)
     expect(report.schemaVersion).toBe('forgedesk-next-v1')
     expect(report.action).toBe('auto-capture')
+    expect(report.reason).toBe('dirty-no-session')
+    expect(report.recommendation).toContain('auto-capture')
     expect(report.dryRun).toBe(true)
     expect(report.summary).toContain('would capture local git changes')
     expect(report.commands).toEqual(['forgedesk next'])
@@ -195,6 +199,8 @@ describe('cli integration', () => {
     expect(preview.status).toBe(0)
     const previewReport = JSON.parse(preview.stdout)
     expect(previewReport.action).toBe('generate-evidence')
+    expect(previewReport.reason).toBe('stale-evidence')
+    expect(previewReport.recommendation).toContain('generate evidence')
     expect(previewReport.evidenceFresh).toBe(false)
     expect(previewReport.session.id).toBe(sessionId)
 
@@ -224,6 +230,8 @@ describe('cli integration', () => {
 
     expect(result.status).toBe(0)
     expect(result.stdout).toContain('Action: export')
+    expect(result.stdout).toContain('Reason: exported')
+    expect(result.stdout).toContain('Recommended next:')
     expect(result.stdout).toContain('Ready: yes')
     const sessionId = JSON.parse(readFileSync(path.join(repo, '.forgedesk', 'config.json'), 'utf8')).activeSessionId
     expect(existsSync(path.join(repo, '.forgedesk', 'exports', sessionId, 'HANDOFF.md'))).toBe(true)
@@ -244,6 +252,7 @@ describe('cli integration', () => {
 
     expect(result.status).toBe(0)
     expect(result.stdout).toContain('Action: export')
+    expect(result.stdout).toContain('Reason: ready-to-export')
     expect(result.stdout).toContain('Dry run: yes')
     const sessionId = JSON.parse(readFileSync(path.join(repo, '.forgedesk', 'config.json'), 'utf8')).activeSessionId
     expect(existsSync(path.join(repo, '.forgedesk', 'exports', sessionId, 'HANDOFF.md'))).toBe(false)
@@ -264,6 +273,8 @@ describe('cli integration', () => {
 
     expect(result.status).not.toBe(0)
     expect(result.stdout).toContain('Action: blocked')
+    expect(result.stdout).toContain('Reason: failed-tests')
+    expect(result.stdout).toContain('Recommended next:')
     expect(result.stdout).toContain('At least one test command failed.')
     expect(result.stdout).toContain('forgedesk fix-context')
     expect(result.stdout).toContain('## Commands')
