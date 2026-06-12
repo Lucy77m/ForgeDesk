@@ -92,12 +92,30 @@ function installedBin(installDir: string): string {
   return path.join(installDir, 'node_modules', '.bin', process.platform === 'win32' ? 'forgedesk.cmd' : 'forgedesk')
 }
 
+function installedCli(installDir: string): string {
+  return path.join(installDir, 'node_modules', 'forgedesk', 'dist', 'cli', 'index.js')
+}
+
+function installedBinVersion(installDir: string): CommandResult {
+  return runOk(
+    'installed forgedesk --version',
+    commandName('npm'),
+    ['exec', '--prefix', installDir, '--', 'forgedesk', '--version'],
+    installDir,
+    process.platform === 'win32'
+  )
+}
+
 function runInstalledForgeDesk(installDir: string, cwd: string, args: string[]): CommandResult {
   const bin = installedBin(installDir)
   if (!existsSync(bin)) {
     throw new Error(`Installed ForgeDesk bin was not found: ${bin}`)
   }
-  return runOk(`installed forgedesk ${args.join(' ')}`, bin, args, cwd, process.platform === 'win32')
+  const cli = installedCli(installDir)
+  if (!existsSync(cli)) {
+    throw new Error(`Installed ForgeDesk CLI entry was not found: ${cli}`)
+  }
+  return runOk(`installed forgedesk ${args.join(' ')}`, process.execPath, [cli, ...args], cwd)
 }
 
 function main(): void {
@@ -126,9 +144,14 @@ function main(): void {
       process.platform === 'win32'
     )
 
-    const version = runInstalledForgeDesk(installDir, installDir, ['--version']).stdout.trim()
+    const versionResult = installedBinVersion(installDir)
+    const version = versionResult.stdout.trim()
     if (version !== expectedVersion) {
-      throw new Error(`Installed ForgeDesk version mismatch: expected ${expectedVersion}, got ${version}`)
+      throw new Error([
+        `Installed ForgeDesk version mismatch: expected ${expectedVersion}, got ${version || '<empty>'}.`,
+        versionResult.stdout.trim() ? `stdout:\n${versionResult.stdout.trim()}` : undefined,
+        versionResult.stderr.trim() ? `stderr:\n${versionResult.stderr.trim()}` : undefined
+      ].filter(Boolean).join('\n\n'))
     }
 
     initDemoRepo(repoDir)
