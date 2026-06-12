@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { Command } from 'commander'
-import { pathToFileURL } from 'node:url'
+import { realpathSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
 import { addDecision, addManualCheck, addRisk, initProject, setIntent, startSession } from '../core/session.js'
 import { renderAutoCaptureReport, runAutoCapture } from '../core/auto.js'
 import { copyToClipboard } from '../core/clipboard.js'
@@ -365,6 +366,18 @@ export async function runCli(argv = process.argv, cwd = process.cwd()): Promise<
   }
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
+export function isDirectCliInvocation(moduleUrl: string, argvPath = process.argv[1] ?? ''): boolean {
+  if (!argvPath) {
+    return false
+  }
+
+  try {
+    return realpathSync.native(fileURLToPath(moduleUrl)) === realpathSync.native(argvPath)
+  } catch {
+    return fileURLToPath(moduleUrl) === argvPath
+  }
+}
+
+if (isDirectCliInvocation(import.meta.url)) {
   await runCli()
 }
