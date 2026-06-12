@@ -5,6 +5,34 @@ All notable ForgeDesk changes are tracked here.
 ForgeDesk is not published to npm yet. Version entries describe the local source
 state and GitHub release preparation only.
 
+## v0.2.2 - 2026-06-12
+
+Release preparation for npm packaging and cross-platform checks.
+
+### Improved
+
+- Added npm package metadata including license, repository, bugs, homepage,
+  keywords, package files, and public publish config.
+- Fixed package publishing to the official npm registry through
+  `publishConfig.registry`.
+- Added a `prepack` build step so package dry-runs and publishes rebuild the
+  compiled CLI before packing.
+- Expanded CI across Windows, macOS, Linux, Node.js 20, and Node.js 24.
+- Added publishing and security docs that keep package publishing as an explicit
+  maintainer action outside the ForgeDesk CLI.
+
+### Tests
+
+- Kept the full typecheck, unit/integration test, build, smoke, pack, and npm
+  dry-run release gates for package validation.
+
+### Boundaries
+
+- Still not published to npm in this version.
+- No AI provider calls, Web UI, cloud sync, background automation, plugin
+  system, automatic code fixing, automatic commit, push, PR, tag, release, or
+  npm publish behavior inside ForgeDesk.
+
 ## v0.2.1 - 2026-06-12
 
 Run-button UX polish for the local auto-capture workflow.

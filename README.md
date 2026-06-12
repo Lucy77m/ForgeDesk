@@ -15,6 +15,8 @@ reviewers inspect the change.
 ## Install
 
 ForgeDesk is an early local MVP. It is not published to npm yet.
+The package metadata and cross-platform release checks are prepared for npm
+publishing in a later release.
 
 Try it from a local checkout:
 
@@ -115,8 +117,9 @@ See [CHANGELOG.md](CHANGELOG.md) for local source version notes.
 
 ## Project Status
 
-ForgeDesk v0.2.1 is prepared as a source-available local auto-capture CLI. It
-is not published to npm.
+ForgeDesk v0.2.2 is prepared as a source-available local auto-capture CLI with
+npm package metadata and cross-platform release checks. It is not published to
+npm yet.
 
 ## Development
 
@@ -145,4 +148,8 @@ Check the package contents without publishing:
 
 ```bash
 pnpm pack --pack-destination <temp-dir>
+npm publish --dry-run
 ```
+
+See [docs/publishing.md](docs/publishing.md) for the release checklist and npm
+publishing boundary.
