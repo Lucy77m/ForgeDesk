@@ -35,6 +35,14 @@ async function removeStaleLock(lockPath: string): Promise<void> {
   await rm(lockPath, { force: true }).catch(() => undefined)
 }
 
+function errorCode(error: unknown): string | undefined {
+  return error instanceof Error && 'code' in error && typeof error.code === 'string' ? error.code : undefined
+}
+
+function isLockBusyError(error: unknown): boolean {
+  return ['EEXIST', 'EPERM', 'EACCES'].includes(errorCode(error) ?? '')
+}
+
 async function acquireJsonLock(filePath: string): Promise<{ handle: FileHandle; lockPath: string }> {
   await mkdir(dirname(filePath), { recursive: true })
   const lockPath = `${filePath}.lock`
@@ -46,17 +54,12 @@ async function acquireJsonLock(filePath: string): Promise<{ handle: FileHandle; 
       await handle.writeFile(`${process.pid}\n${new Date().toISOString()}\n`, 'utf8')
       return { handle, lockPath }
     } catch (error) {
-      if (
-        error instanceof Error &&
-        'code' in error &&
-        error.code === 'EEXIST' &&
-        Date.now() - startedAt <= lockTimeoutMs
-      ) {
+      if (isLockBusyError(error) && Date.now() - startedAt <= lockTimeoutMs) {
         await removeStaleLock(lockPath)
         await sleep(lockPollMs)
         continue
       }
-      if (error instanceof Error && 'code' in error && error.code === 'EEXIST') {
+      if (isLockBusyError(error)) {
         throw new Error(`Timed out waiting for JSON store lock: ${filePath}`)
       }
       throw error

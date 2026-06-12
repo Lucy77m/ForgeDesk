@@ -96,16 +96,6 @@ function installedCli(installDir: string): string {
   return path.join(installDir, 'node_modules', 'forgedesk', 'dist', 'cli', 'index.js')
 }
 
-function installedBinVersion(installDir: string): CommandResult {
-  return runOk(
-    'installed forgedesk --version',
-    commandName('npm'),
-    ['exec', '--prefix', installDir, '--', 'forgedesk', '--version'],
-    installDir,
-    process.platform === 'win32'
-  )
-}
-
 function runInstalledForgeDesk(installDir: string, cwd: string, args: string[]): CommandResult {
   const bin = installedBin(installDir)
   if (!existsSync(bin)) {
@@ -144,7 +134,7 @@ function main(): void {
       process.platform === 'win32'
     )
 
-    const versionResult = installedBinVersion(installDir)
+    const versionResult = runInstalledForgeDesk(installDir, installDir, ['--version'])
     const version = versionResult.stdout.trim()
     if (version !== expectedVersion) {
       throw new Error([
