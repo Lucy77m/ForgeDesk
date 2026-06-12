@@ -1,47 +1,56 @@
 # Local Workflow
 
-ForgeDesk v0.2 is meant to be tried from a local checkout.
+ForgeDesk v0.2 can be installed from npm or tried from a local checkout.
 
 ## Try ForgeDesk On A Demo Repository
 
-Build ForgeDesk first:
+Install ForgeDesk, or build it from a local checkout:
+
+```bash
+npm install -g forgedesk
+```
+
+For local source development:
 
 ```bash
 pnpm install
 pnpm build
 ```
 
+Use `forgedesk` after npm install. From a local checkout, replace `forgedesk`
+with `node dist/cli/index.js`.
+
 Create or open another git repository, make a local change, then preview and run
 the next local ForgeDesk step:
 
 ```bash
-node D:/ForgeDesk/dist/cli/index.js next --dry-run
-node D:/ForgeDesk/dist/cli/index.js next
+forgedesk next --dry-run
+forgedesk next
 ```
 
 Record the change evidence:
 
 ```bash
-node D:/ForgeDesk/dist/cli/index.js intent "Explain what this change should accomplish."
-node D:/ForgeDesk/dist/cli/index.js decision "Record a relevant implementation decision."
-node D:/ForgeDesk/dist/cli/index.js risk "Record a review focus or remaining risk." --severity low
-node D:/ForgeDesk/dist/cli/index.js check "Record a manual verification step."
-node D:/ForgeDesk/dist/cli/index.js test --command "pnpm test"
-node D:/ForgeDesk/dist/cli/index.js test -- pnpm test
+forgedesk intent "Explain what this change should accomplish."
+forgedesk decision "Record a relevant implementation decision."
+forgedesk risk "Record a review focus or remaining risk." --severity low
+forgedesk check "Record a manual verification step."
+forgedesk test --command "pnpm test"
+forgedesk test -- pnpm test
 ```
 
 Generate, check, and export the evidence with the run button:
 
 ```bash
-node D:/ForgeDesk/dist/cli/index.js next
-node D:/ForgeDesk/dist/cli/index.js next
-node D:/ForgeDesk/dist/cli/index.js inspect --export
+forgedesk next
+forgedesk next
+forgedesk inspect --export
 ```
 
 Use lifecycle commands when the local evidence workflow is complete:
 
 ```bash
-node D:/ForgeDesk/dist/cli/index.js done
+forgedesk done
 ```
 
 ForgeDesk writes local output under:

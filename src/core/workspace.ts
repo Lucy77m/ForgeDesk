@@ -71,7 +71,7 @@ async function hasForgeDeskProject(repoPath: string): Promise<boolean> {
 }
 
 function missingProjectError(): ForgeDeskError {
-  return new ForgeDeskError(PROJECT_NOT_FOUND_MESSAGE)
+  return new ForgeDeskError(PROJECT_NOT_FOUND_MESSAGE, 'PROJECT_NOT_FOUND')
 }
 
 export async function ensureForgeDeskDirs(repoPath: string): Promise<void> {
@@ -129,7 +129,7 @@ function isNotFoundError(error: unknown): boolean {
 }
 
 function unknownSessionError(sessionId: string): ForgeDeskError {
-  return new ForgeDeskError(`Unknown session: ${sessionId}`)
+  return new ForgeDeskError(`Unknown session: ${sessionId}`, 'SESSION_NOT_FOUND')
 }
 
 async function readSessionOrThrow(repoPath: string, sessionId: string): Promise<ChangeSession> {
@@ -146,7 +146,10 @@ async function readSessionOrThrow(repoPath: string, sessionId: string): Promise<
 function activeSessionIdOrThrow(workspace: Workspace): string {
   const activeSessionId = workspace.config.activeSessionId
   if (!activeSessionId) {
-    throw new ForgeDeskError('No active change session. Run "forgedesk start --title <title>" first.')
+    throw new ForgeDeskError(
+      'No active change session. Run "forgedesk start --title <title>" first.',
+      'NO_ACTIVE_SESSION'
+    )
   }
   return activeSessionId
 }

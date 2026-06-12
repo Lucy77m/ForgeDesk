@@ -1,11 +1,11 @@
 import path from 'node:path'
 import { captureGitSnapshot, gitRoot, isGitRepo } from '../git/snapshot.js'
 import { readJson } from '../storage/json-store.js'
-import { displayPath } from '../templates/format.js'
+import { displayPath, listLinesOrNone } from '../templates/format.js'
 import type { ChangeSession, EvidenceBundle, GitSnapshot } from '../types.js'
 import { runAutoCapture } from './auto.js'
 import { generateEvidence } from './evidence.js'
-import { ForgeDeskError } from './errors.js'
+import { ForgeDeskError, isForgeDeskError } from './errors.js'
 import { exportEvidencePack } from './export.js'
 import { getReadyReport } from './ready.js'
 import { getActiveSession, loadWorkspace, pathExists, pathsFor, type Workspace } from './workspace.js'
@@ -39,11 +39,11 @@ export type NextReport = {
 }
 
 function projectNotFound(error: unknown): boolean {
-  return error instanceof ForgeDeskError && error.message.startsWith('Could not find a ForgeDesk project.')
+  return isForgeDeskError(error, 'PROJECT_NOT_FOUND')
 }
 
 function noActiveSession(error: unknown): boolean {
-  return error instanceof ForgeDeskError && error.message.startsWith('No active change session.')
+  return isForgeDeskError(error, 'NO_ACTIVE_SESSION')
 }
 
 function sessionSummary(session: ChangeSession): NextSession {
@@ -150,7 +150,7 @@ async function autoCapture(cwd: string, repoPath: string, dryRun: boolean, sessi
 export async function getNextReport(cwd: string, options: NextOptions = {}): Promise<NextReport> {
   const dryRun = options.dryRun === true
   if (!isGitRepo(cwd)) {
-    throw new ForgeDeskError(`Cannot run next because this is not a git repository: ${cwd}`)
+    throw new ForgeDeskError(`Cannot run next because this is not a git repository: ${cwd}`, 'NOT_A_GIT_REPO')
   }
 
   const repoPath = gitRoot(cwd)
@@ -164,7 +164,10 @@ export async function getNextReport(cwd: string, options: NextOptions = {}): Pro
       return autoCapture(cwd, repoPath, dryRun)
     }
     if (projectNotFound(error)) {
-      throw new ForgeDeskError('No ForgeDesk project or local changes to capture. Make a local change or run "forgedesk init --repo ." first.')
+      throw new ForgeDeskError(
+        'No ForgeDesk project or local changes to capture. Make a local change or run "forgedesk init --repo ." first.',
+        'PROJECT_NOT_FOUND'
+      )
     }
     throw error
   }
@@ -175,7 +178,10 @@ export async function getNextReport(cwd: string, options: NextOptions = {}): Pro
   }
 
   if (!session) {
-    throw new ForgeDeskError('No active change session and no local changes to capture. Make a local change or run "forgedesk start --title <title>".')
+    throw new ForgeDeskError(
+      'No active change session and no local changes to capture. Make a local change or run "forgedesk start --title <title>".',
+      'NO_ACTIVE_SESSION'
+    )
   }
 
   if (!session.evidenceDir || !(await evidenceCurrent(workspace.repoPath, session))) {
@@ -253,10 +259,6 @@ export async function getNextReport(cwd: string, options: NextOptions = {}): Pro
   }
 }
 
-function listOrNone(items: string[]): string[] {
-  return items.length > 0 ? items.map((item) => `- ${item}`) : ['- None']
-}
-
 export function renderNextReport(report: NextReport): string {
   return [
     'ForgeDesk Next',
@@ -273,16 +275,16 @@ export function renderNextReport(report: NextReport): string {
     report.outputDir ? `Output: ${displayPath(report.outputDir)}` : undefined,
     '',
     '## Blockers',
-    ...listOrNone(report.blockers),
+    ...listLinesOrNone(report.blockers),
     '',
     '## Warnings',
-    ...listOrNone(report.warnings),
+    ...listLinesOrNone(report.warnings),
     '',
     '## Next',
-    ...listOrNone(report.next),
+    ...listLinesOrNone(report.next),
     '',
     '## Commands',
-    ...listOrNone(report.commands),
+    ...listLinesOrNone(report.commands),
     '',
     'This is a local run button. It does not call AI, change product code, commit, push, open PRs, or release.'
   ].filter((line): line is string => line !== undefined).join('\n')

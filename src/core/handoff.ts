@@ -1,6 +1,6 @@
 import path from 'node:path'
 import type { ChangeSession } from '../types.js'
-import { changedFileCount, displayPath, testSummary } from '../templates/format.js'
+import { changedFileCount, displayPath, listLinesOrNone, testSummary } from '../templates/format.js'
 import { EVIDENCE_FILE_NAMES } from './constants.js'
 import { getReadyReport, type ReadyReport } from './ready.js'
 import { resolveSession } from './workspace.js'
@@ -63,10 +63,6 @@ export async function getHandoffReport(cwd: string, sessionId?: string): Promise
   }
 }
 
-function listOrNone(items: string[], emptyText = 'None'): string[] {
-  return items.length > 0 ? items.map((item) => `- ${item}`) : [`- ${emptyText}`]
-}
-
 function countOrMissing(value: number | undefined): string {
   return typeof value === 'number' ? String(value) : 'missing'
 }
@@ -91,13 +87,13 @@ export function renderHandoffReport(report: HandoffReport): string {
     `Changed files: ${countOrMissing(report.summary.changedFiles)}`,
     '',
     '## Ready Blockers',
-    ...listOrNone(report.ready.blockers),
+    ...listLinesOrNone(report.ready.blockers),
     '',
     '## Ready Warnings',
-    ...listOrNone(report.ready.warnings),
+    ...listLinesOrNone(report.ready.warnings),
     '',
     '## Recommended Files',
-    ...listOrNone(report.recommendedFiles, 'Generate evidence before handoff.'),
+    ...listLinesOrNone(report.recommendedFiles, 'Generate evidence before handoff.'),
     '',
     'This is a local evidence handoff summary, not an AI review or code correctness verdict.'
   ].join('\n')

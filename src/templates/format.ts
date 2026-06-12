@@ -17,6 +17,10 @@ export function listOrNone(items: string[], emptyText = 'None'): string {
   return items.length > 0 ? items.map((item) => `- ${item}`).join('\n') : `- ${emptyText}`
 }
 
+export function listLinesOrNone(items: string[], emptyText = 'None'): string[] {
+  return items.length > 0 ? items.map((item) => `- ${item}`) : [`- ${emptyText}`]
+}
+
 export function displayPath(filePath: string): string {
   return filePath.replaceAll('\\', '/')
 }

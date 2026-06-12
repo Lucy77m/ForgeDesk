@@ -14,12 +14,12 @@ export function runGitRaw(repoPath: string, args: string[]): string {
   })
 
   if (result.error) {
-    throw new ForgeDeskError(`Failed to run git: ${result.error.message}`)
+    throw new ForgeDeskError(`Failed to run git: ${result.error.message}`, 'GIT_COMMAND_FAILED')
   }
 
   if (result.status !== 0) {
     const message = result.stderr.trim() || result.stdout.trim() || `git ${args.join(' ')} failed`
-    throw new ForgeDeskError(message)
+    throw new ForgeDeskError(message, 'GIT_COMMAND_FAILED')
   }
 
   return result.stdout
@@ -60,7 +60,7 @@ function addUnique(files: string[], file: string): void {
   }
 }
 
-function parseStatus(output: string): Pick<
+export function parseStatus(output: string): Pick<
   GitSnapshot,
   'modifiedFiles' | 'addedFiles' | 'deletedFiles' | 'untrackedFiles'
 > {
@@ -81,23 +81,23 @@ function parseStatus(output: string): Pick<
     }
 
     if (x === '?' && y === '?') {
-      addUnique(untrackedFiles, file)
+      addUnique(untrackedFiles, normalizedFile)
       continue
     }
 
     if (x === 'D' || y === 'D') {
-      addUnique(deletedFiles, file)
+      addUnique(deletedFiles, normalizedFile)
     } else if (x === 'A' || y === 'A') {
-      addUnique(addedFiles, file)
+      addUnique(addedFiles, normalizedFile)
     } else {
-      addUnique(modifiedFiles, file)
+      addUnique(modifiedFiles, normalizedFile)
     }
   }
 
   return { modifiedFiles, addedFiles, deletedFiles, untrackedFiles }
 }
 
-function parseRecentCommits(output: string): GitSnapshot['recentCommits'] {
+export function parseRecentCommits(output: string): GitSnapshot['recentCommits'] {
   return output
     .split(/\r?\n/)
     .filter(Boolean)
@@ -109,7 +109,7 @@ function parseRecentCommits(output: string): GitSnapshot['recentCommits'] {
 
 export function captureGitSnapshot(repoPath: string): GitSnapshot {
   if (!isGitRepo(repoPath)) {
-    throw new ForgeDeskError(`Not a git repository: ${repoPath}`)
+    throw new ForgeDeskError(`Not a git repository: ${repoPath}`, 'NOT_A_GIT_REPO')
   }
 
   const branch = runGit(repoPath, ['branch', '--show-current']) || 'HEAD'

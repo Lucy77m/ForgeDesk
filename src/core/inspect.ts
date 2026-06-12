@@ -1,7 +1,7 @@
 import { stat } from 'node:fs/promises'
 import path from 'node:path'
 import type { ChangeSession } from '../types.js'
-import { displayPath } from '../templates/format.js'
+import { displayPath, listLinesOrNone } from '../templates/format.js'
 import { EVIDENCE_FILE_NAMES } from './constants.js'
 import { ForgeDeskError } from './errors.js'
 import { getReadyReport, type ReadyReport } from './ready.js'
@@ -100,10 +100,6 @@ export async function getInspectReport(cwd: string, options: InspectOptions = {}
   }
 }
 
-function listOrNone(items: string[]): string[] {
-  return items.length > 0 ? items.map((item) => `- ${item}`) : ['- None']
-}
-
 function formatFile(file: InspectFile): string {
   const size = typeof file.sizeBytes === 'number' ? `${file.sizeBytes} bytes` : 'missing'
   return `- ${file.exists ? 'ok' : 'missing'}: ${file.name} (${size})`
@@ -125,7 +121,7 @@ export function renderInspectReport(report: InspectReport): string {
     ...report.files.map(formatFile),
     '',
     '## Missing Files',
-    ...listOrNone(report.missingFiles),
+    ...listLinesOrNone(report.missingFiles),
     '',
     'This is a read-only local evidence inspection. It does not generate, copy, upload, or review code.'
   ].join('\n')

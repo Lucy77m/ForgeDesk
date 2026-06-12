@@ -1,6 +1,6 @@
 import path from 'node:path'
 import type { ChangeSession } from '../types.js'
-import { displayPath } from '../templates/format.js'
+import { displayPath, listLinesOrNone } from '../templates/format.js'
 import { EVIDENCE_FILE_NAMES } from './constants.js'
 import { pathExists, resolveSession } from './workspace.js'
 
@@ -95,10 +95,6 @@ export async function getReadyReport(cwd: string, sessionId?: string): Promise<R
   }
 }
 
-function listOrNone(items: string[]): string[] {
-  return items.length > 0 ? items.map((item) => `- ${item}`) : ['- None']
-}
-
 export function renderReadyReport(report: ReadyReport): string {
   return [
     'ForgeDesk Ready',
@@ -110,10 +106,10 @@ export function renderReadyReport(report: ReadyReport): string {
     `Status: ${report.session.status}`,
     '',
     '## Blockers',
-    ...listOrNone(report.blockers),
+    ...listLinesOrNone(report.blockers),
     '',
     '## Warnings',
-    ...listOrNone(report.warnings),
+    ...listLinesOrNone(report.warnings),
     '',
     'This is an evidence readiness check, not a code correctness verdict.'
   ].map((line) => line.includes('\\') ? displayPath(line) : line).join('\n')

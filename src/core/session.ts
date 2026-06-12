@@ -35,7 +35,10 @@ export async function initProject(repoInput: string, cwd: string): Promise<Proje
   const requestedPath = resolveFrom(cwd, repoInput)
 
   if (!isGitRepo(requestedPath)) {
-    throw new ForgeDeskError(`Cannot initialize ForgeDesk because this is not a git repository: ${requestedPath}`)
+    throw new ForgeDeskError(
+      `Cannot initialize ForgeDesk because this is not a git repository: ${requestedPath}`,
+      'NOT_A_GIT_REPO'
+    )
   }
 
   const repoPath = path.resolve(gitRoot(requestedPath))

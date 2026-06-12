@@ -1,15 +1,7 @@
 import { captureGitSnapshot } from '../git/snapshot.js'
+import { changedFileCount } from '../templates/format.js'
 import type { ChangeSession } from '../types.js'
 import { getActiveSession, listSessions, loadWorkspace } from './workspace.js'
-
-function changedFileCount(snapshot: ReturnType<typeof captureGitSnapshot>): number {
-  return (
-    snapshot.modifiedFiles.length +
-    snapshot.addedFiles.length +
-    snapshot.deletedFiles.length +
-    snapshot.untrackedFiles.length
-  )
-}
 
 function nextAction(session: ChangeSession | undefined): string {
   if (!session) {

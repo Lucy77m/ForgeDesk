@@ -2,9 +2,10 @@ import path from 'node:path'
 import type { AutoCaptureMeta, ChangeSession, EvidenceBundle, RiskHint, SourceLabel } from '../types.js'
 import { captureGitSnapshot, gitRoot, isGitRepo } from '../git/snapshot.js'
 import { readJson } from '../storage/json-store.js'
-import { changedFileCount, displayPath } from '../templates/format.js'
+import { changedFileCount, displayPath, listLinesOrNone } from '../templates/format.js'
 import { generateEvidence } from './evidence.js'
-import { ForgeDeskError } from './errors.js'
+import { EVIDENCE_FILE_NAMES } from './constants.js'
+import { ForgeDeskError, isForgeDeskError } from './errors.js'
 import { deriveRiskHints } from './risk-rules.js'
 import { initProject, startSession } from './session.js'
 import { getActiveSession, loadWorkspace, updateSession, type Workspace } from './workspace.js'
@@ -31,25 +32,13 @@ export type AutoCaptureReport = {
   files: string[]
 }
 
-const generatedFiles = [
-  'SUMMARY.md',
-  'PR_BODY.md',
-  'REVIEW_CONTEXT.md',
-  'TEST_EVIDENCE.md',
-  'PR_EVIDENCE.md',
-  'CHANGE_SUMMARY.md',
-  'TEST_RESULTS.md',
-  'REVIEW_PROMPT.md',
-  'evidence.json'
-]
-
 function projectNotFound(error: unknown): boolean {
-  return error instanceof ForgeDeskError && error.message.startsWith('Could not find a ForgeDesk project.')
+  return isForgeDeskError(error, 'PROJECT_NOT_FOUND')
 }
 
 async function loadOrInitWorkspace(cwd: string): Promise<Workspace> {
   if (!isGitRepo(cwd)) {
-    throw new ForgeDeskError(`Cannot auto capture because this is not a git repository: ${cwd}`)
+    throw new ForgeDeskError(`Cannot auto capture because this is not a git repository: ${cwd}`, 'NOT_A_GIT_REPO')
   }
 
   try {
@@ -190,12 +179,8 @@ export async function runAutoCapture(cwd: string, options: AutoCaptureOptions = 
     changedFiles: changedFileCount(bundle.gitSnapshot),
     riskHints: bundle.autoCapture?.riskHints ?? deriveRiskHints(bundle.gitSnapshot),
     checks: formatChecks(bundle.autoCapture?.checks ?? checkRecords),
-    files: generatedFiles.map((file) => displayPath(path.join(outputDir, file)))
+    files: EVIDENCE_FILE_NAMES.map((file) => displayPath(path.join(outputDir, file)))
   }
-}
-
-function listOrNone(items: string[], emptyText = 'None'): string[] {
-  return items.length > 0 ? items.map((item) => `- ${item}`) : [`- ${emptyText}`]
 }
 
 export function renderAutoCaptureReport(report: AutoCaptureReport): string {
@@ -209,10 +194,10 @@ export function renderAutoCaptureReport(report: AutoCaptureReport): string {
     `${report.changedFiles} changed file${report.changedFiles === 1 ? '' : 's'}`,
     '',
     'Checks:',
-    ...listOrNone(report.checks),
+    ...listLinesOrNone(report.checks),
     '',
     'Risk hints:',
-    ...listOrNone(report.riskHints.map((hint) => `${hint.text} (${hint.source}, ${hint.severity})`), 'No risk hints generated.'),
+    ...listLinesOrNone(report.riskHints.map((hint) => `${hint.text} (${hint.source}, ${hint.severity})`), 'No risk hints generated.'),
     '',
     'Generated:',
     ...report.files.map((file) => `- ${file}`),

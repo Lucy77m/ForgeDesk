@@ -5,6 +5,7 @@ import {
   displayPath,
   executedTests,
   failedTests,
+  listLinesOrNone,
   notVerified,
   passedTests,
   recordedOnlyTests,
@@ -43,6 +44,11 @@ describe('format helpers', () => {
   it('normalizes display paths', () => {
     expect(displayPath('docs\\commands.md')).toBe('docs/commands.md')
     expect(displayPath('src/core/workspace.ts')).toBe('src/core/workspace.ts')
+  })
+
+  it('renders list items as reusable output lines', () => {
+    expect(listLinesOrNone(['alpha', 'beta'])).toEqual(['- alpha', '- beta'])
+    expect(listLinesOrNone([], 'No items.')).toEqual(['- No items.'])
   })
 
   it('counts changed files across git status groups', () => {
