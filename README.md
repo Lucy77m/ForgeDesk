@@ -33,6 +33,7 @@ After building from a local checkout, replace `forgedesk` with
 
 ```bash
 echo "Local change" >> README.md
+forgedesk next --dry-run
 forgedesk next
 ```
 
@@ -65,6 +66,7 @@ intent, changed files, test evidence, and remaining risks easy to inspect.
 
 ```bash
 forgedesk init --repo .
+forgedesk next --dry-run
 forgedesk next
 forgedesk auto --no-run
 forgedesk review-context

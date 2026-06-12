@@ -8,9 +8,13 @@ import { generateEvidence } from './evidence.js'
 import { ForgeDeskError } from './errors.js'
 import { exportEvidencePack } from './export.js'
 import { getReadyReport } from './ready.js'
-import { getActiveSession, loadWorkspace, pathExists, type Workspace } from './workspace.js'
+import { getActiveSession, loadWorkspace, pathExists, pathsFor, type Workspace } from './workspace.js'
 
 export type NextAction = 'auto-capture' | 'generate-evidence' | 'blocked' | 'export'
+
+export type NextOptions = {
+  dryRun?: boolean
+}
 
 type NextSession = {
   id: string
@@ -22,6 +26,7 @@ export type NextReport = {
   schemaVersion: 'forgedesk-next-v1'
   generatedAt: string
   action: NextAction
+  dryRun: boolean
   repoPath: string
   session?: NextSession
   outputDir?: string
@@ -100,19 +105,30 @@ async function tryActiveSession(workspace: Workspace): Promise<ChangeSession | u
   }
 }
 
-function baseReport(action: NextAction, repoPath: string): Omit<NextReport, 'blockers' | 'warnings' | 'next'> {
+function baseReport(action: NextAction, repoPath: string, dryRun: boolean): Omit<NextReport, 'blockers' | 'warnings' | 'next'> {
   return {
     schemaVersion: 'forgedesk-next-v1',
     generatedAt: new Date().toISOString(),
     action,
+    dryRun,
     repoPath
   }
 }
 
-async function autoCapture(cwd: string, repoPath: string): Promise<NextReport> {
+async function autoCapture(cwd: string, repoPath: string, dryRun: boolean, session?: ChangeSession): Promise<NextReport> {
+  if (dryRun) {
+    return {
+      ...baseReport('auto-capture', repoPath, true),
+      session: session ? sessionSummary(session) : undefined,
+      blockers: [],
+      warnings: ['Dry run only. No files were written.'],
+      next: ['Run "forgedesk next" to auto-capture local changes.']
+    }
+  }
+
   const report = await runAutoCapture(cwd, { noRun: true })
   return {
-    ...baseReport('auto-capture', repoPath),
+    ...baseReport('auto-capture', repoPath, false),
     session: report.session,
     outputDir: report.outputDir,
     blockers: [],
@@ -121,7 +137,8 @@ async function autoCapture(cwd: string, repoPath: string): Promise<NextReport> {
   }
 }
 
-export async function getNextReport(cwd: string): Promise<NextReport> {
+export async function getNextReport(cwd: string, options: NextOptions = {}): Promise<NextReport> {
+  const dryRun = options.dryRun === true
   if (!isGitRepo(cwd)) {
     throw new ForgeDeskError(`Cannot run next because this is not a git repository: ${cwd}`)
   }
@@ -134,7 +151,7 @@ export async function getNextReport(cwd: string): Promise<NextReport> {
     workspace = await loadWorkspace(cwd)
   } catch (error) {
     if (projectNotFound(error) && snapshot.isDirty) {
-      return autoCapture(cwd, repoPath)
+      return autoCapture(cwd, repoPath, dryRun)
     }
     if (projectNotFound(error)) {
       throw new ForgeDeskError('No ForgeDesk project or local changes to capture. Make a local change or run "forgedesk init --repo ." first.')
@@ -144,7 +161,7 @@ export async function getNextReport(cwd: string): Promise<NextReport> {
 
   const session = await tryActiveSession(workspace)
   if (snapshot.isDirty && (!session || (session.evidenceDir && !sameCapturedDiff(session, snapshot)))) {
-    return autoCapture(cwd, repoPath)
+    return autoCapture(cwd, repoPath, dryRun, session)
   }
 
   if (!session) {
@@ -152,9 +169,21 @@ export async function getNextReport(cwd: string): Promise<NextReport> {
   }
 
   if (!session.evidenceDir || !(await evidenceCurrent(workspace.repoPath, session))) {
+    const defaultOutputDir = displayPath(path.join(pathsFor(workspace.repoPath).evidenceDir, session.id))
+    if (dryRun) {
+      return {
+        ...baseReport('generate-evidence', workspace.repoPath, true),
+        session: sessionSummary(session),
+        outputDir: defaultOutputDir,
+        blockers: [],
+        warnings: ['Dry run only. No files were written.'],
+        next: ['Run "forgedesk next" to generate evidence.']
+      }
+    }
+
     const outputDir = await generateEvidence(cwd, { sessionId: session.id })
     return {
-      ...baseReport('generate-evidence', workspace.repoPath),
+      ...baseReport('generate-evidence', workspace.repoPath, false),
       session: {
         ...sessionSummary(session),
         status: 'needs-review'
@@ -169,7 +198,7 @@ export async function getNextReport(cwd: string): Promise<NextReport> {
   const ready = await getReadyReport(cwd, session.id)
   if (!ready.ready) {
     return {
-      ...baseReport('blocked', workspace.repoPath),
+      ...baseReport('blocked', workspace.repoPath, dryRun),
       session: ready.session,
       ready: false,
       blockers: ready.blockers,
@@ -178,9 +207,21 @@ export async function getNextReport(cwd: string): Promise<NextReport> {
     }
   }
 
+  if (dryRun) {
+    return {
+      ...baseReport('export', workspace.repoPath, true),
+      session: sessionSummary(session),
+      outputDir: displayPath(path.join(pathsFor(workspace.repoPath).exportsDir, session.id)),
+      ready: true,
+      blockers: [],
+      warnings: ready.warnings,
+      next: ['Run "forgedesk next" to export the ready evidence pack.']
+    }
+  }
+
   const exported = await exportEvidencePack(cwd, { sessionId: session.id })
   return {
-    ...baseReport('export', workspace.repoPath),
+    ...baseReport('export', workspace.repoPath, false),
     session: {
       id: exported.session.id,
       title: exported.session.title,
@@ -203,6 +244,7 @@ export function renderNextReport(report: NextReport): string {
     'ForgeDesk Next',
     '',
     `Action: ${report.action}`,
+    `Dry run: ${report.dryRun ? 'yes' : 'no'}`,
     `Repo: ${displayPath(report.repoPath)}`,
     report.session ? `Session: ${report.session.title}` : undefined,
     report.session ? `Session ID: ${report.session.id}` : undefined,

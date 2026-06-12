@@ -144,9 +144,10 @@ export function buildProgram(cwd = process.cwd()): Command {
   program
     .command('next')
     .description('Run the next safe local ForgeDesk step.')
+    .option('--dry-run', 'show the next step without writing local ForgeDesk files')
     .option('--json', 'print the next-step report as JSON')
-    .action(async (options: { json?: boolean }) => {
-      const report = await getNextReport(cwd)
+    .action(async (options: { dryRun?: boolean; json?: boolean }) => {
+      const report = await getNextReport(cwd, { dryRun: options.dryRun })
       console.log(options.json ? JSON.stringify(report, null, 2) : renderNextReport(report))
       if (report.action === 'blocked') {
         process.exitCode = 1

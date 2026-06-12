@@ -6,6 +6,7 @@ the target repository unless a command explicitly runs a test process.
 ## Recommended Workflow
 
 ```bash
+forgedesk next --dry-run
 forgedesk next
 ```
 
@@ -36,12 +37,16 @@ forgedesk inspect --export
 | Command | Purpose | Writes local data |
 |---|---|---|
 | `forgedesk next` | Run the next safe local ForgeDesk step. | yes |
+| `forgedesk next --dry-run` | Preview the next safe local step without writing files. | no |
 | `forgedesk next --json` | Print the next-step report as JSON. | yes |
 
 `next` may auto-capture local changes, generate evidence, check readiness, or
 export a ready evidence pack. It does not run tests, call an AI provider, modify
 product code, commit, push, open PRs, tag, release, publish, or run in the
 background.
+
+Use `next --dry-run` as a button preview before running the step. It reports the
+same planned action without changing `.forgedesk/`.
 
 ## Auto Capture
 

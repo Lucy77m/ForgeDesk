@@ -12,6 +12,7 @@ automation.
 Turn the manual evidence workflow into a one-command local capture experience.
 
 - Make `forgedesk next` the primary run button for safe local workflow steps.
+- Support `forgedesk next --dry-run` as a safe button preview.
 - Keep `forgedesk auto` as the explicit entry point for local change capture.
 - Automatically create or reuse a session for the current git diff.
 - Generate draft title/intent, changed-file summary, risk hints, `SUMMARY.md`,

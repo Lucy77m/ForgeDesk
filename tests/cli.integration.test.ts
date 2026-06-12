@@ -96,6 +96,22 @@ describe('cli integration', () => {
     expect(existsSync(path.join(evidenceDir, 'PR_BODY.md'))).toBe(true)
   })
 
+  it('previews auto-capture with next --dry-run without writing ForgeDesk files', () => {
+    const repo = tempDir()
+    dirs.push(repo)
+    initGitRepo(repo)
+    writeFileSync(path.join(repo, 'README.md'), '# Demo changed\n', 'utf8')
+
+    const result = runCli(repo, ['next', '--dry-run', '--json'])
+
+    expect(result.status).toBe(0)
+    const report = JSON.parse(result.stdout)
+    expect(report.schemaVersion).toBe('forgedesk-next-v1')
+    expect(report.action).toBe('auto-capture')
+    expect(report.dryRun).toBe(true)
+    expect(existsSync(path.join(repo, '.forgedesk'))).toBe(false)
+  })
+
   it('runs next to generate evidence for an active session without evidence', () => {
     const repo = tempDir()
     dirs.push(repo)
@@ -112,6 +128,25 @@ describe('cli integration', () => {
     expect(result.stdout).toContain('Action: generate-evidence')
     const sessionId = JSON.parse(readFileSync(path.join(repo, '.forgedesk', 'config.json'), 'utf8')).activeSessionId
     expect(existsSync(path.join(repo, '.forgedesk', 'evidence', sessionId, 'evidence.json'))).toBe(true)
+  })
+
+  it('previews evidence generation with next --dry-run without writing evidence', () => {
+    const repo = tempDir()
+    dirs.push(repo)
+    initGitRepo(repo)
+
+    expect(runCli(repo, ['init', '--repo', '.']).status).toBe(0)
+    expect(runCli(repo, ['start', '--title', 'Next evidence dry run']).status).toBe(0)
+    expect(runCli(repo, ['intent', 'Preview evidence generation through next.']).status).toBe(0)
+    expect(runCli(repo, ['check', 'Reviewed next dry-run output.']).status).toBe(0)
+
+    const result = runCli(repo, ['next', '--dry-run'])
+
+    expect(result.status).toBe(0)
+    expect(result.stdout).toContain('Action: generate-evidence')
+    expect(result.stdout).toContain('Dry run: yes')
+    const sessionId = JSON.parse(readFileSync(path.join(repo, '.forgedesk', 'config.json'), 'utf8')).activeSessionId
+    expect(existsSync(path.join(repo, '.forgedesk', 'evidence', sessionId, 'evidence.json'))).toBe(false)
   })
 
   it('runs next to refresh stale evidence before readiness/export', () => {
@@ -152,6 +187,26 @@ describe('cli integration', () => {
     expect(result.stdout).toContain('Ready: yes')
     const sessionId = JSON.parse(readFileSync(path.join(repo, '.forgedesk', 'config.json'), 'utf8')).activeSessionId
     expect(existsSync(path.join(repo, '.forgedesk', 'exports', sessionId, 'HANDOFF.md'))).toBe(true)
+  })
+
+  it('previews export with next --dry-run without writing export files', () => {
+    const repo = tempDir()
+    dirs.push(repo)
+    initGitRepo(repo)
+
+    expect(runCli(repo, ['init', '--repo', '.']).status).toBe(0)
+    expect(runCli(repo, ['start', '--title', 'Next export dry run']).status).toBe(0)
+    expect(runCli(repo, ['intent', 'Preview export through next.']).status).toBe(0)
+    expect(runCli(repo, ['check', 'Reviewed ready dry-run evidence.']).status).toBe(0)
+    expect(runCli(repo, ['evidence']).status).toBe(0)
+
+    const result = runCli(repo, ['next', '--dry-run'])
+
+    expect(result.status).toBe(0)
+    expect(result.stdout).toContain('Action: export')
+    expect(result.stdout).toContain('Dry run: yes')
+    const sessionId = JSON.parse(readFileSync(path.join(repo, '.forgedesk', 'config.json'), 'utf8')).activeSessionId
+    expect(existsSync(path.join(repo, '.forgedesk', 'exports', sessionId, 'HANDOFF.md'))).toBe(false)
   })
 
   it('blocks next export when evidence is not ready', () => {
