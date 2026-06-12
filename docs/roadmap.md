@@ -2,7 +2,7 @@
 
 This roadmap is a planning reference, not a commitment list.
 
-ForgeDesk v0.2.2 is a local auto-capture CLI for evidence-first AI-assisted
+ForgeDesk v0.2.3 is a local auto-capture CLI for evidence-first AI-assisted
 code changes. The next direction is run-button hardening: making local workflow
 steps easier to preview, execute, and hand off while keeping ForgeDesk out of AI
 review, cloud sync, and irreversible automation.
@@ -28,6 +28,7 @@ Make the automatic local workflow boringly reliable and easier for humans.
 
 Reduce the friction of handing ForgeDesk material to humans or AI reviewers.
 
+- Improve first-run onboarding and install-to-first-evidence guidance.
 - Improve PR body and review context templates.
 - Consider saving externally produced review notes back into a local session.
 

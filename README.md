@@ -14,11 +14,16 @@ reviewers inspect the change.
 
 ## Install
 
-ForgeDesk is an early local MVP. It is not published to npm yet.
-The package metadata and cross-platform release checks are prepared for npm
-publishing in a later release.
+ForgeDesk is an early local MVP published to npm.
 
-Try it from a local checkout:
+Install the CLI:
+
+```bash
+npm install -g forgedesk
+forgedesk --help
+```
+
+Or try it from a local checkout:
 
 ```bash
 git clone https://github.com/Lucy77m/ForgeDesk.git
@@ -30,8 +35,8 @@ node dist/cli/index.js --help
 
 ## Quick Start
 
-After building from a local checkout, replace `forgedesk` with
-`node dist/cli/index.js` until the package is published.
+After installing from npm, run `forgedesk` directly. From a local checkout, use
+`node dist/cli/index.js` after `pnpm build`.
 
 ```bash
 echo "Local change" >> README.md
@@ -117,9 +122,9 @@ See [CHANGELOG.md](CHANGELOG.md) for local source version notes.
 
 ## Project Status
 
-ForgeDesk v0.2.2 is prepared as a source-available local auto-capture CLI with
-npm package metadata and cross-platform release checks. It is not published to
-npm yet.
+ForgeDesk v0.2.3 is prepared as the npm publishing release for the local
+auto-capture CLI, with package metadata, cross-platform release checks, and a
+GitHub source release plan.
 
 ## Development
 

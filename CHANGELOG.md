@@ -2,8 +2,35 @@
 
 All notable ForgeDesk changes are tracked here.
 
-ForgeDesk is not published to npm yet. Version entries describe the local source
-state and GitHub release preparation only.
+Version entries describe source, GitHub release, and npm publishing state.
+
+## v0.2.3 - 2026-06-12
+
+Release preparation for the first npm-published local run-button CLI.
+
+### Improved
+
+- Updated package and CLI versions for the npm-published release.
+- Updated README install instructions for `npm install -g forgedesk` while
+  preserving local-checkout development instructions.
+- Updated the roadmap toward post-publish onboarding and review-context relief.
+
+### Tests
+
+- Kept the full typecheck, unit/integration test, build, smoke, pack, npm
+  dry-run, and install sanity gates for the published package.
+
+### Publishing Prep
+
+- Prepared the package for publishing to npm as `forgedesk`.
+- Prepared the matching GitHub source release and tag.
+
+### Boundaries
+
+- npm publishing is a maintainer release action, not ForgeDesk product behavior.
+- No AI provider calls, Web UI, cloud sync, background automation, plugin
+  system, automatic code fixing, automatic commit, push, PR, tag, release, or
+  npm publish behavior inside ForgeDesk.
 
 ## v0.2.2 - 2026-06-12
 
