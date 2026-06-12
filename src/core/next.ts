@@ -29,6 +29,7 @@ export type NextReport = {
   dryRun: boolean
   repoPath: string
   summary: string
+  evidenceFresh?: boolean
   session?: NextSession
   outputDir?: string
   ready?: boolean
@@ -70,6 +71,9 @@ function sameCapturedDiff(session: ChangeSession, snapshot: GitSnapshot): boolea
   if (!captured) {
     return false
   }
+  if (captured.diffFingerprint && snapshot.diffFingerprint) {
+    return captured.diffFingerprint === snapshot.diffFingerprint
+  }
   return captured.branch === snapshot.branch &&
     captured.head === snapshot.head &&
     sameFiles(captured.modifiedFiles, snapshot.modifiedFiles) &&
@@ -78,7 +82,7 @@ function sameCapturedDiff(session: ChangeSession, snapshot: GitSnapshot): boolea
     sameFiles(captured.untrackedFiles, snapshot.untrackedFiles)
 }
 
-async function evidenceCurrent(repoPath: string, session: ChangeSession): Promise<boolean> {
+async function evidenceCurrent(repoPath: string, session: ChangeSession, snapshot: GitSnapshot): Promise<boolean> {
   if (!session.evidenceDir) {
     return false
   }
@@ -90,7 +94,13 @@ async function evidenceCurrent(repoPath: string, session: ChangeSession): Promis
 
   try {
     const bundle = await readJson<EvidenceBundle>(evidenceJson)
-    return bundle.generatedAt === session.updatedAt
+    if (bundle.generatedAt !== session.updatedAt) {
+      return false
+    }
+    if (bundle.gitSnapshot.diffFingerprint && snapshot.diffFingerprint) {
+      return bundle.gitSnapshot.diffFingerprint === snapshot.diffFingerprint
+    }
+    return sameCapturedDiff(session, snapshot)
   } catch {
     return false
   }
@@ -173,7 +183,7 @@ export async function getNextReport(cwd: string, options: NextOptions = {}): Pro
   }
 
   const session = await tryActiveSession(workspace)
-  if (snapshot.isDirty && (!session || (session.evidenceDir && !sameCapturedDiff(session, snapshot)))) {
+  if (snapshot.isDirty && !session) {
     return autoCapture(cwd, repoPath, dryRun, session)
   }
 
@@ -184,15 +194,26 @@ export async function getNextReport(cwd: string, options: NextOptions = {}): Pro
     )
   }
 
-  if (!session.evidenceDir || !(await evidenceCurrent(workspace.repoPath, session))) {
+  const currentEvidence = await evidenceCurrent(workspace.repoPath, session, snapshot)
+  if (!session.evidenceDir || !currentEvidence) {
     const defaultOutputDir = displayPath(path.join(pathsFor(workspace.repoPath).evidenceDir, session.id))
     if (dryRun) {
       return {
-        ...baseReport('generate-evidence', workspace.repoPath, true, 'ForgeDesk would generate or refresh the local evidence pack.'),
+        ...baseReport(
+          'generate-evidence',
+          workspace.repoPath,
+          true,
+          session.evidenceDir
+            ? 'ForgeDesk would refresh stale evidence for the current local diff.'
+            : 'ForgeDesk would generate or refresh the local evidence pack.'
+        ),
         session: sessionSummary(session),
         outputDir: defaultOutputDir,
+        evidenceFresh: false,
         blockers: [],
-        warnings: ['Dry run only. No files were written.'],
+        warnings: session.evidenceDir
+          ? ['Evidence is stale for the current local diff. Dry run only. No files were written.']
+          : ['Dry run only. No files were written.'],
         next: ['Run "forgedesk next" to generate evidence.'],
         commands: ['forgedesk next']
       }
@@ -206,6 +227,7 @@ export async function getNextReport(cwd: string, options: NextOptions = {}): Pro
         status: 'needs-review'
       },
       outputDir: displayPath(outputDir),
+      evidenceFresh: true,
       blockers: [],
       warnings: ['Evidence was generated. Run "forgedesk next" again to check readiness.'],
       next: ['Run "forgedesk next" again.'],
@@ -272,6 +294,7 @@ export function renderNextReport(report: NextReport): string {
     report.session ? `Session ID: ${report.session.id}` : undefined,
     report.session ? `Status: ${report.session.status}` : undefined,
     report.ready === undefined ? undefined : `Ready: ${report.ready ? 'yes' : 'no'}`,
+    report.evidenceFresh === undefined ? undefined : `Evidence fresh: ${report.evidenceFresh ? 'yes' : 'no'}`,
     report.outputDir ? `Output: ${displayPath(report.outputDir)}` : undefined,
     '',
     '## Blockers',

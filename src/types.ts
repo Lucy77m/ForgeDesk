@@ -77,6 +77,7 @@ export type GitSnapshot = {
   branch: string
   head: string
   isDirty: boolean
+  diffFingerprint?: string
   modifiedFiles: string[]
   addedFiles: string[]
   deletedFiles: string[]

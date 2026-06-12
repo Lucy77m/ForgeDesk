@@ -4,6 +4,40 @@ All notable ForgeDesk changes are tracked here.
 
 Version entries describe source, GitHub release, and npm publishing state.
 
+## v0.2.5 - 2026-06-13
+
+Evidence freshness hardening for the local run-button workflow.
+
+### Improved
+
+- Added a local diff fingerprint to new git snapshots so ForgeDesk can detect
+  stale evidence when tracked file contents change without changing the file
+  list.
+- Updated `forgedesk next` and `forgedesk next --dry-run` to refresh stale
+  evidence instead of exporting an evidence pack for an older local diff.
+- Added `evidenceFresh` to `forgedesk next --json` reports when freshness is
+  relevant.
+- Included the local shared-helper maintenance hardening from the post-v0.2.3
+  development branch: shared CLI list rendering, internal error codes, direct
+  git parser tests, and local workflow doc cleanup.
+
+### Tests
+
+- Added coverage for same-file content changes triggering evidence refresh.
+- Added direct tests for git status parsing, diff fingerprints, and internal
+  error-code matching.
+
+### Publishing
+
+- GitHub source release only.
+- No npm publish in this version.
+
+### Boundaries
+
+- No AI provider calls, Web UI, cloud sync, background automation, plugin
+  system, automatic code fixing, automatic commit, push, PR, tag, release, or
+  npm publish behavior inside ForgeDesk.
+
 ## v0.2.3 - 2026-06-12
 
 First npm-published release for the local run-button CLI.

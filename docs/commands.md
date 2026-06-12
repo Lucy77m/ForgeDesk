@@ -46,6 +46,12 @@ export a ready evidence pack. It does not run tests, call an AI provider, modify
 product code, commit, push, open PRs, tag, release, publish, or run in the
 background.
 
+When evidence exists, `next` compares the current local diff fingerprint with
+the fingerprint recorded in the evidence pack. If the code changed since
+evidence generation, `next` refreshes evidence before export instead of handing
+off a stale pack. JSON reports include `evidenceFresh` when this freshness check
+is relevant.
+
 Use `next --dry-run` as a button preview before running the step. It reports the
 same planned action without changing `.forgedesk/`.
 

@@ -122,9 +122,9 @@ See [CHANGELOG.md](CHANGELOG.md) for local source version notes.
 
 ## Project Status
 
-ForgeDesk v0.2.3 is published as the npm release for the local auto-capture
-CLI, with package metadata, cross-platform release checks, and a matching
-GitHub source release.
+ForgeDesk v0.2.5 is prepared as a GitHub source release for local run-button
+hardening. The npm package remains at v0.2.3 until the next explicit npm
+publish.
 
 ## Development
 

@@ -20,7 +20,7 @@ describe('cli integration', () => {
     const result = runCli(repo, ['--version'])
 
     expect(result.status).toBe(0)
-    expect(result.stdout.trim()).toBe('0.2.3')
+    expect(result.stdout.trim()).toBe('0.2.5')
   })
 
   it('auto-captures a local change without running checks', () => {
@@ -172,6 +172,41 @@ describe('cli integration', () => {
     const sessionId = JSON.parse(readFileSync(path.join(repo, '.forgedesk', 'config.json'), 'utf8')).activeSessionId
     const summary = readFileSync(path.join(repo, '.forgedesk', 'evidence', sessionId, 'PR_EVIDENCE.md'), 'utf8')
     expect(summary).toContain('Recorded after evidence generation.')
+  })
+
+  it('refreshes evidence when tracked file content changes without changing the file list', () => {
+    const repo = tempDir()
+    dirs.push(repo)
+    initGitRepo(repo)
+
+    expect(runCli(repo, ['init', '--repo', '.']).status).toBe(0)
+    expect(runCli(repo, ['start', '--title', 'Next fingerprint refresh']).status).toBe(0)
+    expect(runCli(repo, ['intent', 'Refresh stale evidence when content changes.']).status).toBe(0)
+    expect(runCli(repo, ['check', 'Reviewed initial evidence.']).status).toBe(0)
+    writeFileSync(path.join(repo, 'README.md'), '# First dirty content\n', 'utf8')
+    expect(runCli(repo, ['evidence']).status).toBe(0)
+    const sessionId = JSON.parse(readFileSync(path.join(repo, '.forgedesk', 'config.json'), 'utf8')).activeSessionId
+    const originalSession = JSON.parse(readFileSync(path.join(repo, '.forgedesk', 'sessions', `${sessionId}.json`), 'utf8'))
+    const originalFingerprint = originalSession.gitSnapshot.diffFingerprint
+
+    writeFileSync(path.join(repo, 'README.md'), '# Changed dirty content\n', 'utf8')
+    const preview = runCli(repo, ['next', '--dry-run', '--json'])
+
+    expect(preview.status).toBe(0)
+    const previewReport = JSON.parse(preview.stdout)
+    expect(previewReport.action).toBe('generate-evidence')
+    expect(previewReport.evidenceFresh).toBe(false)
+    expect(previewReport.session.id).toBe(sessionId)
+
+    const result = runCli(repo, ['next'])
+
+    expect(result.status).toBe(0)
+    expect(result.stdout).toContain('Action: generate-evidence')
+    expect(result.stdout).toContain('Evidence fresh: yes')
+    const refreshedSession = JSON.parse(readFileSync(path.join(repo, '.forgedesk', 'sessions', `${sessionId}.json`), 'utf8'))
+    expect(refreshedSession.gitSnapshot.diffFingerprint).toBeTruthy()
+    expect(refreshedSession.gitSnapshot.diffFingerprint).not.toBe(originalFingerprint)
+    expect(refreshedSession.id).toBe(sessionId)
   })
 
   it('runs next to export ready evidence', () => {

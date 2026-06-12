@@ -1,7 +1,7 @@
 import { mkdirSync, rmSync, unlinkSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
-import { captureGitSnapshot, parseRecentCommits, parseStatus } from '../src/git/snapshot.js'
+import { captureGitSnapshot, createDiffFingerprint, parseRecentCommits, parseStatus } from '../src/git/snapshot.js'
 import { cleanupDir, git, initGitRepo, tempDir } from './helpers.js'
 
 describe('git snapshot', () => {
@@ -104,5 +104,29 @@ describe('git snapshot parsers', () => {
 
   it('returns no recent commits for empty log output', () => {
     expect(parseRecentCommits('')).toEqual([])
+  })
+
+  it('changes the diff fingerprint when diff or untracked content changes', () => {
+    const repo = tempDir()
+    mkdirSync(repo, { recursive: true })
+
+    const snapshot = {
+      branch: 'main',
+      head: 'abc123',
+      modifiedFiles: ['README.md'],
+      addedFiles: [],
+      deletedFiles: [],
+      untrackedFiles: ['notes.md']
+    }
+    writeFileSync(path.join(repo, 'notes.md'), 'first\n', 'utf8')
+    const first = createDiffFingerprint(repo, snapshot, 'diff -- README.md\n+first\n', '')
+    const second = createDiffFingerprint(repo, snapshot, 'diff -- README.md\n+second\n', '')
+    writeFileSync(path.join(repo, 'notes.md'), 'second\n', 'utf8')
+    const third = createDiffFingerprint(repo, snapshot, 'diff -- README.md\n+first\n', '')
+
+    expect(second).not.toBe(first)
+    expect(third).not.toBe(first)
+
+    cleanupDir(repo)
   })
 })
