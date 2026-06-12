@@ -103,7 +103,7 @@ See [docs/commands.md](docs/commands.md) for the full command reference.
 - It does not commit, push, open PRs, or publish releases.
 - It does not upload your project.
 
-See [docs/boundaries.md](docs/boundaries.md) for the v0.1 boundary contract.
+See [docs/boundaries.md](docs/boundaries.md) for the product boundary contract.
 See [docs/commands.md](docs/commands.md) for all CLI commands and side effects.
 See [docs/reviewer-guide.md](docs/reviewer-guide.md) for how to inspect an
 evidence pack.
@@ -115,8 +115,8 @@ See [CHANGELOG.md](CHANGELOG.md) for local source version notes.
 
 ## Project Status
 
-ForgeDesk v0.1.4 is prepared as a source-available local CLI MVP. It is not
-published to npm.
+ForgeDesk v0.2.0 is prepared as a source-available local auto-capture CLI. It
+is not published to npm.
 
 ## Development
 

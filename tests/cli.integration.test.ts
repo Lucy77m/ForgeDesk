@@ -20,7 +20,7 @@ describe('cli integration', () => {
     const result = runCli(repo, ['--version'])
 
     expect(result.status).toBe(0)
-    expect(result.stdout.trim()).toBe('0.1.4')
+    expect(result.stdout.trim()).toBe('0.2.0')
   })
 
   it('auto-captures a local change without running checks', () => {

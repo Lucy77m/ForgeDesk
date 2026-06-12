@@ -5,6 +5,43 @@ All notable ForgeDesk changes are tracked here.
 ForgeDesk is not published to npm yet. Version entries describe the local source
 state and GitHub release preparation only.
 
+## v0.2.0 - 2026-06-12
+
+Release prep for the local auto-capture and run-button workflow.
+
+### Added
+
+- Added `forgedesk next` as a safe local run button that auto-captures,
+  generates evidence, checks readiness, or exports one step at a time.
+- Added `forgedesk next --dry-run` to preview the next local step without
+  writing `.forgedesk/` files.
+- Added `forgedesk auto --no-run` for local auto-capture of dirty git changes.
+- Added `forgedesk review-context` and `forgedesk pr` print/copy exits for
+  review context and PR body handoff.
+- Added `forgedesk fix-context` for bounded failed-test repair context.
+
+### Improved
+
+- Generated `SUMMARY.md`, `PR_BODY.md`, `REVIEW_CONTEXT.md`, and
+  `TEST_EVIDENCE.md` alongside the existing evidence pack.
+- Added rule-derived local risk hints with explicit source labels.
+- Updated README, command docs, boundaries, and roadmap around the automatic
+  local workflow.
+
+### Tests
+
+- Added integration coverage for `next`, `next --dry-run`, auto-capture,
+  review/PR exits, and fix-context behavior.
+- Added focused unit coverage for risk rules, clipboard, review output, and
+  fix-context rendering.
+
+### Boundaries
+
+- Still source-only and not published to npm.
+- No AI provider calls, Web UI, cloud sync, background automation, plugin
+  system, automatic code fixing, automatic commit, push, PR, tag, release, or
+  npm publish behavior inside ForgeDesk.
+
 ## v0.1.4 - 2026-06-11
 
 Release prep for v0.2 maintainability hardening after v0.1.3.

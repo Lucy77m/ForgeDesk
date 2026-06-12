@@ -1,6 +1,6 @@
 # Local Workflow
 
-ForgeDesk v0.1 is meant to be tried from a local checkout.
+ForgeDesk v0.2 is meant to be tried from a local checkout.
 
 ## Try ForgeDesk On A Demo Repository
 
@@ -11,11 +11,12 @@ pnpm install
 pnpm build
 ```
 
-Create or open another git repository, then initialize ForgeDesk:
+Create or open another git repository, make a local change, then preview and run
+the next local ForgeDesk step:
 
 ```bash
-node D:/ForgeDesk/dist/cli/index.js init --repo .
-node D:/ForgeDesk/dist/cli/index.js start --title "Describe the change"
+node D:/ForgeDesk/dist/cli/index.js next --dry-run
+node D:/ForgeDesk/dist/cli/index.js next
 ```
 
 Record the change evidence:
@@ -29,14 +30,11 @@ node D:/ForgeDesk/dist/cli/index.js test --command "pnpm test"
 node D:/ForgeDesk/dist/cli/index.js test -- pnpm test
 ```
 
-Generate, check, and export the evidence:
+Generate, check, and export the evidence with the run button:
 
 ```bash
-node D:/ForgeDesk/dist/cli/index.js evidence
-node D:/ForgeDesk/dist/cli/index.js ready
-node D:/ForgeDesk/dist/cli/index.js handoff
-node D:/ForgeDesk/dist/cli/index.js export
-node D:/ForgeDesk/dist/cli/index.js inspect
+node D:/ForgeDesk/dist/cli/index.js next
+node D:/ForgeDesk/dist/cli/index.js next
 node D:/ForgeDesk/dist/cli/index.js inspect --export
 ```
 
@@ -66,6 +64,8 @@ node dist/cli/index.js sessions
 node dist/cli/index.js show
 node dist/cli/index.js status
 node dist/cli/index.js doctor
+node dist/cli/index.js next --dry-run
+node dist/cli/index.js next
 node dist/cli/index.js ready
 node dist/cli/index.js handoff
 node dist/cli/index.js export
@@ -81,6 +81,9 @@ dogfood sessions and evidence packs without publishing them by default.
 Start with:
 
 - `PR_EVIDENCE.md`
+- `SUMMARY.md`
+- `REVIEW_CONTEXT.md`
+- `PR_BODY.md`
 - `TEST_RESULTS.md`
 - `REVIEW_PROMPT.md`
 - `HANDOFF.md` if you ran `forgedesk export`
@@ -123,6 +126,9 @@ correctness, security, merge, or release verdict.
 Use `forgedesk handoff` to print a compact local summary for a reviewer, PR
 description, release note draft, or next AI window. It reads existing local
 evidence and does not call an AI provider.
+
+Use `forgedesk fix-context` after failed tests to print bounded local context
+for a repair pass. It packages failure evidence but does not fix code.
 
 Use `forgedesk export` to copy the existing evidence pack and a generated
 `HANDOFF.md` into `.forgedesk/exports/<session-id>` or a chosen local directory.

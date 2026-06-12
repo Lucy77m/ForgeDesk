@@ -2,7 +2,7 @@
 
 This page covers common local ForgeDesk errors and the shortest useful fix.
 
-ForgeDesk v0.1 is local-only. These commands do not require an AI provider,
+ForgeDesk v0.2 is local-only. These commands do not require an AI provider,
 cloud sync, GitHub write access, or npm publishing.
 
 ## Cannot Find A ForgeDesk Project
@@ -69,10 +69,10 @@ Evidence has not been generated
 ```
 
 Generate an evidence pack before running `ready`, `handoff`, `export`, or
-`inspect` workflows that expect output files:
+`inspect` workflows that expect output files. The easiest route is:
 
 ```bash
-forgedesk evidence
+forgedesk next
 ```
 
 Then check it:
@@ -116,7 +116,7 @@ forgedesk inspect --export
 ## Metadata Is Invalid Or Corrupted
 
 Errors like these mean a local `.forgedesk/*.json` file is malformed or does
-not match the current v0.1 schema:
+not match the current ForgeDesk schema:
 
 ```text
 Could not read ForgeDesk project metadata
@@ -164,6 +164,18 @@ forgedesk evidence
 
 Warnings do not necessarily block local handoff, but they should be read before
 treating a session as ready.
+
+## Failed Tests Need Repair Context
+
+If `forgedesk next` reports failed tests as a blocker, package the failure
+context for a repair pass:
+
+```bash
+forgedesk fix-context
+```
+
+`fix-context` reads local failed test logs and changed files. It does not call an
+AI provider or modify code.
 
 ## Test Command Did Not Run As Expected
 
