@@ -114,7 +114,7 @@ export function captureGitSnapshot(repoPath: string): GitSnapshot {
 
   const branch = runGit(repoPath, ['branch', '--show-current']) || 'HEAD'
   const head = tryRunGit(repoPath, ['rev-parse', '--short', 'HEAD']) ?? 'unborn'
-  const statusOutput = runGitRaw(repoPath, ['status', '--porcelain=v1'])
+  const statusOutput = runGitRaw(repoPath, ['status', '--porcelain=v1', '-uall'])
   const recentCommitsOutput = tryRunGitRaw(repoPath, [
     'log',
     '-n',

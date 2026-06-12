@@ -1,13 +1,18 @@
 import { mkdir } from 'node:fs/promises'
 import path from 'node:path'
-import { EVIDENCE_SCHEMA_VERSION, type ChangeSession, type EvidenceBundle } from '../types.js'
+import { EVIDENCE_SCHEMA_VERSION, type AutoCaptureMeta, type ChangeSession, type EvidenceBundle } from '../types.js'
 import { captureGitSnapshot } from '../git/snapshot.js'
 import { writeJson } from '../storage/json-store.js'
 import { renderChangeSummary } from '../templates/change-summary.js'
+import { renderPrBody } from '../templates/pr-body.js'
 import { renderPrEvidence } from '../templates/pr-evidence.js'
+import { renderReviewContext } from '../templates/review-context.js'
 import { renderReviewPrompt } from '../templates/review-prompt.js'
+import { renderSummary } from '../templates/summary.js'
+import { renderTestEvidence } from '../templates/test-evidence.js'
 import { renderTestResults } from '../templates/test-results.js'
 import { displayPath } from '../templates/format.js'
+import { deriveRiskHints } from './risk-rules.js'
 import { ForgeDeskError } from './errors.js'
 import {
   getActiveSession,
@@ -22,6 +27,7 @@ import { writeFile } from 'node:fs/promises'
 export type GenerateEvidenceOptions = {
   sessionId?: string
   outputDir?: string
+  autoCapture?: Partial<Pick<AutoCaptureMeta, 'title' | 'intent' | 'checks'>>
 }
 
 type SessionWithEvidence = ChangeSession & { evidenceDir: string }
@@ -52,7 +58,24 @@ export async function generateEvidence(cwd: string, options: GenerateEvidenceOpt
     generatedAt: new Date().toISOString(),
     project: workspace.project,
     session: { ...session, gitSnapshot: snapshot },
-    gitSnapshot: snapshot
+    gitSnapshot: snapshot,
+    autoCapture: {
+      title: options.autoCapture?.title,
+      intent: options.autoCapture?.intent,
+      riskHints: deriveRiskHints(snapshot),
+      checks: options.autoCapture?.checks ?? session.tests.map((test) => ({
+        command: test.command,
+        status: test.status,
+        source: 'session:test'
+      })),
+      artifacts: {
+        summary: 'SUMMARY.md',
+        prBody: 'PR_BODY.md',
+        reviewContext: 'REVIEW_CONTEXT.md',
+        testEvidence: 'TEST_EVIDENCE.md',
+        rawEvidence: 'PR_EVIDENCE.md'
+      }
+    }
   }
 
   const outputDir = options.outputDir
@@ -60,6 +83,10 @@ export async function generateEvidence(cwd: string, options: GenerateEvidenceOpt
     : path.join(pathsFor(workspace.repoPath).evidenceDir, session.id)
   await mkdir(outputDir, { recursive: true })
 
+  await writeFile(path.join(outputDir, 'SUMMARY.md'), renderSummary(bundle), 'utf8')
+  await writeFile(path.join(outputDir, 'PR_BODY.md'), renderPrBody(bundle), 'utf8')
+  await writeFile(path.join(outputDir, 'REVIEW_CONTEXT.md'), renderReviewContext(bundle), 'utf8')
+  await writeFile(path.join(outputDir, 'TEST_EVIDENCE.md'), renderTestEvidence(bundle), 'utf8')
   await writeFile(path.join(outputDir, 'PR_EVIDENCE.md'), renderPrEvidence(bundle), 'utf8')
   await writeFile(path.join(outputDir, 'CHANGE_SUMMARY.md'), renderChangeSummary(bundle), 'utf8')
   await writeFile(path.join(outputDir, 'TEST_RESULTS.md'), renderTestResults(bundle), 'utf8')

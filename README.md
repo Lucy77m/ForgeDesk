@@ -1,11 +1,16 @@
 # ForgeDesk
 
-ForgeDesk is a local evidence desk for AI-assisted code changes.
+ForgeDesk is a local auto-capture layer for AI-assisted code changes.
 
 AI coding tools can write code fast, but the resulting changes are often hard to review:
 What was the intent? What files changed? What tests ran? What risks remain?
 
-ForgeDesk helps you turn a local git diff into a reviewable evidence pack.
+ForgeDesk captures local git changes and prepares review-ready material:
+summary, PR body, test evidence, risk hints, review context, and an evidence
+pack.
+
+It does not review code for you. It prepares the material before humans or AI
+reviewers inspect the change.
 
 ## Install
 
@@ -27,13 +32,8 @@ After building from a local checkout, replace `forgedesk` with
 `node dist/cli/index.js` until the package is published.
 
 ```bash
-forgedesk init --repo .
-forgedesk start --title "Fix OAuth redirect"
-forgedesk intent "Return users to the original page after login."
-forgedesk decision "Keep the redirect target in signed state."
-forgedesk risk "Malformed redirect state needs review."
-forgedesk test -- npm test
-forgedesk evidence
+echo "Local change" >> README.md
+forgedesk auto --no-run
 ```
 
 ## Output
@@ -41,17 +41,21 @@ forgedesk evidence
 ```text
 .forgedesk/evidence/<session-id>/
 |-- PR_EVIDENCE.md
+|-- SUMMARY.md
+|-- PR_BODY.md
+|-- REVIEW_CONTEXT.md
+|-- TEST_EVIDENCE.md
 |-- CHANGE_SUMMARY.md
 |-- TEST_RESULTS.md
 |-- REVIEW_PROMPT.md
-`-- evidence.json
+|-- evidence.json
 ```
 
 ## Dogfood Example
 
-ForgeDesk is used on its own repository. A typical dogfood session records a
-small local change, captures `pnpm typecheck`, `pnpm test`, and `pnpm build`,
-then generates a reviewable evidence pack under `.forgedesk/evidence/`.
+ForgeDesk is used on its own repository. A typical dogfood session captures a
+local change, records `pnpm typecheck`, `pnpm test`, and `pnpm build`, then
+generates review-ready material under `.forgedesk/evidence/`.
 
 The goal is not to prove the code is perfect. The goal is to make the change
 intent, changed files, test evidence, and remaining risks easy to inspect.
@@ -60,6 +64,7 @@ intent, changed files, test evidence, and remaining risks easy to inspect.
 
 ```bash
 forgedesk init --repo .
+forgedesk auto --no-run
 forgedesk start --title "Describe the change"
 forgedesk intent "Record the user-facing goal."
 forgedesk decision "Record an implementation decision."
@@ -78,13 +83,15 @@ See [docs/commands.md](docs/commands.md) for the full command reference.
 ## What ForgeDesk Does
 
 - Reads local git status and changed files.
+- Auto-captures local change context.
 - Records change intent, decisions, risks, and tests.
-- Generates a Markdown evidence pack for PRs, reviews, releases, or AI handoff.
+- Generates summaries, PR body, review context, risk hints, and evidence files.
 
 ## What ForgeDesk Does Not Do
 
 - It does not write code.
 - It does not review code for you.
+- It does not act as an AI code reviewer or security scanner.
 - It does not call an AI provider by default.
 - It does not commit, push, open PRs, or publish releases.
 - It does not upload your project.

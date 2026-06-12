@@ -2,6 +2,7 @@
 import { Command } from 'commander'
 import { pathToFileURL } from 'node:url'
 import { addDecision, addManualCheck, addRisk, initProject, setIntent, startSession } from '../core/session.js'
+import { renderAutoCaptureReport, runAutoCapture } from '../core/auto.js'
 import { getDoctorReport, renderDoctorReport } from '../core/doctor.js'
 import { generateEvidence, getLatestEvidencePack, listEvidencePacks } from '../core/evidence.js'
 import { ForgeDeskError } from '../core/errors.js'
@@ -48,6 +49,17 @@ export function buildProgram(cwd = process.cwd()): Command {
       const project = await initProject(options.repo, cwd)
       console.log(`Initialized ForgeDesk for ${project.name}`)
       console.log(`Repo: ${project.repoPath}`)
+    })
+
+  program
+    .command('auto')
+    .description('Auto-capture local changes and generate pre-review materials.')
+    .option('--no-run', 'do not run checks; capture local context only')
+    .option('--title <title>', 'override the generated session title')
+    .option('--json', 'print the auto-capture report as JSON')
+    .action(async (options: { noRun?: boolean; title?: string; json?: boolean }) => {
+      const report = await runAutoCapture(cwd, options)
+      console.log(options.json ? JSON.stringify(report, null, 2) : renderAutoCaptureReport(report))
     })
 
   program

@@ -1,23 +1,26 @@
 # ForgeDesk Boundaries
 
-ForgeDesk v0.1 is a local evidence desk for AI-assisted code changes.
+ForgeDesk is a local auto-capture layer for AI-assisted code changes.
 
-It helps a developer explain and verify a local git change by recording intent,
-decisions, risks, tests, and git status, then rendering a Markdown evidence
-pack.
+It helps a developer turn local git changes into review-ready material:
+summary, PR body, test evidence, risk hints, review context, and an inspectable
+evidence pack.
 
-## What v0.1 Does
+## What ForgeDesk Does
 
 - Reads local git status, branch, HEAD, changed files, and recent commits.
 - Stores ForgeDesk project/session metadata locally under `.forgedesk/`.
-- Records change intent, decisions, risks, and test evidence.
+- Auto-captures local change context with `forgedesk auto`.
+- Generates draft intent, summaries, PR body, review context, and risk hints.
+- Records change intent, decisions, risks, manual checks, and test evidence.
 - Runs test commands only when the user explicitly invokes `forgedesk test --`.
 - Generates local Markdown and JSON evidence files.
 
-## What v0.1 Does Not Do
+## What ForgeDesk Does Not Do
 
 - It does not write or modify product code for the user.
 - It does not judge whether code is correct.
+- It does not act as an AI code reviewer, PR review bot, bug finder, or security scanner.
 - It does not call AI providers.
 - It does not store API keys or credentials.
 - It does not upload repository contents.
@@ -27,7 +30,7 @@ pack.
 
 ## Evidence Is Not Review
 
-ForgeDesk evidence is review input, not a review verdict.
+ForgeDesk evidence and risk hints are review input, not review verdicts.
 
 The evidence pack should help a maintainer or future AI window answer:
 
@@ -38,3 +41,12 @@ The evidence pack should help a maintainer or future AI window answer:
 - What remains unverified?
 
 The final judgment still belongs to the developer or reviewer.
+
+## Automation Boundary
+
+ForgeDesk may automatically capture, summarize, and package local context. It
+must mark generated or rule-derived material honestly and avoid correctness
+claims.
+
+ForgeDesk must not automatically perform irreversible project actions such as
+commit, push, pull request creation, merge, tag, release, or package publish.

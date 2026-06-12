@@ -3,6 +3,13 @@ export const CONFIG_SCHEMA_VERSION = 'forgedesk-config-v1'
 export const SESSION_SCHEMA_VERSION = 'forgedesk-session-v1'
 export const EVIDENCE_SCHEMA_VERSION = 'forgedesk-evidence-v1'
 
+export type SourceLabel = {
+  text: string
+  source: string
+  confidence: 'low' | 'medium' | 'high'
+  confirmed: boolean
+}
+
 export type Project = {
   schemaVersion: typeof PROJECT_SCHEMA_VERSION
   name: string
@@ -82,10 +89,36 @@ export type GitSnapshot = {
   capturedAt: string
 }
 
+export type RiskHint = {
+  text: string
+  source: string
+  severity: 'low' | 'medium' | 'high'
+  confidence: 'low' | 'medium' | 'high'
+}
+
+export type AutoCaptureMeta = {
+  title?: SourceLabel
+  intent?: SourceLabel
+  riskHints: RiskHint[]
+  checks: Array<{
+    command: string
+    status: 'recommended' | 'recorded' | 'passed' | 'failed' | 'not-run'
+    source: string
+  }>
+  artifacts: {
+    summary: string
+    prBody: string
+    reviewContext: string
+    testEvidence: string
+    rawEvidence: string
+  }
+}
+
 export type EvidenceBundle = {
   schemaVersion: typeof EVIDENCE_SCHEMA_VERSION
   generatedAt: string
   project: Project
   session: ChangeSession
   gitSnapshot: GitSnapshot
+  autoCapture?: AutoCaptureMeta
 }

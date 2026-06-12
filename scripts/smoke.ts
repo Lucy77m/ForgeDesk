@@ -103,7 +103,17 @@ function main(): void {
 
     const evidenceDir = path.join(repoPath, '.forgedesk', 'evidence', config.activeSessionId)
     const exportDir = path.join(repoPath, '.forgedesk', 'exports', config.activeSessionId)
-    for (const file of ['PR_EVIDENCE.md', 'CHANGE_SUMMARY.md', 'TEST_RESULTS.md', 'REVIEW_PROMPT.md', 'evidence.json']) {
+    for (const file of [
+      'SUMMARY.md',
+      'PR_BODY.md',
+      'REVIEW_CONTEXT.md',
+      'TEST_EVIDENCE.md',
+      'PR_EVIDENCE.md',
+      'CHANGE_SUMMARY.md',
+      'TEST_RESULTS.md',
+      'REVIEW_PROMPT.md',
+      'evidence.json'
+    ]) {
       assertFile(path.join(evidenceDir, file))
       assertFile(path.join(exportDir, file))
     }

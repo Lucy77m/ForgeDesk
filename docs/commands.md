@@ -6,6 +6,13 @@ the target repository unless a command explicitly runs a test process.
 ## Recommended Workflow
 
 ```bash
+forgedesk auto --no-run
+```
+
+`auto` is the primary entry point for local auto-capture. Manual commands remain
+available for advanced control:
+
+```bash
 forgedesk init --repo .
 forgedesk start --title "Describe the change"
 forgedesk intent "Record the user-facing goal."
@@ -19,6 +26,19 @@ forgedesk handoff
 forgedesk export
 forgedesk inspect --export
 ```
+
+## Auto Capture
+
+| Command | Purpose | Writes local data |
+|---|---|---|
+| `forgedesk auto --no-run` | Capture the current local git change and generate pre-review material without running checks. | yes |
+| `forgedesk auto --title "..." --no-run` | Override the generated session title. | yes |
+| `forgedesk auto --json --no-run` | Print the auto-capture report as JSON. | yes |
+
+Auto capture may initialize `.forgedesk/` in a git repository, create or reuse a
+session, generate draft intent, derive local risk hints, and write review-ready
+files. It does not review code, call an AI provider, commit, push, open PRs, tag,
+release, or publish.
 
 ## Session Setup
 
@@ -59,6 +79,10 @@ Generating evidence marks the target session as `needs-review`.
 Generated evidence includes:
 
 ```text
+SUMMARY.md
+PR_BODY.md
+REVIEW_CONTEXT.md
+TEST_EVIDENCE.md
 PR_EVIDENCE.md
 CHANGE_SUMMARY.md
 TEST_RESULTS.md
