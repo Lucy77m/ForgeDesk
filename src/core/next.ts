@@ -28,12 +28,14 @@ export type NextReport = {
   action: NextAction
   dryRun: boolean
   repoPath: string
+  summary: string
   session?: NextSession
   outputDir?: string
   ready?: boolean
   blockers: string[]
   warnings: string[]
   next: string[]
+  commands: string[]
 }
 
 function projectNotFound(error: unknown): boolean {
@@ -105,35 +107,43 @@ async function tryActiveSession(workspace: Workspace): Promise<ChangeSession | u
   }
 }
 
-function baseReport(action: NextAction, repoPath: string, dryRun: boolean): Omit<NextReport, 'blockers' | 'warnings' | 'next'> {
+function baseReport(
+  action: NextAction,
+  repoPath: string,
+  dryRun: boolean,
+  summary: string
+): Omit<NextReport, 'blockers' | 'warnings' | 'next' | 'commands'> {
   return {
     schemaVersion: 'forgedesk-next-v1',
     generatedAt: new Date().toISOString(),
     action,
     dryRun,
-    repoPath
+    repoPath,
+    summary
   }
 }
 
 async function autoCapture(cwd: string, repoPath: string, dryRun: boolean, session?: ChangeSession): Promise<NextReport> {
   if (dryRun) {
     return {
-      ...baseReport('auto-capture', repoPath, true),
+      ...baseReport('auto-capture', repoPath, true, 'ForgeDesk would capture local git changes and prepare review material.'),
       session: session ? sessionSummary(session) : undefined,
       blockers: [],
       warnings: ['Dry run only. No files were written.'],
-      next: ['Run "forgedesk next" to auto-capture local changes.']
+      next: ['Run "forgedesk next" to auto-capture local changes.'],
+      commands: ['forgedesk next']
     }
   }
 
   const report = await runAutoCapture(cwd, { noRun: true })
   return {
-    ...baseReport('auto-capture', repoPath, false),
+    ...baseReport('auto-capture', repoPath, false, 'Captured local changes and prepared review material.'),
     session: report.session,
     outputDir: report.outputDir,
     blockers: [],
     warnings: ['No checks were run. Record tests, then run "forgedesk next" again.'],
-    next: ['Run or record tests with "forgedesk test -- <command>".', 'Run "forgedesk next" again.']
+    next: ['Run or record tests with "forgedesk test -- <command>".', 'Run "forgedesk next" again.'],
+    commands: ['forgedesk test -- <command>', 'forgedesk next']
   }
 }
 
@@ -172,18 +182,19 @@ export async function getNextReport(cwd: string, options: NextOptions = {}): Pro
     const defaultOutputDir = displayPath(path.join(pathsFor(workspace.repoPath).evidenceDir, session.id))
     if (dryRun) {
       return {
-        ...baseReport('generate-evidence', workspace.repoPath, true),
+        ...baseReport('generate-evidence', workspace.repoPath, true, 'ForgeDesk would generate or refresh the local evidence pack.'),
         session: sessionSummary(session),
         outputDir: defaultOutputDir,
         blockers: [],
         warnings: ['Dry run only. No files were written.'],
-        next: ['Run "forgedesk next" to generate evidence.']
+        next: ['Run "forgedesk next" to generate evidence.'],
+        commands: ['forgedesk next']
       }
     }
 
     const outputDir = await generateEvidence(cwd, { sessionId: session.id })
     return {
-      ...baseReport('generate-evidence', workspace.repoPath, false),
+      ...baseReport('generate-evidence', workspace.repoPath, false, 'Generated or refreshed the local evidence pack.'),
       session: {
         ...sessionSummary(session),
         status: 'needs-review'
@@ -191,37 +202,43 @@ export async function getNextReport(cwd: string, options: NextOptions = {}): Pro
       outputDir: displayPath(outputDir),
       blockers: [],
       warnings: ['Evidence was generated. Run "forgedesk next" again to check readiness.'],
-      next: ['Run "forgedesk next" again.']
+      next: ['Run "forgedesk next" again.'],
+      commands: ['forgedesk next']
     }
   }
 
   const ready = await getReadyReport(cwd, session.id)
   if (!ready.ready) {
+    const failedTestBlocker = ready.blockers.some((blocker) => blocker.toLowerCase().includes('test command failed'))
     return {
-      ...baseReport('blocked', workspace.repoPath, dryRun),
+      ...baseReport('blocked', workspace.repoPath, dryRun, 'Evidence exists, but readiness blockers prevent export.'),
       session: ready.session,
       ready: false,
       blockers: ready.blockers,
       warnings: ready.warnings,
-      next: ['Address the blockers above, then run "forgedesk next" again.']
+      next: failedTestBlocker
+        ? ['Run "forgedesk fix-context" to print bounded failed-test context.', 'Address the blockers above, then run "forgedesk next" again.']
+        : ['Address the blockers above, then run "forgedesk next" again.'],
+      commands: failedTestBlocker ? ['forgedesk fix-context', 'forgedesk next'] : ['forgedesk next']
     }
   }
 
   if (dryRun) {
     return {
-      ...baseReport('export', workspace.repoPath, true),
+      ...baseReport('export', workspace.repoPath, true, 'ForgeDesk would export the ready evidence pack.'),
       session: sessionSummary(session),
       outputDir: displayPath(path.join(pathsFor(workspace.repoPath).exportsDir, session.id)),
       ready: true,
       blockers: [],
       warnings: ready.warnings,
-      next: ['Run "forgedesk next" to export the ready evidence pack.']
+      next: ['Run "forgedesk next" to export the ready evidence pack.'],
+      commands: ['forgedesk next']
     }
   }
 
   const exported = await exportEvidencePack(cwd, { sessionId: session.id })
   return {
-    ...baseReport('export', workspace.repoPath, false),
+    ...baseReport('export', workspace.repoPath, false, 'Exported the ready evidence pack.'),
     session: {
       id: exported.session.id,
       title: exported.session.title,
@@ -231,7 +248,8 @@ export async function getNextReport(cwd: string, options: NextOptions = {}): Pro
     ready: true,
     blockers: [],
     warnings: ready.warnings,
-    next: ['Open the export directory, or run "forgedesk review-context" / "forgedesk pr".']
+    next: ['Open the export directory, or run "forgedesk review-context" / "forgedesk pr".'],
+    commands: ['forgedesk review-context', 'forgedesk pr']
   }
 }
 
@@ -242,6 +260,8 @@ function listOrNone(items: string[]): string[] {
 export function renderNextReport(report: NextReport): string {
   return [
     'ForgeDesk Next',
+    '',
+    report.summary,
     '',
     `Action: ${report.action}`,
     `Dry run: ${report.dryRun ? 'yes' : 'no'}`,
@@ -260,6 +280,9 @@ export function renderNextReport(report: NextReport): string {
     '',
     '## Next',
     ...listOrNone(report.next),
+    '',
+    '## Commands',
+    ...listOrNone(report.commands),
     '',
     'This is a local run button. It does not call AI, change product code, commit, push, open PRs, or release.'
   ].filter((line): line is string => line !== undefined).join('\n')

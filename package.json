@@ -1,6 +1,6 @@
 {
   "name": "forgedesk",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "A local auto-capture desk for AI-assisted code changes.",
   "type": "module",
   "packageManager": "pnpm@11.1.3",

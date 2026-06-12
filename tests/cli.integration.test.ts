@@ -20,7 +20,7 @@ describe('cli integration', () => {
     const result = runCli(repo, ['--version'])
 
     expect(result.status).toBe(0)
-    expect(result.stdout.trim()).toBe('0.2.0')
+    expect(result.stdout.trim()).toBe('0.2.1')
   })
 
   it('auto-captures a local change without running checks', () => {
@@ -88,6 +88,9 @@ describe('cli integration', () => {
     const report = JSON.parse(result.stdout)
     expect(report.schemaVersion).toBe('forgedesk-next-v1')
     expect(report.action).toBe('auto-capture')
+    expect(report.summary).toContain('Captured local changes')
+    expect(report.commands).toContain('forgedesk test -- <command>')
+    expect(report.commands).toContain('forgedesk next')
     expect(report.outputDir).toContain('.forgedesk/evidence')
 
     const config = JSON.parse(readFileSync(path.join(repo, '.forgedesk', 'config.json'), 'utf8'))
@@ -109,6 +112,8 @@ describe('cli integration', () => {
     expect(report.schemaVersion).toBe('forgedesk-next-v1')
     expect(report.action).toBe('auto-capture')
     expect(report.dryRun).toBe(true)
+    expect(report.summary).toContain('would capture local git changes')
+    expect(report.commands).toEqual(['forgedesk next'])
     expect(existsSync(path.join(repo, '.forgedesk'))).toBe(false)
   })
 
@@ -225,6 +230,8 @@ describe('cli integration', () => {
     expect(result.status).not.toBe(0)
     expect(result.stdout).toContain('Action: blocked')
     expect(result.stdout).toContain('At least one test command failed.')
+    expect(result.stdout).toContain('forgedesk fix-context')
+    expect(result.stdout).toContain('## Commands')
     const sessionId = JSON.parse(readFileSync(path.join(repo, '.forgedesk', 'config.json'), 'utf8')).activeSessionId
     expect(existsSync(path.join(repo, '.forgedesk', 'exports', sessionId, 'HANDOFF.md'))).toBe(false)
 

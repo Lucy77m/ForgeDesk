@@ -49,6 +49,11 @@ background.
 Use `next --dry-run` as a button preview before running the step. It reports the
 same planned action without changing `.forgedesk/`.
 
+The human-readable `next` output includes a short summary, blockers, warnings,
+recommended next steps, and a `Commands` section with copyable local commands.
+When failed tests block export, `next` points to `forgedesk fix-context` before
+asking you to run the button again.
+
 ## Auto Capture
 
 | Command | Purpose | Writes local data |

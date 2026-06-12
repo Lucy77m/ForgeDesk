@@ -115,7 +115,7 @@ See [CHANGELOG.md](CHANGELOG.md) for local source version notes.
 
 ## Project Status
 
-ForgeDesk v0.2.0 is prepared as a source-available local auto-capture CLI. It
+ForgeDesk v0.2.1 is prepared as a source-available local auto-capture CLI. It
 is not published to npm.
 
 ## Development

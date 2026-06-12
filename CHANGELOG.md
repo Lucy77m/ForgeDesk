@@ -5,6 +5,30 @@ All notable ForgeDesk changes are tracked here.
 ForgeDesk is not published to npm yet. Version entries describe the local source
 state and GitHub release preparation only.
 
+## v0.2.1 - 2026-06-12
+
+Run-button UX polish for the local auto-capture workflow.
+
+### Improved
+
+- Added concise summaries and copyable command suggestions to `forgedesk next`
+  output and `forgedesk next --json` reports.
+- Improved blocked `next` guidance so failed-test readiness blockers point to
+  `forgedesk fix-context` before rerunning the local button.
+- Documented the human-readable `next` output shape in the command reference.
+
+### Tests
+
+- Extended CLI integration coverage for `next` summaries, command suggestions,
+  dry-run previews, and failed-test blocker guidance.
+
+### Boundaries
+
+- Still source-only and not published to npm.
+- No AI provider calls, Web UI, cloud sync, background automation, plugin
+  system, automatic code fixing, automatic commit, push, PR, tag, release, or
+  npm publish behavior inside ForgeDesk.
+
 ## v0.2.0 - 2026-06-12
 
 Release prep for the local auto-capture and run-button workflow.
