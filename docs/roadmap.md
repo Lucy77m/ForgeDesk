@@ -15,6 +15,7 @@ Turn the manual evidence workflow into a one-command local capture experience.
 - Support `forgedesk next --dry-run` as a safe button preview.
 - Keep `forgedesk auto` as the explicit entry point for local change capture.
 - Automatically create or reuse a session for the current git diff.
+- Generate bounded fix context when tests fail.
 - Generate draft title/intent, changed-file summary, risk hints, `SUMMARY.md`,
   `PR_BODY.md`, `REVIEW_CONTEXT.md`, `TEST_EVIDENCE.md`, and the existing
   evidence pack.
@@ -25,7 +26,6 @@ Turn the manual evidence workflow into a one-command local capture experience.
 
 Reduce the friction of handing ForgeDesk material to humans or AI reviewers.
 
-- Generate bounded fix context when tests fail.
 - Improve PR body and review context templates.
 - Consider saving externally produced review notes back into a local session.
 

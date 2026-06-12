@@ -8,6 +8,7 @@ import { getDoctorReport, renderDoctorReport } from '../core/doctor.js'
 import { generateEvidence, getLatestEvidencePack, listEvidencePacks } from '../core/evidence.js'
 import { ForgeDeskError } from '../core/errors.js'
 import { exportEvidencePack, renderExportReport } from '../core/export.js'
+import { getFixContextReport, renderFixContext } from '../core/fix-context.js'
 import { getHandoffReport, renderHandoffReport } from '../core/handoff.js'
 import { getInspectReport, renderInspectReport } from '../core/inspect.js'
 import { getNextReport, renderNextReport } from '../core/next.js'
@@ -223,6 +224,22 @@ export function buildProgram(cwd = process.cwd()): Command {
         return
       }
       process.stdout.write(output.text)
+    })
+
+  program
+    .command('fix-context')
+    .description('Print or copy bounded context for fixing failed tests.')
+    .option('--session <id>', 'session id; defaults to the active session')
+    .option('--copy', 'copy the fix context to the system clipboard')
+    .action(async (options: { session?: string; copy?: boolean }) => {
+      const report = await getFixContextReport(cwd, { sessionId: options.session })
+      const text = renderFixContext(report)
+      if (options.copy) {
+        copyToClipboard(text)
+        console.log(`Copied fix context for session: ${report.session.id}`)
+        return
+      }
+      process.stdout.write(text)
     })
 
   program

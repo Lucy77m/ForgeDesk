@@ -6,8 +6,8 @@ AI coding tools can write code fast, but the resulting changes are often hard to
 What was the intent? What files changed? What tests ran? What risks remain?
 
 ForgeDesk captures local git changes and prepares review-ready material:
-summary, PR body, test evidence, risk hints, review context, and an evidence
-pack.
+summary, PR body, test evidence, risk hints, review context, failed-test fix
+context, and an evidence pack.
 
 It does not review code for you. It prepares the material before humans or AI
 reviewers inspect the change.
@@ -71,6 +71,7 @@ forgedesk next
 forgedesk auto --no-run
 forgedesk review-context
 forgedesk pr
+forgedesk fix-context
 forgedesk start --title "Describe the change"
 forgedesk intent "Record the user-facing goal."
 forgedesk decision "Record an implementation decision."
@@ -91,7 +92,7 @@ See [docs/commands.md](docs/commands.md) for the full command reference.
 - Reads local git status and changed files.
 - Auto-captures local change context.
 - Records change intent, decisions, risks, and tests.
-- Generates summaries, PR body, review context, risk hints, and evidence files.
+- Generates summaries, PR body, review context, risk hints, fix context, and evidence files.
 
 ## What ForgeDesk Does Not Do
 

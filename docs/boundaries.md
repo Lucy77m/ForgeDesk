@@ -3,8 +3,8 @@
 ForgeDesk is a local auto-capture layer for AI-assisted code changes.
 
 It helps a developer turn local git changes into review-ready material:
-summary, PR body, test evidence, risk hints, review context, and an inspectable
-evidence pack.
+summary, PR body, test evidence, risk hints, review context, failed-test fix
+context, and an inspectable evidence pack.
 
 ## What ForgeDesk Does
 
@@ -14,6 +14,7 @@ evidence pack.
 - Generates draft intent, summaries, PR body, review context, and risk hints.
 - Records change intent, decisions, risks, manual checks, and test evidence.
 - Runs test commands only when the user explicitly invokes `forgedesk test --`.
+- Packages bounded fix context for failed tests.
 - Generates local Markdown and JSON evidence files.
 
 ## What ForgeDesk Does Not Do

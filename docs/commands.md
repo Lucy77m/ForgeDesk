@@ -26,6 +26,7 @@ forgedesk test -- npm test
 forgedesk evidence
 forgedesk review-context
 forgedesk pr
+forgedesk fix-context
 forgedesk ready
 forgedesk handoff
 forgedesk export
@@ -130,17 +131,21 @@ evidence.json
 | `forgedesk pr` | Print `PR_BODY.md` for the active session. | no |
 | `forgedesk pr --session <id>` | Print `PR_BODY.md` for a specific session. | no |
 | `forgedesk pr --copy` | Copy `PR_BODY.md` to the system clipboard. | no |
+| `forgedesk fix-context` | Print bounded context for fixing failed tests. | no |
+| `forgedesk fix-context --session <id>` | Print fix context for a specific session. | no |
+| `forgedesk fix-context --copy` | Copy fix context to the system clipboard. | no |
 | `forgedesk inspect` | Check expected evidence files and file sizes. | no |
 | `forgedesk inspect --session <id>` | Inspect a specific session's evidence files. | no |
 | `forgedesk inspect --export` | Inspect the default export directory for the session. | no |
 | `forgedesk inspect --json` | Print the inspect report as JSON. | no |
 
-`review-context` and `pr` read existing evidence; they do not generate it. With
-`--copy`, they attempt to use the local system clipboard and fail clearly if no
-clipboard command is available.
+`review-context`, `pr`, and `fix-context` read existing local session data; they
+do not generate evidence or fix code. With `--copy`, they attempt to use the
+local system clipboard and fail clearly if no clipboard command is available.
 
-`ready`, `handoff`, `review-context`, `pr`, and `inspect` do not decide whether
-the code is correct. They only organize local evidence for human review.
+`ready`, `handoff`, `review-context`, `pr`, `fix-context`, and `inspect` do not
+decide whether the code is correct. They only organize local evidence for human
+review.
 
 ## Export
 

@@ -227,6 +227,38 @@ describe('cli integration', () => {
     expect(result.stdout).toContain('At least one test command failed.')
     const sessionId = JSON.parse(readFileSync(path.join(repo, '.forgedesk', 'config.json'), 'utf8')).activeSessionId
     expect(existsSync(path.join(repo, '.forgedesk', 'exports', sessionId, 'HANDOFF.md'))).toBe(false)
+
+    const fixContext = runCli(repo, ['fix-context'])
+    expect(fixContext.status).toBe(0)
+    expect(fixContext.stdout).toContain('# Fix Context')
+    expect(fixContext.stdout).toContain('node -e')
+    expect(fixContext.stdout).toContain('Keep the fix scoped')
+  })
+
+  it('prints fix context for an explicit failed session without falling back to active', () => {
+    const repo = tempDir()
+    dirs.push(repo)
+    initGitRepo(repo)
+
+    expect(runCli(repo, ['init', '--repo', '.']).status).toBe(0)
+    expect(runCli(repo, ['start', '--title', 'First failed session']).status).toBe(0)
+    const firstSessionId = JSON.parse(readFileSync(path.join(repo, '.forgedesk', 'config.json'), 'utf8')).activeSessionId
+    expect(runCli(repo, ['intent', 'Fix the first failed session only.']).status).toBe(0)
+    expect(runCli(repo, ['test', '--', 'node', '-e', '"console.error(\'first failure\'); process.exit(2)"']).status).toBe(0)
+    expect(runCli(repo, ['evidence']).status).toBe(0)
+
+    expect(runCli(repo, ['start', '--title', 'Second active session']).status).toBe(0)
+
+    const fixContext = runCli(repo, ['fix-context', '--session', firstSessionId])
+
+    expect(fixContext.status).toBe(0)
+    expect(fixContext.stdout).toContain('First failed session')
+    expect(fixContext.stdout).toContain('first failure')
+    expect(fixContext.stdout).not.toContain('Second active session')
+
+    const activeFixContext = runCli(repo, ['fix-context'])
+    expect(activeFixContext.status).not.toBe(0)
+    expect(activeFixContext.stderr).toContain('no failed tests are recorded')
   })
 
   it('runs the full evidence workflow', () => {
