@@ -16,6 +16,7 @@ pnpm typecheck
 pnpm test
 pnpm build
 pnpm smoke
+pnpm package-smoke
 node dist/cli/index.js --version
 pnpm pack --pack-destination <temp-dir>
 npm publish --dry-run
@@ -23,6 +24,11 @@ npm publish --dry-run
 
 Local development and CI use `pnpm@11.1.3`, which requires Node.js 22.13 or
 newer. The published CLI runtime supports Node.js 20 and newer.
+
+`pnpm package-smoke` creates a package tarball, installs it into a temporary npm
+project, verifies the installed `forgedesk` binary version, and runs
+`forgedesk next --dry-run --json` in a temporary git repository. It removes its
+temporary files and does not publish anything.
 
 Before a real npm publish, confirm:
 

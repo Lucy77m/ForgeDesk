@@ -1,6 +1,6 @@
 {
   "name": "forgedesk",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "description": "A local auto-capture desk for AI-assisted code changes.",
   "type": "module",
   "license": "MIT",
@@ -45,6 +45,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "smoke": "tsx scripts/smoke.ts",
+    "package-smoke": "tsx scripts/package-smoke.ts",
     "prepack": "pnpm build"
   },
   "dependencies": {

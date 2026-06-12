@@ -205,3 +205,13 @@ pnpm smoke
 The smoke script creates a temporary git repository, runs the compiled CLI
 through the evidence, readiness, handoff, export, and inspect flow, then removes
 the temporary repository. It does not push, publish, tag, or upload anything.
+
+To verify the packaged CLI install path, run:
+
+```bash
+pnpm package-smoke
+```
+
+The package smoke script packs ForgeDesk, installs the tarball into a temporary
+npm project, runs the installed `forgedesk` binary, and removes the temporary
+directory. It does not publish to npm.

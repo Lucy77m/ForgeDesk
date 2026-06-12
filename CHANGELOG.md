@@ -4,6 +4,36 @@ All notable ForgeDesk changes are tracked here.
 
 Version entries describe source, GitHub release, and npm publishing state.
 
+## v0.2.7 - 2026-06-13
+
+Install and runtime hardening for packaged ForgeDesk builds.
+
+### Improved
+
+- Added `pnpm package-smoke`, which packs ForgeDesk, installs the generated
+  tarball into a temporary npm project, verifies the installed `forgedesk`
+  version, and runs `forgedesk next --dry-run --json` in a temporary git repo.
+- Added the package smoke check to CI after the existing pack step.
+- Documented package smoke as part of maintainer preflight validation.
+
+### Tests
+
+- Kept the full typecheck, unit/integration test, build, smoke, pack, and
+  package-install smoke gates.
+
+### Publishing
+
+- GitHub source release only.
+- No npm publish in this version.
+
+### Boundaries
+
+- Package smoke validates the ForgeDesk package locally; it does not publish,
+  upload, tag, release, or store credentials.
+- No AI provider calls, Web UI, cloud sync, background automation, plugin
+  system, automatic code fixing, automatic commit, push, PR, tag, release, or
+  npm publish behavior inside ForgeDesk.
+
 ## v0.2.6 - 2026-06-13
 
 Run-button UX polish for clearer next-step decisions.

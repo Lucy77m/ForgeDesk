@@ -56,3 +56,6 @@ jobs:
 
       - name: Pack
         run: pnpm pack --pack-destination ./tmp-pack
+
+      - name: Package smoke
+        run: pnpm package-smoke
