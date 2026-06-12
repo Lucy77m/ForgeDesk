@@ -6,7 +6,7 @@ Version entries describe source, GitHub release, and npm publishing state.
 
 ## v0.2.3 - 2026-06-12
 
-Release preparation for the first npm-published local run-button CLI.
+First npm-published release for the local run-button CLI.
 
 ### Improved
 
@@ -22,10 +22,10 @@ Release preparation for the first npm-published local run-button CLI.
 - Kept the full typecheck, unit/integration test, build, smoke, pack, npm
   dry-run, and install sanity gates for the published package.
 
-### Publishing Prep
+### Publishing
 
-- Prepared the package for publishing to npm as `forgedesk`.
-- Prepared the matching GitHub source release and tag.
+- Published the package to npm as `forgedesk`.
+- Published the matching GitHub source release and tag.
 
 ### Boundaries
 
