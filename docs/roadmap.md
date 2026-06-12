@@ -23,7 +23,6 @@ Turn the manual evidence workflow into a one-command local capture experience.
 
 Reduce the friction of handing ForgeDesk material to humans or AI reviewers.
 
-- Add `review-context --copy` and `pr --copy`.
 - Generate bounded fix context when tests fail.
 - Improve PR body and review context templates.
 - Consider saving externally produced review notes back into a local session.

@@ -3,6 +3,7 @@ import { Command } from 'commander'
 import { pathToFileURL } from 'node:url'
 import { addDecision, addManualCheck, addRisk, initProject, setIntent, startSession } from '../core/session.js'
 import { renderAutoCaptureReport, runAutoCapture } from '../core/auto.js'
+import { copyToClipboard } from '../core/clipboard.js'
 import { getDoctorReport, renderDoctorReport } from '../core/doctor.js'
 import { generateEvidence, getLatestEvidencePack, listEvidencePacks } from '../core/evidence.js'
 import { ForgeDeskError } from '../core/errors.js'
@@ -10,6 +11,7 @@ import { exportEvidencePack, renderExportReport } from '../core/export.js'
 import { getHandoffReport, renderHandoffReport } from '../core/handoff.js'
 import { getInspectReport, renderInspectReport } from '../core/inspect.js'
 import { getReadyReport, renderReadyReport } from '../core/ready.js'
+import { getReviewOutput } from '../core/review-output.js'
 import { getStatus } from '../core/status.js'
 import { recordTestCommand, runTestCommand } from '../core/test-runner.js'
 import { getSessions } from '../core/sessions.js'
@@ -171,6 +173,42 @@ export function buildProgram(cwd = process.cwd()): Command {
     .action(async (options: { session?: string; json?: boolean }) => {
       const report = await getHandoffReport(cwd, options.session)
       console.log(options.json ? JSON.stringify(report, null, 2) : renderHandoffReport(report))
+    })
+
+  program
+    .command('review-context')
+    .description('Print or copy REVIEW_CONTEXT.md for a session.')
+    .option('--session <id>', 'session id; defaults to the active session')
+    .option('--copy', 'copy the review context to the system clipboard')
+    .action(async (options: { session?: string; copy?: boolean }) => {
+      const output = await getReviewOutput(cwd, {
+        sessionId: options.session,
+        kind: 'review-context'
+      })
+      if (options.copy) {
+        copyToClipboard(output.text)
+        console.log(`Copied ${output.fileName} for session: ${output.session.id}`)
+        return
+      }
+      process.stdout.write(output.text)
+    })
+
+  program
+    .command('pr')
+    .description('Print or copy PR_BODY.md for a session.')
+    .option('--session <id>', 'session id; defaults to the active session')
+    .option('--copy', 'copy the PR body to the system clipboard')
+    .action(async (options: { session?: string; copy?: boolean }) => {
+      const output = await getReviewOutput(cwd, {
+        sessionId: options.session,
+        kind: 'pr'
+      })
+      if (options.copy) {
+        copyToClipboard(output.text)
+        console.log(`Copied ${output.fileName} for session: ${output.session.id}`)
+        return
+      }
+      process.stdout.write(output.text)
     })
 
   program

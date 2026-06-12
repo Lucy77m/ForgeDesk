@@ -7,6 +7,8 @@ the target repository unless a command explicitly runs a test process.
 
 ```bash
 forgedesk auto --no-run
+forgedesk review-context --copy
+forgedesk pr --copy
 ```
 
 `auto` is the primary entry point for local auto-capture. Manual commands remain
@@ -21,6 +23,8 @@ forgedesk risk "Record a risk or review focus."
 forgedesk check "Record a manual verification check."
 forgedesk test -- npm test
 forgedesk evidence
+forgedesk review-context
+forgedesk pr
 forgedesk ready
 forgedesk handoff
 forgedesk export
@@ -103,13 +107,23 @@ evidence.json
 | `forgedesk handoff` | Print a compact handoff summary for the active session. | no |
 | `forgedesk handoff --session <id>` | Print a handoff summary for one session. | no |
 | `forgedesk handoff --json` | Print the handoff report as JSON. | no |
+| `forgedesk review-context` | Print `REVIEW_CONTEXT.md` for the active session. | no |
+| `forgedesk review-context --session <id>` | Print `REVIEW_CONTEXT.md` for a specific session. | no |
+| `forgedesk review-context --copy` | Copy `REVIEW_CONTEXT.md` to the system clipboard. | no |
+| `forgedesk pr` | Print `PR_BODY.md` for the active session. | no |
+| `forgedesk pr --session <id>` | Print `PR_BODY.md` for a specific session. | no |
+| `forgedesk pr --copy` | Copy `PR_BODY.md` to the system clipboard. | no |
 | `forgedesk inspect` | Check expected evidence files and file sizes. | no |
 | `forgedesk inspect --session <id>` | Inspect a specific session's evidence files. | no |
 | `forgedesk inspect --export` | Inspect the default export directory for the session. | no |
 | `forgedesk inspect --json` | Print the inspect report as JSON. | no |
 
-`ready`, `handoff`, and `inspect` do not decide whether the code is correct.
-They only organize local evidence for human review.
+`review-context` and `pr` read existing evidence; they do not generate it. With
+`--copy`, they attempt to use the local system clipboard and fail clearly if no
+clipboard command is available.
+
+`ready`, `handoff`, `review-context`, `pr`, and `inspect` do not decide whether
+the code is correct. They only organize local evidence for human review.
 
 ## Export
 

@@ -34,6 +34,8 @@ After building from a local checkout, replace `forgedesk` with
 ```bash
 echo "Local change" >> README.md
 forgedesk auto --no-run
+forgedesk review-context --copy
+forgedesk pr --copy
 ```
 
 ## Output
@@ -65,6 +67,8 @@ intent, changed files, test evidence, and remaining risks easy to inspect.
 ```bash
 forgedesk init --repo .
 forgedesk auto --no-run
+forgedesk review-context
+forgedesk pr
 forgedesk start --title "Describe the change"
 forgedesk intent "Record the user-facing goal."
 forgedesk decision "Record an implementation decision."
