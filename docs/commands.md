@@ -156,6 +156,13 @@ evidence.json
 | `forgedesk inspect --export` | Inspect the default export directory for the session. | no |
 | `forgedesk inspect --json` | Print the inspect report as JSON. | no |
 
+`doctor` checks local ForgeDesk metadata, session files, evidence file
+integrity, the active session's verification state, and whether active evidence
+matches the current local diff. Human-readable output includes `Recommended
+next`; JSON output includes the same `recommendation` field. Older evidence
+packs created by previous ForgeDesk versions are summarized as historical
+warnings when they are not the active session.
+
 `review-context`, `pr`, and `fix-context` read existing local session data; they
 do not generate evidence or fix code. With `--copy`, they attempt to use the
 local system clipboard and fail clearly if no clipboard command is available.

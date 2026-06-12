@@ -130,6 +130,10 @@ First run:
 forgedesk doctor
 ```
 
+`doctor` is read-only. It prints a `Recommended next` line and, with
+`--json`, a `recommendation` field. Use it when you are unsure whether the
+problem is metadata, missing evidence files, stale evidence, or failed tests.
+
 If the error names `project.json` or `config.json`, the safest recovery is often
 to move the broken `.forgedesk/` directory aside and reinitialize the repository:
 
@@ -140,6 +144,27 @@ forgedesk init --repo .
 If the error names one file under `.forgedesk/sessions/`, inspect that session
 file locally. Do not paste private project details, secrets, or token-like
 values into external tools while debugging metadata.
+
+## Doctor Says Evidence Is Stale
+
+If `forgedesk doctor` reports:
+
+```text
+Active session evidence is stale for the current local diff.
+```
+
+The code changed after the evidence pack was generated. Refresh it with the run
+button:
+
+```bash
+forgedesk next
+```
+
+Then recheck:
+
+```bash
+forgedesk doctor
+```
 
 ## Ready Says No
 

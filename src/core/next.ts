@@ -1,14 +1,14 @@
 import path from 'node:path'
 import { captureGitSnapshot, gitRoot, isGitRepo } from '../git/snapshot.js'
-import { readJson } from '../storage/json-store.js'
 import { displayPath, listLinesOrNone } from '../templates/format.js'
-import type { ChangeSession, EvidenceBundle, GitSnapshot } from '../types.js'
+import type { ChangeSession } from '../types.js'
 import { runAutoCapture } from './auto.js'
+import { evidenceCurrent } from './evidence-state.js'
 import { generateEvidence } from './evidence.js'
 import { ForgeDeskError, isForgeDeskError } from './errors.js'
 import { exportEvidencePack } from './export.js'
 import { getReadyReport } from './ready.js'
-import { getActiveSession, loadWorkspace, pathExists, pathsFor, type Workspace } from './workspace.js'
+import { getActiveSession, loadWorkspace, pathsFor, type Workspace } from './workspace.js'
 
 export type NextAction = 'auto-capture' | 'generate-evidence' | 'blocked' | 'export'
 export type NextReason =
@@ -63,57 +63,6 @@ function sessionSummary(session: ChangeSession): NextSession {
     id: session.id,
     title: session.title,
     status: session.status
-  }
-}
-
-function sortedFiles(files: string[]): string[] {
-  return files.map((file) => file.replaceAll('\\', '/')).sort()
-}
-
-function sameFiles(left: string[], right: string[]): boolean {
-  const normalizedLeft = sortedFiles(left)
-  const normalizedRight = sortedFiles(right)
-  return normalizedLeft.length === normalizedRight.length &&
-    normalizedLeft.every((file, index) => file === normalizedRight[index])
-}
-
-function sameCapturedDiff(session: ChangeSession, snapshot: GitSnapshot): boolean {
-  const captured = session.gitSnapshot
-  if (!captured) {
-    return false
-  }
-  if (captured.diffFingerprint && snapshot.diffFingerprint) {
-    return captured.diffFingerprint === snapshot.diffFingerprint
-  }
-  return captured.branch === snapshot.branch &&
-    captured.head === snapshot.head &&
-    sameFiles(captured.modifiedFiles, snapshot.modifiedFiles) &&
-    sameFiles(captured.addedFiles, snapshot.addedFiles) &&
-    sameFiles(captured.deletedFiles, snapshot.deletedFiles) &&
-    sameFiles(captured.untrackedFiles, snapshot.untrackedFiles)
-}
-
-async function evidenceCurrent(repoPath: string, session: ChangeSession, snapshot: GitSnapshot): Promise<boolean> {
-  if (!session.evidenceDir) {
-    return false
-  }
-
-  const evidenceJson = path.resolve(repoPath, session.evidenceDir, 'evidence.json')
-  if (!(await pathExists(evidenceJson))) {
-    return false
-  }
-
-  try {
-    const bundle = await readJson<EvidenceBundle>(evidenceJson)
-    if (bundle.generatedAt !== session.updatedAt) {
-      return false
-    }
-    if (bundle.gitSnapshot.diffFingerprint && snapshot.diffFingerprint) {
-      return bundle.gitSnapshot.diffFingerprint === snapshot.diffFingerprint
-    }
-    return sameCapturedDiff(session, snapshot)
-  } catch {
-    return false
   }
 }
 

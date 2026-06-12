@@ -122,8 +122,8 @@ See [CHANGELOG.md](CHANGELOG.md) for local source version notes.
 
 ## Project Status
 
-ForgeDesk v0.2.7 is prepared as a GitHub source release for local run-button
-hardening. The npm package remains at v0.2.3 until the next explicit npm
+ForgeDesk v0.2.8 is prepared as a GitHub source release for local doctor and
+troubleshooting hardening. The npm package remains at v0.2.3 until the next explicit npm
 publish.
 
 ## Development

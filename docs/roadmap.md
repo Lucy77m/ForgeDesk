@@ -2,7 +2,7 @@
 
 This roadmap is a planning reference, not a commitment list.
 
-ForgeDesk v0.2.7 is a local auto-capture CLI for evidence-first AI-assisted
+ForgeDesk v0.2.8 is a local auto-capture CLI for evidence-first AI-assisted
 code changes. The next direction is run-button hardening: making local workflow
 steps easier to preview, execute, and hand off while keeping ForgeDesk out of AI
 review, cloud sync, and irreversible automation.
@@ -27,6 +27,8 @@ Make the automatic local workflow boringly reliable and easier for humans.
 - Keep npm publishing intentional, verified, and separate from ForgeDesk product
   behavior.
 - Validate packaged CLI installs with local package smoke before release.
+- Make `forgedesk doctor` a clearer troubleshooting button for local session,
+  evidence freshness, and verification state.
 
 ## Next: v0.3 Review Context Relief
 

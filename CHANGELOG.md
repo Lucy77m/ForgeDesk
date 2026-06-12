@@ -4,6 +4,38 @@ All notable ForgeDesk changes are tracked here.
 
 Version entries describe source, GitHub release, and npm publishing state.
 
+## v0.2.8 - 2026-06-13
+
+Doctor and troubleshooting polish for the local run-button workflow.
+
+### Improved
+
+- Added a `recommendation` to `forgedesk doctor` reports so the command points
+  to the next useful local action instead of only listing checks.
+- Added active-session diagnostics for missing evidence, stale evidence,
+  missing verification, and failed tests.
+- Reused the same evidence freshness helper from `forgedesk next`, so doctor
+  and next agree on whether the evidence pack matches the current local diff.
+
+### Tests
+
+- Extended doctor integration coverage for healthy evidence, stale evidence,
+  and missing evidence files.
+
+### Publishing
+
+- GitHub source release only.
+- No npm publish in this version.
+
+### Boundaries
+
+- Doctor remains a local read-only diagnostic command. It does not call AI,
+  modify product code, run tests, commit, push, open PRs, tag, release, or
+  publish.
+- No AI provider calls, Web UI, cloud sync, background automation, plugin
+  system, automatic code fixing, automatic commit, push, PR, tag, release, or
+  npm publish behavior inside ForgeDesk.
+
 ## v0.2.7 - 2026-06-13
 
 Install and runtime hardening for packaged ForgeDesk builds.

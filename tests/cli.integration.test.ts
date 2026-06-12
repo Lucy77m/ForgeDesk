@@ -20,7 +20,7 @@ describe('cli integration', () => {
     const result = runCli(repo, ['--version'])
 
     expect(result.status).toBe(0)
-    expect(result.stdout.trim()).toBe('0.2.7')
+    expect(result.stdout.trim()).toBe('0.2.8')
   })
 
   it('auto-captures a local change without running checks', () => {
@@ -487,14 +487,52 @@ describe('cli integration', () => {
     const report = JSON.parse(doctorJson.stdout)
     expect(report.schemaVersion).toBe('forgedesk-doctor-v1')
     expect(report.status).toBe('ok')
+    expect(report.recommendation).toContain('forgedesk next')
+    expect(report.activeSession.title).toBe('Doctor demo')
     expect(report.checks.some((item: { name: string; status: string }) => item.name === 'evidence' && item.status === 'ok')).toBe(true)
+    expect(report.checks.some((item: { name: string; status: string }) => item.name === 'activeEvidence' && item.status === 'ok')).toBe(true)
 
     const sessionId = JSON.parse(readFileSync(path.join(repo, '.forgedesk', 'config.json'), 'utf8')).activeSessionId
+    writeFileSync(path.join(repo, 'README.md'), '# Demo changed after evidence\n', 'utf8')
+    const staleDoctor = runCli(repo, ['doctor', '--json'])
+    expect(staleDoctor.status).toBe(0)
+    const staleReport = JSON.parse(staleDoctor.stdout)
+    expect(staleReport.status).toBe('warning')
+    expect(staleReport.recommendation).toContain('generate or refresh evidence')
+    expect(staleReport.checks.some((item: { name: string; status: string }) => item.name === 'activeEvidence' && item.status === 'warning')).toBe(true)
+
     rmSync(path.join(repo, '.forgedesk', 'evidence', sessionId, 'PR_EVIDENCE.md'))
     const brokenDoctor = runCli(repo, ['doctor'])
     expect(brokenDoctor.status).not.toBe(0)
     expect(brokenDoctor.stdout).toContain('Status: error')
+    expect(brokenDoctor.stdout).toContain('Recommended next: Fix the error checks above')
     expect(brokenDoctor.stdout).toContain('missing PR_EVIDENCE.md')
+  })
+
+  it('summarizes historical evidence issues without failing the active session', () => {
+    const repo = tempDir()
+    dirs.push(repo)
+    initGitRepo(repo)
+
+    expect(runCli(repo, ['init', '--repo', '.']).status).toBe(0)
+    expect(runCli(repo, ['start', '--title', 'Old doctor evidence']).status).toBe(0)
+    expect(runCli(repo, ['intent', 'Create older evidence.']).status).toBe(0)
+    expect(runCli(repo, ['check', 'Reviewed older evidence.']).status).toBe(0)
+    expect(runCli(repo, ['evidence']).status).toBe(0)
+    const oldSessionId = JSON.parse(readFileSync(path.join(repo, '.forgedesk', 'config.json'), 'utf8')).activeSessionId
+    rmSync(path.join(repo, '.forgedesk', 'evidence', oldSessionId, 'PR_EVIDENCE.md'))
+
+    expect(runCli(repo, ['start', '--title', 'Current doctor evidence']).status).toBe(0)
+    expect(runCli(repo, ['intent', 'Keep current evidence healthy.']).status).toBe(0)
+    expect(runCli(repo, ['check', 'Reviewed current evidence.']).status).toBe(0)
+    expect(runCli(repo, ['evidence']).status).toBe(0)
+
+    const doctor = runCli(repo, ['doctor', '--json'])
+    expect(doctor.status).toBe(0)
+    const report = JSON.parse(doctor.stdout)
+    expect(report.status).toBe('warning')
+    expect(report.checks.some((item: { name: string; status: string }) => item.name === 'historicalEvidence' && item.status === 'warning')).toBe(true)
+    expect(report.checks.some((item: { name: string; status: string }) => item.name === 'evidence' && item.status === 'error')).toBe(false)
   })
 
   it('checks evidence readiness for handoff', () => {
