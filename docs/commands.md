@@ -166,6 +166,22 @@ blockers, warnings, and next suggested action.
 `next`, `doctor`, `watch --once`, and `ci check` also refresh `NOW.md` when
 possible. `NOW.md` is local status, not a review verdict.
 
+## Episodes
+
+| Command | Purpose | Writes local data |
+|---|---|---|
+| `forgedesk episodes status` | Show the active local work episode phase. | no |
+| `forgedesk episodes status --json` | Print the episode status report as JSON. | no |
+
+An episode is ForgeDesk's local summary of the current work segment around the
+active session. It may report phases such as `needs-evidence`,
+`stale-evidence`, `needs-verification`, `failed-tests`, `ready`, `exported`, or
+`done`, then point to the next local command.
+
+Episodes do not add a task board, timeline, review verdict, or new evidence
+schema. They summarize existing local session, git, evidence, readiness, and
+export state.
+
 ## Shortcuts
 
 | Command | Purpose | Writes local data |

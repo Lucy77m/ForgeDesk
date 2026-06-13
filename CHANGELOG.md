@@ -4,6 +4,41 @@ All notable ForgeDesk changes are tracked here.
 
 Version entries describe source, GitHub release, and npm publishing state.
 
+## v0.4.4 - 2026-06-13
+
+Local episode status for the current work segment.
+
+### Added
+
+- Added `forgedesk episodes status` to summarize the active local work episode.
+- Added `forgedesk episodes status --json` with the
+  `forgedesk-episode-status-v1` report.
+- Added episode phase and summary lines to `.forgedesk/NOW.md`.
+
+### Improved
+
+- Episode status classifies the active session as `no-active-session`,
+  `needs-evidence`, `stale-evidence`, `needs-verification`, `failed-tests`,
+  `draft`, `ready`, `exported`, or `done`.
+- The report points to the next local action without changing session or
+  evidence schema.
+
+### Tests
+
+- Added episode coverage for no active session, needs-evidence, ready,
+  exported, and stale-evidence phases.
+
+### Publishing
+
+- GitHub source release only.
+- No npm publish in this version.
+
+### Boundaries
+
+- Episodes are local status summaries over existing sessions. They do not add a
+  task board, timeline, AI review, code edits, commits, pushes, PRs, releases,
+  publishes, uploads, or background services.
+
 ## v0.4.3 - 2026-06-13
 
 Test button discovery for editor shortcuts.

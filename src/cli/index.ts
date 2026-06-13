@@ -8,6 +8,7 @@ import { getAutoConfigReport, parseAutoMode, renderAutoConfigReport, setAutoConf
 import { getCiCheckReport, initCiWorkflow, renderCiCheckReport, renderCiInitReport, renderCiWorkflow } from '../core/ci.js'
 import { copyToClipboard } from '../core/clipboard.js'
 import { getDoctorReport, renderDoctorReport } from '../core/doctor.js'
+import { getEpisodeStatus, renderEpisodeStatus } from '../core/episodes.js'
 import { generateEvidence, getLatestEvidencePack, listEvidencePacks } from '../core/evidence.js'
 import { ForgeDeskError } from '../core/errors.js'
 import { exportEvidencePack, renderExportReport } from '../core/export.js'
@@ -61,7 +62,7 @@ export function buildProgram(cwd = process.cwd()): Command {
   program
     .name('forgedesk')
     .description('A local auto-capture desk for AI-assisted code changes.')
-    .version('0.4.3')
+    .version('0.4.4')
 
   program
     .command('init')
@@ -309,6 +310,19 @@ export function buildProgram(cwd = process.cwd()): Command {
     .action(async (options: { json?: boolean }) => {
       const report = await refreshNowFile(cwd)
       console.log(options.json ? JSON.stringify(report, null, 2) : renderNowReport(report))
+    })
+
+  const episodes = program
+    .command('episodes')
+    .description('Inspect the current local ForgeDesk work episode.')
+
+  episodes
+    .command('status')
+    .description('Show the active local work episode phase.')
+    .option('--json', 'print the episode report as JSON')
+    .action(async (options: { json?: boolean }) => {
+      const report = await getEpisodeStatus(cwd)
+      console.log(options.json ? JSON.stringify(report, null, 2) : renderEpisodeStatus(report))
     })
 
   program

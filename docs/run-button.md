@@ -112,6 +112,18 @@ forgedesk now
 export paths, blockers, warnings, and the next suggested action. It is refreshed
 by `next`, `doctor`, `watch --once`, and `ci check` when possible.
 
+## Episodes
+
+`forgedesk episodes status` names the current local work segment phase.
+
+```bash
+forgedesk episodes status
+```
+
+Episodes sit on top of existing sessions and evidence. They are meant to answer
+"where am I in this change?" with phases like `needs-evidence`,
+`needs-verification`, `ready`, or `exported`.
+
 ## Editor Shortcuts
 
 `forgedesk shortcuts install` creates VS Code tasks so the most common
@@ -181,6 +193,7 @@ These commands support the run-button path:
 
 ```bash
 forgedesk doctor
+forgedesk episodes status
 forgedesk fix-context
 forgedesk review-context
 forgedesk pr

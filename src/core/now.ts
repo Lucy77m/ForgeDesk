@@ -2,6 +2,7 @@ import path from 'node:path'
 import { displayPath, listLinesOrNone } from '../templates/format.js'
 import type { ChangeSession } from '../types.js'
 import { readAutoConfig } from './auto-config.js'
+import { getEpisodeStatus, type EpisodeStatusReport } from './episodes.js'
 import { ForgeDeskError, isForgeDeskError } from './errors.js'
 import { getInspectReport } from './inspect.js'
 import { getReadyReport } from './ready.js'
@@ -18,6 +19,10 @@ export type NowReport = {
     title: string
     status: ChangeSession['status']
     evidenceDir?: string
+  }
+  episode?: {
+    phase: EpisodeStatusReport['phase']
+    summary: string
   }
   ready?: boolean
   inspectOk?: boolean
@@ -64,6 +69,7 @@ export async function getNowReport(cwd: string): Promise<NowReport> {
   const warnings: string[] = []
   const next: string[] = []
   const session = await tryActiveSession(workspace)
+  const episode = await getEpisodeStatus(cwd)
 
   let ready: boolean | undefined
   let inspectOk: boolean | undefined
@@ -110,6 +116,10 @@ export async function getNowReport(cwd: string): Promise<NowReport> {
     path: nowPath(workspace.repoPath),
     autoMode: autoConfig.config.mode,
     session: session ? sessionSummary(session) : undefined,
+    episode: {
+      phase: episode.phase,
+      summary: episode.summary
+    },
     ready,
     inspectOk,
     exportDir: session ? path.join(pathsFor(workspace.repoPath).exportsDir, session.id) : undefined,
@@ -131,6 +141,8 @@ export function renderNowMarkdown(report: NowReport): string {
     report.session ? `Session: ${report.session.title}` : 'Session: None',
     report.session ? `Session ID: ${report.session.id}` : undefined,
     report.session ? `Session status: ${report.session.status}` : undefined,
+    report.episode ? `Episode phase: ${report.episode.phase}` : undefined,
+    report.episode ? `Episode summary: ${report.episode.summary}` : undefined,
     report.ready === undefined ? undefined : `Ready: ${report.ready ? 'yes' : 'no'}`,
     report.inspectOk === undefined ? undefined : `Inspect OK: ${report.inspectOk ? 'yes' : 'no'}`,
     report.session?.evidenceDir ? `Evidence: ${displayPath(report.session.evidenceDir)}` : undefined,
@@ -168,6 +180,7 @@ export function renderNowReport(report: NowReport): string {
     `Auto mode: ${report.autoMode}`,
     report.session ? `Session: ${report.session.title}` : 'Session: None',
     report.session ? `Session ID: ${report.session.id}` : undefined,
+    report.episode ? `Episode phase: ${report.episode.phase}` : undefined,
     report.ready === undefined ? undefined : `Ready: ${report.ready ? 'yes' : 'no'}`,
     report.inspectOk === undefined ? undefined : `Inspect OK: ${report.inspectOk ? 'yes' : 'no'}`,
     '',
