@@ -56,6 +56,8 @@ Set the local automation profile before using hooks or watch mode:
 ```bash
 forgedesk auto-config
 forgedesk auto-config set assist
+forgedesk hooks install
+forgedesk hooks status
 ```
 
 Auto profiles are explicit local controls. They do not enable AI calls, product
@@ -96,6 +98,9 @@ forgedesk next
 forgedesk auto --no-run
 forgedesk auto-config
 forgedesk auto-config set assist
+forgedesk hooks install
+forgedesk hooks status
+forgedesk hooks uninstall
 forgedesk review-context
 forgedesk pr
 forgedesk fix-context
@@ -144,8 +149,8 @@ See [CHANGELOG.md](CHANGELOG.md) for local source version notes.
 
 ## Project Status
 
-ForgeDesk v0.3.1 is prepared as a GitHub source release for local auto-profile
-configuration. The npm package remains at v0.2.3 until the next explicit npm
+ForgeDesk v0.3.2 is prepared as a GitHub source release for optional local git
+hooks. The npm package remains at v0.2.3 until the next explicit npm
 publish.
 
 ## Development

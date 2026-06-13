@@ -53,7 +53,8 @@ claims.
 ForgeDesk may provide explicit, opt-in local automation surfaces such as
 repository git hooks, foreground watch mode, or CI evidence gates. These
 surfaces must be visible, local, inspectable, removable, and bounded by the
-configured auto profile.
+configured auto profile. Git hooks must be installed per repository and must not
+overwrite user-managed hooks.
 
 ForgeDesk must not automatically perform irreversible project actions such as
 commit, push, pull request creation, merge, tag, release, or package publish.

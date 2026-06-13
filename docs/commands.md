@@ -91,6 +91,29 @@ Modes:
 product code, run tests, commit, push, open PRs, tag, release, publish, upload,
 or start a hidden background service.
 
+## Git Hooks
+
+| Command | Purpose | Writes local data |
+|---|---|---|
+| `forgedesk hooks status` | Show whether ForgeDesk-managed git hooks are installed. | no |
+| `forgedesk hooks install` | Install ForgeDesk-managed `pre-commit` and `pre-push` hooks. | yes |
+| `forgedesk hooks uninstall` | Remove ForgeDesk-managed hooks. | yes |
+| `forgedesk hooks run <hook>` | Run one hook check; used by installed hooks. | maybe |
+
+Hooks are installed only in the current repository under `.git/hooks/`.
+ForgeDesk refuses to overwrite hooks it does not manage. Remove or merge custom
+hooks manually, then run `forgedesk hooks install` again.
+
+Hook behavior follows `forgedesk auto-config`:
+
+- `manual`: installed hooks stay idle and pass.
+- `assist`: hooks warn and pass.
+- `local-auto`: hooks may run one safe `forgedesk next` step, writing only local ForgeDesk evidence/export files.
+- `guarded`: hooks may block git commit or push when evidence is missing, stale, or not ready.
+
+Hooks do not call AI, edit product code, run tests, commit, push, open PRs, tag,
+release, publish, upload, or run as a hidden background service.
+
 ## Auto Capture
 
 | Command | Purpose | Writes local data |

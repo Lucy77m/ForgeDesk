@@ -12,6 +12,16 @@ import { ForgeDeskError } from '../core/errors.js'
 import { exportEvidencePack, renderExportReport } from '../core/export.js'
 import { getFixContextReport, renderFixContext } from '../core/fix-context.js'
 import { getHandoffReport, renderHandoffReport } from '../core/handoff.js'
+import {
+  getHooksStatus,
+  installHooks,
+  parseHookName,
+  renderHookRun,
+  renderHooksInstall,
+  renderHooksStatus,
+  runHook,
+  uninstallHooks
+} from '../core/hooks.js'
 import { getInspectReport, renderInspectReport } from '../core/inspect.js'
 import { getNextReport, renderNextReport } from '../core/next.js'
 import { getReadyReport, renderReadyReport } from '../core/ready.js'
@@ -45,7 +55,7 @@ export function buildProgram(cwd = process.cwd()): Command {
   program
     .name('forgedesk')
     .description('A local auto-capture desk for AI-assisted code changes.')
-    .version('0.3.1')
+    .version('0.3.2')
 
   program
     .command('init')
@@ -94,6 +104,50 @@ export function buildProgram(cwd = process.cwd()): Command {
     .action(async (mode: string, options: { json?: boolean }) => {
       const report = await setAutoConfigMode(cwd, parseAutoMode(mode))
       console.log(options.json ? JSON.stringify(report, null, 2) : renderAutoConfigReport(report))
+    })
+
+  const hooks = program
+    .command('hooks')
+    .description('Install, remove, or run local ForgeDesk git hooks.')
+
+  hooks
+    .command('status')
+    .description('Show local ForgeDesk git hook status.')
+    .option('--json', 'print the hooks status report as JSON')
+    .action(async (options: { json?: boolean }) => {
+      const report = await getHooksStatus(cwd)
+      console.log(options.json ? JSON.stringify(report, null, 2) : renderHooksStatus(report))
+    })
+
+  hooks
+    .command('install')
+    .description('Install ForgeDesk-managed pre-commit and pre-push hooks in this repository.')
+    .option('--json', 'print the hooks install report as JSON')
+    .action(async (options: { json?: boolean }) => {
+      const report = await installHooks(cwd, process.argv[1] ?? fileURLToPath(import.meta.url))
+      console.log(options.json ? JSON.stringify(report, null, 2) : renderHooksInstall(report))
+    })
+
+  hooks
+    .command('uninstall')
+    .description('Remove ForgeDesk-managed git hooks from this repository.')
+    .option('--json', 'print the hooks uninstall report as JSON')
+    .action(async (options: { json?: boolean }) => {
+      const report = await uninstallHooks(cwd)
+      console.log(options.json ? JSON.stringify(report, null, 2) : renderHooksInstall(report))
+    })
+
+  hooks
+    .command('run')
+    .description('Run one ForgeDesk hook check. Used by ForgeDesk-managed git hooks.')
+    .argument('<hook>', 'pre-commit or pre-push')
+    .option('--json', 'print the hook run report as JSON')
+    .action(async (hook: string, options: { json?: boolean }) => {
+      const report = await runHook(cwd, parseHookName(hook))
+      console.log(options.json ? JSON.stringify(report, null, 2) : renderHookRun(report))
+      if (report.outcome === 'blocked') {
+        process.exitCode = 1
+      }
     })
 
   program

@@ -38,6 +38,27 @@ Profiles remain local and explicit. They do not enable AI calls, product-code
 edits, automatic commits, pushes, PRs, tags, releases, publishes, uploads, or
 hidden background services.
 
+## Git Hooks
+
+`forgedesk hooks install` adds ForgeDesk-managed `pre-commit` and `pre-push`
+hooks to the current repository.
+
+```bash
+forgedesk auto-config set assist
+forgedesk hooks install
+forgedesk hooks status
+```
+
+The recommended first hook mode is `assist`: it warns without blocking. Use
+`local-auto` only when you want hooks to run one safe local `next` step, and use
+`guarded` only when you want evidence problems to block commit or push.
+
+ForgeDesk refuses to overwrite hooks it does not manage. Remove hooks with:
+
+```bash
+forgedesk hooks uninstall
+```
+
 ## Supporting Buttons
 
 These commands support the run-button path:

@@ -4,6 +4,43 @@ All notable ForgeDesk changes are tracked here.
 
 Version entries describe source, GitHub release, and npm publishing state.
 
+## v0.3.2 - 2026-06-13
+
+Optional local git hooks for the auto-profile workflow.
+
+### Added
+
+- Added `forgedesk hooks status` to inspect local ForgeDesk-managed hook state.
+- Added `forgedesk hooks install` and `forgedesk hooks uninstall` for
+  repository-local `pre-commit` and `pre-push` hooks.
+- Added `forgedesk hooks run <hook>` as the local runner used by installed
+  hooks.
+
+### Improved
+
+- Hooks follow the configured auto profile:
+  - `manual` keeps installed hooks idle.
+  - `assist` warns without blocking.
+  - `local-auto` may run one safe local `forgedesk next` step.
+  - `guarded` may block commit or push when evidence is missing, stale, or not ready.
+- Hook installation refuses to overwrite hooks not managed by ForgeDesk.
+
+### Tests
+
+- Added hook integration tests for install/status/uninstall, unmanaged-hook
+  refusal, `assist`, `local-auto`, `guarded`, and unknown hook names.
+
+### Publishing
+
+- GitHub source release only.
+- No npm publish in this version.
+
+### Boundaries
+
+- Hooks are explicit, local, inspectable, and removable. They do not call AI,
+  edit product code, run tests, commit, push, open PRs, tag, release, publish,
+  upload, or run as hidden background services.
+
 ## v0.3.1 - 2026-06-13
 
 Auto-profile foundation for explicit local automation.
