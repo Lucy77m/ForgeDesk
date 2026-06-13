@@ -26,6 +26,7 @@ import { getInspectReport, renderInspectReport } from '../core/inspect.js'
 import { getNextReport, renderNextReport } from '../core/next.js'
 import { getReadyReport, renderReadyReport } from '../core/ready.js'
 import { getReviewOutput } from '../core/review-output.js'
+import { getShortcutsStatus, installShortcuts, renderShortcutsReport, uninstallShortcuts } from '../core/shortcuts.js'
 import { getStatus } from '../core/status.js'
 import { recordTestCommand, runTestCommand } from '../core/test-runner.js'
 import { getSessions } from '../core/sessions.js'
@@ -56,7 +57,7 @@ export function buildProgram(cwd = process.cwd()): Command {
   program
     .name('forgedesk')
     .description('A local auto-capture desk for AI-assisted code changes.')
-    .version('0.3.3')
+    .version('0.3.4')
 
   program
     .command('init')
@@ -169,6 +170,40 @@ export function buildProgram(cwd = process.cwd()): Command {
       }
       console.log('ForgeDesk watch is running in the foreground. Press Ctrl+C to stop.')
       await startWatch(cwd, { intervalMs, json: options.json })
+    })
+
+  const shortcuts = program
+    .command('shortcuts')
+    .description('Install or remove local editor and package shortcuts for ForgeDesk.')
+
+  shortcuts
+    .command('status')
+    .description('Show local ForgeDesk shortcut status.')
+    .option('--package-scripts', 'include package.json script status')
+    .option('--json', 'print the shortcuts report as JSON')
+    .action(async (options: { packageScripts?: boolean; json?: boolean }) => {
+      const report = await getShortcutsStatus(cwd, { packageScripts: options.packageScripts })
+      console.log(options.json ? JSON.stringify(report, null, 2) : renderShortcutsReport(report))
+    })
+
+  shortcuts
+    .command('install')
+    .description('Install VS Code tasks and optional package scripts for ForgeDesk.')
+    .option('--package-scripts', 'also install package.json scripts')
+    .option('--json', 'print the shortcuts report as JSON')
+    .action(async (options: { packageScripts?: boolean; json?: boolean }) => {
+      const report = await installShortcuts(cwd, { packageScripts: options.packageScripts })
+      console.log(options.json ? JSON.stringify(report, null, 2) : renderShortcutsReport(report))
+    })
+
+  shortcuts
+    .command('uninstall')
+    .description('Remove ForgeDesk-managed VS Code tasks and optional package scripts.')
+    .option('--package-scripts', 'also remove ForgeDesk package.json scripts')
+    .option('--json', 'print the shortcuts report as JSON')
+    .action(async (options: { packageScripts?: boolean; json?: boolean }) => {
+      const report = await uninstallShortcuts(cwd, { packageScripts: options.packageScripts })
+      console.log(options.json ? JSON.stringify(report, null, 2) : renderShortcutsReport(report))
     })
 
   program

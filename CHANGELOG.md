@@ -4,6 +4,41 @@ All notable ForgeDesk changes are tracked here.
 
 Version entries describe source, GitHub release, and npm publishing state.
 
+## v0.3.4 - 2026-06-13
+
+Zero-terminal editor shortcuts for the local run-button workflow.
+
+### Added
+
+- Added `forgedesk shortcuts status`.
+- Added `forgedesk shortcuts install` and `forgedesk shortcuts uninstall` for
+  ForgeDesk-managed VS Code tasks.
+- Added optional `--package-scripts` support for installing/removing
+  ForgeDesk-managed npm scripts.
+
+### Improved
+
+- Generated VS Code tasks for `Next`, `Next Preview`, `Doctor`, `Watch`, and
+  `Inspect Export`.
+- Shortcut installation refuses to overwrite unmanaged tasks or package scripts.
+
+### Tests
+
+- Added shortcut integration coverage for install/status/uninstall,
+  unmanaged-task refusal, optional package scripts, missing package.json, and
+  unmanaged package script refusal.
+
+### Publishing
+
+- GitHub source release only.
+- No npm publish in this version.
+
+### Boundaries
+
+- Shortcuts are explicit local entry points for existing ForgeDesk commands.
+  They do not call AI, edit product code, commit, push, open PRs, tag, release,
+  publish, upload, or run as hidden background services.
+
 ## v0.3.3 - 2026-06-13
 
 Foreground watch mode for local run-button automation.

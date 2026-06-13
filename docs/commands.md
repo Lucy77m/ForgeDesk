@@ -135,6 +135,37 @@ Watch behavior follows `forgedesk auto-config`:
 
 Use `watch --once` for scripts, tests, or a one-shot no-loop check.
 
+## Shortcuts
+
+| Command | Purpose | Writes local data |
+|---|---|---|
+| `forgedesk shortcuts status` | Show local editor shortcut status. | no |
+| `forgedesk shortcuts install` | Install ForgeDesk VS Code tasks. | yes |
+| `forgedesk shortcuts install --package-scripts` | Also add ForgeDesk npm scripts when `package.json` exists. | yes |
+| `forgedesk shortcuts uninstall` | Remove ForgeDesk-managed VS Code tasks. | yes |
+| `forgedesk shortcuts uninstall --package-scripts` | Also remove ForgeDesk-managed package scripts. | yes |
+
+Installed VS Code tasks:
+
+- `ForgeDesk: Next`
+- `ForgeDesk: Next Preview`
+- `ForgeDesk: Doctor`
+- `ForgeDesk: Watch`
+- `ForgeDesk: Inspect Export`
+
+Optional package scripts:
+
+- `forgedesk:next`
+- `forgedesk:preview`
+- `forgedesk:doctor`
+- `forgedesk:watch`
+- `forgedesk:inspect-export`
+
+ForgeDesk refuses to overwrite tasks or scripts it does not manage. Shortcuts
+are local entry points for existing ForgeDesk commands; they do not call AI,
+edit product code, commit, push, open PRs, tag, release, publish, upload, or
+run as a hidden background service.
+
 ## Auto Capture
 
 | Command | Purpose | Writes local data |

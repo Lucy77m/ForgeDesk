@@ -59,6 +59,7 @@ forgedesk auto-config set assist
 forgedesk hooks install
 forgedesk hooks status
 forgedesk watch
+forgedesk shortcuts install
 ```
 
 Auto profiles are explicit local controls. They do not enable AI calls, product
@@ -104,6 +105,9 @@ forgedesk hooks status
 forgedesk hooks uninstall
 forgedesk watch
 forgedesk watch --once
+forgedesk shortcuts install
+forgedesk shortcuts status
+forgedesk shortcuts uninstall
 forgedesk review-context
 forgedesk pr
 forgedesk fix-context
@@ -152,8 +156,8 @@ See [CHANGELOG.md](CHANGELOG.md) for local source version notes.
 
 ## Project Status
 
-ForgeDesk v0.3.3 is prepared as a GitHub source release for foreground local
-watch mode. The npm package remains at v0.2.3 until the next explicit npm
+ForgeDesk v0.3.4 is prepared as a GitHub source release for zero-terminal
+editor shortcuts. The npm package remains at v0.2.3 until the next explicit npm
 publish.
 
 ## Development

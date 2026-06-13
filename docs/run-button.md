@@ -80,6 +80,36 @@ it. For a one-shot check:
 forgedesk watch --once
 ```
 
+## Editor Shortcuts
+
+`forgedesk shortcuts install` creates VS Code tasks so the most common
+ForgeDesk buttons can be clicked from the editor.
+
+```bash
+forgedesk shortcuts install
+```
+
+The generated tasks are:
+
+- `ForgeDesk: Next`
+- `ForgeDesk: Next Preview`
+- `ForgeDesk: Doctor`
+- `ForgeDesk: Watch`
+- `ForgeDesk: Inspect Export`
+
+Package scripts are opt-in:
+
+```bash
+forgedesk shortcuts install --package-scripts
+```
+
+ForgeDesk only removes shortcuts that it generated:
+
+```bash
+forgedesk shortcuts uninstall
+forgedesk shortcuts uninstall --package-scripts
+```
+
 ## Supporting Buttons
 
 These commands support the run-button path:
