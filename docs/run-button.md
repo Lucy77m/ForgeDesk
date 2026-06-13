@@ -124,6 +124,18 @@ Episodes sit on top of existing sessions and evidence. They are meant to answer
 "where am I in this change?" with phases like `needs-evidence`,
 `needs-verification`, `ready`, or `exported`.
 
+## Repair
+
+`forgedesk repair` is the local setup repair button.
+
+```bash
+forgedesk repair
+```
+
+It refreshes `NOW.md`, repairs safe ForgeDesk editor shortcuts, and reports
+whether hooks or ignition need explicit setup. It does not install hooks or
+folder-open ignition by default.
+
 ## Editor Shortcuts
 
 `forgedesk shortcuts install` creates VS Code tasks so the most common
@@ -194,6 +206,7 @@ These commands support the run-button path:
 ```bash
 forgedesk doctor
 forgedesk episodes status
+forgedesk repair
 forgedesk fix-context
 forgedesk review-context
 forgedesk pr

@@ -4,6 +4,44 @@ All notable ForgeDesk changes are tracked here.
 
 Version entries describe source, GitHub release, and npm publishing state.
 
+## v0.4.5 - 2026-06-13
+
+Safe local repair for ForgeDesk entry points.
+
+### Added
+
+- Added `forgedesk repair` to refresh `.forgedesk/NOW.md`, repair safe editor
+  shortcuts, and report stronger opt-in entry points.
+- Added `forgedesk repair --test-tasks` to also repair discovered package test
+  tasks.
+- Added `forgedesk repair --package-scripts` to also repair ForgeDesk package
+  scripts.
+- Added `forgedesk repair --json` with the `forgedesk-repair-v1` report.
+
+### Improved
+
+- Repair checks auto profile, NOW, shortcuts, ignition, and hooks in one local
+  pass.
+- Default repair does not install hooks or ignition; it suggests the explicit
+  commands for those stronger opt-ins instead.
+
+### Tests
+
+- Added repair coverage for default NOW/shortcut repair, optional test-task
+  repair, and unmanaged editor-task refusal.
+
+### Publishing
+
+- GitHub source release only.
+- No npm publish in this version.
+
+### Boundaries
+
+- Repair only touches local ForgeDesk setup files such as NOW and explicit
+  shortcuts by default. It does not call AI, edit product code, run tests,
+  commit, push, open PRs, tag, release, publish, upload, or install
+  hooks/ignition unless those explicit commands are run separately.
+
 ## v0.4.4 - 2026-06-13
 
 Local episode status for the current work segment.

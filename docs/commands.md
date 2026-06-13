@@ -182,6 +182,20 @@ Episodes do not add a task board, timeline, review verdict, or new evidence
 schema. They summarize existing local session, git, evidence, readiness, and
 export state.
 
+## Repair
+
+| Command | Purpose | Writes local data |
+|---|---|---|
+| `forgedesk repair` | Refresh NOW and repair safe ForgeDesk editor shortcuts. | yes |
+| `forgedesk repair --test-tasks` | Also repair discovered package test tasks. | yes |
+| `forgedesk repair --package-scripts` | Also repair ForgeDesk package scripts. | yes |
+| `forgedesk repair --json` | Print the repair report as JSON. | yes |
+
+Repair checks auto profile, NOW, shortcuts, ignition, and hooks in one pass.
+By default it only refreshes `NOW.md` and repairs explicit editor shortcuts.
+It does not install hooks or ignition; it reports the explicit commands for
+those stronger opt-ins.
+
 ## Shortcuts
 
 | Command | Purpose | Writes local data |

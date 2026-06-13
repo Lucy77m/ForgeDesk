@@ -29,6 +29,7 @@ import { getInspectReport, renderInspectReport } from '../core/inspect.js'
 import { getNextReport, renderNextReport } from '../core/next.js'
 import { refreshNowFile, renderNowReport } from '../core/now.js'
 import { getReadyReport, renderReadyReport } from '../core/ready.js'
+import { renderRepairReport, repairLocalSetup } from '../core/repair.js'
 import { getReviewOutput } from '../core/review-output.js'
 import { getShortcutsStatus, installShortcuts, renderShortcutsReport, uninstallShortcuts } from '../core/shortcuts.js'
 import { getStatus } from '../core/status.js'
@@ -62,7 +63,7 @@ export function buildProgram(cwd = process.cwd()): Command {
   program
     .name('forgedesk')
     .description('A local auto-capture desk for AI-assisted code changes.')
-    .version('0.4.4')
+    .version('0.4.5')
 
   program
     .command('init')
@@ -323,6 +324,23 @@ export function buildProgram(cwd = process.cwd()): Command {
     .action(async (options: { json?: boolean }) => {
       const report = await getEpisodeStatus(cwd)
       console.log(options.json ? JSON.stringify(report, null, 2) : renderEpisodeStatus(report))
+    })
+
+  program
+    .command('repair')
+    .description('Repair safe local ForgeDesk entry points and report stronger opt-ins.')
+    .option('--package-scripts', 'also repair ForgeDesk package scripts')
+    .option('--test-tasks', 'also repair discovered package test tasks')
+    .option('--json', 'print the repair report as JSON')
+    .action(async (options: { packageScripts?: boolean; testTasks?: boolean; json?: boolean }) => {
+      const report = await repairLocalSetup(cwd, {
+        packageScripts: options.packageScripts,
+        testTasks: options.testTasks
+      })
+      console.log(options.json ? JSON.stringify(report, null, 2) : renderRepairReport(report))
+      if (report.blockers.length > 0) {
+        process.exitCode = 1
+      }
     })
 
   program

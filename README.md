@@ -62,6 +62,7 @@ forgedesk watch
 forgedesk ignition install
 forgedesk now
 forgedesk episodes status
+forgedesk repair
 forgedesk tests discover
 forgedesk shortcuts install
 forgedesk shortcuts install --test-tasks
@@ -116,6 +117,7 @@ forgedesk ignition status
 forgedesk ignition uninstall
 forgedesk now
 forgedesk episodes status
+forgedesk repair
 forgedesk tests discover
 forgedesk shortcuts install
 forgedesk shortcuts install --test-tasks
@@ -149,6 +151,7 @@ See [docs/commands.md](docs/commands.md) for the full command reference.
 - Records change intent, decisions, risks, and tests.
 - Generates summaries, PR body, review context, risk hints, fix context, and evidence files.
 - Summarizes the current local work episode and next safe action.
+- Repairs safe local ForgeDesk entry points when editor shortcuts or NOW drift.
 
 ## What ForgeDesk Does Not Do
 
@@ -173,8 +176,8 @@ See [CHANGELOG.md](CHANGELOG.md) for local source version notes.
 
 ## Project Status
 
-ForgeDesk v0.4.4 is prepared as a GitHub source release for local episode
-status over the current work segment. The npm package remains at v0.2.3 until the next explicit npm
+ForgeDesk v0.4.5 is prepared as a GitHub source release for safe local repair
+of ForgeDesk entry points. The npm package remains at v0.2.3 until the next explicit npm
 publish.
 
 ## Development
