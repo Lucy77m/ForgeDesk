@@ -21,6 +21,23 @@ Depending on the current repository and session state, `forgedesk next` may:
 Use `forgedesk next --dry-run` when you want to preview the next action without
 writing `.forgedesk/` files.
 
+## Auto Profile
+
+`forgedesk auto-config` shows the repository's local automation profile.
+
+```bash
+forgedesk auto-config
+forgedesk auto-config set assist
+```
+
+The default profile is `manual`, which preserves direct command-driven
+behavior. Local automation surfaces such as git hooks, foreground watch mode,
+and CI evidence gates use this profile as their safety boundary.
+
+Profiles remain local and explicit. They do not enable AI calls, product-code
+edits, automatic commits, pushes, PRs, tags, releases, publishes, uploads, or
+hidden background services.
+
 ## Supporting Buttons
 
 These commands support the run-button path:
@@ -70,7 +87,7 @@ forgedesk next
 
 The run button does not call AI, edit product code, run tests unless you
 explicitly use `forgedesk test --`, commit, push, open PRs, tag, release,
-publish, upload, or run in the background.
+publish, upload, or run as a hidden background service.
 
 ForgeDesk organizes local evidence. It does not decide whether the code is
 correct.

@@ -88,6 +88,7 @@ describe('workspace helpers', () => {
     expect(paths.forgedeskDir).toBe(path.join(repo, '.forgedesk'))
     expect(paths.projectFile).toBe(path.join(repo, '.forgedesk', 'project.json'))
     expect(paths.configFile).toBe(path.join(repo, '.forgedesk', 'config.json'))
+    expect(paths.autoConfigFile).toBe(path.join(repo, '.forgedesk', 'auto.json'))
     expect(paths.sessionsDir).toBe(path.join(repo, '.forgedesk', 'sessions'))
     expect(paths.evidenceDir).toBe(path.join(repo, '.forgedesk', 'evidence'))
     expect(paths.exportsDir).toBe(path.join(repo, '.forgedesk', 'exports'))

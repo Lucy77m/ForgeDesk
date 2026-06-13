@@ -1,7 +1,10 @@
 export const PROJECT_SCHEMA_VERSION = 'forgedesk-project-v1'
 export const CONFIG_SCHEMA_VERSION = 'forgedesk-config-v1'
+export const AUTO_CONFIG_SCHEMA_VERSION = 'forgedesk-auto-config-v1'
 export const SESSION_SCHEMA_VERSION = 'forgedesk-session-v1'
 export const EVIDENCE_SCHEMA_VERSION = 'forgedesk-evidence-v1'
+
+export type AutoMode = 'manual' | 'assist' | 'local-auto' | 'guarded'
 
 export type SourceLabel = {
   text: string
@@ -23,6 +26,13 @@ export type Project = {
 export type Config = {
   schemaVersion: typeof CONFIG_SCHEMA_VERSION
   activeSessionId?: string
+  createdAt: string
+  updatedAt: string
+}
+
+export type AutoConfig = {
+  schemaVersion: typeof AUTO_CONFIG_SCHEMA_VERSION
+  mode: AutoMode
   createdAt: string
   updatedAt: string
 }

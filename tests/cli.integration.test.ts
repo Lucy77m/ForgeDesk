@@ -20,7 +20,30 @@ describe('cli integration', () => {
     const result = runCli(repo, ['--version'])
 
     expect(result.status).toBe(0)
-    expect(result.stdout.trim()).toBe('0.3.0')
+    expect(result.stdout.trim()).toBe('0.3.1')
+  })
+
+  it('shows and sets the local auto profile', () => {
+    const repo = tempDir()
+    dirs.push(repo)
+    initGitRepo(repo)
+
+    expect(runCli(repo, ['init', '--repo', '.']).status).toBe(0)
+    const defaultProfile = runCli(repo, ['auto-config', '--json'])
+    expect(defaultProfile.status).toBe(0)
+    const defaultReport = JSON.parse(defaultProfile.stdout)
+    expect(defaultReport.schemaVersion).toBe('forgedesk-auto-config-report-v1')
+    expect(defaultReport.config.mode).toBe('manual')
+    expect(defaultReport.source).toBe('default')
+
+    const setProfile = runCli(repo, ['auto-config', 'set', 'assist'])
+    expect(setProfile.status).toBe(0)
+    expect(setProfile.stdout).toContain('Mode: assist')
+    expect(setProfile.stdout).toContain('Auto profiles only control explicit local ForgeDesk automation')
+
+    const doctor = runCli(repo, ['doctor'])
+    expect(doctor.status).toBe(0)
+    expect(doctor.stdout).toContain('Auto mode: assist (file)')
   })
 
   it('auto-captures a local change without running checks', () => {

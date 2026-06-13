@@ -26,6 +26,7 @@ export type WorkspacePaths = {
   forgedeskDir: string
   projectFile: string
   configFile: string
+  autoConfigFile: string
   sessionsDir: string
   evidenceDir: string
   exportsDir: string
@@ -46,6 +47,7 @@ export function pathsFor(repoPath: string): WorkspacePaths {
     forgedeskDir,
     projectFile: path.join(forgedeskDir, 'project.json'),
     configFile: path.join(forgedeskDir, 'config.json'),
+    autoConfigFile: path.join(forgedeskDir, 'auto.json'),
     sessionsDir: path.join(forgedeskDir, 'sessions'),
     evidenceDir: path.join(forgedeskDir, 'evidence'),
     exportsDir: path.join(forgedeskDir, 'exports'),

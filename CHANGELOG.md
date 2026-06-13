@@ -4,6 +4,39 @@ All notable ForgeDesk changes are tracked here.
 
 Version entries describe source, GitHub release, and npm publishing state.
 
+## v0.3.1 - 2026-06-13
+
+Auto-profile foundation for explicit local automation.
+
+### Added
+
+- Added `forgedesk auto-config` to show the repository automation profile.
+- Added `forgedesk auto-config set <mode>` with `manual`, `assist`,
+  `local-auto`, and `guarded` modes.
+- Added `.forgedesk/auto.json` as the local, inspectable auto-profile file used
+  by future hooks, watch mode, and CI evidence gates.
+
+### Improved
+
+- `forgedesk doctor` now reports the active auto profile.
+- Updated boundaries and run-button docs to distinguish hidden background
+  automation from explicit opt-in local automation surfaces.
+
+### Tests
+
+- Added direct auto-config validation tests and CLI coverage for showing,
+  setting, and diagnosing the local auto profile.
+
+### Publishing
+
+- GitHub source release only.
+- No npm publish in this version.
+
+### Boundaries
+
+- Auto profiles do not call AI, edit product code, run tests, commit, push,
+  open PRs, tag, release, publish, upload, or start hidden background services.
+
 ## v0.3.0 - 2026-06-13
 
 Local run-button milestone release.

@@ -2,10 +2,11 @@
 
 This roadmap is a planning reference, not a commitment list.
 
-ForgeDesk v0.3.0 is a local run-button CLI for evidence-first AI-assisted code
-changes. The current direction is to make local workflow steps easier to
-preview, execute, diagnose, and hand off while keeping ForgeDesk out of AI
-review, cloud sync, and irreversible automation.
+ForgeDesk v0.3.1 is a local run-button CLI with explicit auto-profile
+configuration for evidence-first AI-assisted code changes. The current
+direction is to make local workflow steps easier to preview, execute, diagnose,
+and hand off while keeping ForgeDesk out of AI review, cloud sync, hidden
+background automation, and irreversible automation.
 
 ## Now: v0.3 Run Button Milestone
 
@@ -31,12 +32,16 @@ Make the automatic local workflow boringly reliable and easier for humans.
   evidence freshness, and verification state.
 - Improve review and handoff output so generated Markdown can go to reviewers
   with less manual rearranging.
+- Use `forgedesk auto-config` as the shared safety profile for future local
+  hooks, watch mode, and CI evidence gates.
 
 ## Next: v0.3.x Review Context Relief
 
 Reduce the friction of handing ForgeDesk material to humans or AI reviewers.
 
-- Improve first-run onboarding and install-to-first-evidence guidance.
+- Add optional local git hooks that use the auto profile as their safety guard.
+- Add a foreground watch mode for users who want less command memorization.
+- Add zero-terminal entry helpers such as VS Code tasks.
 - Keep improving PR body, review context, and handoff templates from dogfood.
 - Consider lightweight local review-note capture after external review.
 - Consider saving externally produced review notes back into a local session.

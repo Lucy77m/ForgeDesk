@@ -51,6 +51,17 @@ forgedesk next
 generates or refreshes evidence, checks readiness, and exports ready evidence
 one safe step at a time.
 
+Set the local automation profile before using hooks or watch mode:
+
+```bash
+forgedesk auto-config
+forgedesk auto-config set assist
+```
+
+Auto profiles are explicit local controls. They do not enable AI calls, product
+code edits, commits, pushes, PRs, releases, publishes, uploads, or hidden
+background services.
+
 ## Output
 
 ```text
@@ -83,6 +94,8 @@ forgedesk init --repo .
 forgedesk next --dry-run
 forgedesk next
 forgedesk auto --no-run
+forgedesk auto-config
+forgedesk auto-config set assist
 forgedesk review-context
 forgedesk pr
 forgedesk fix-context
@@ -131,8 +144,8 @@ See [CHANGELOG.md](CHANGELOG.md) for local source version notes.
 
 ## Project Status
 
-ForgeDesk v0.3.0 is prepared as a GitHub source release for the local run-button
-milestone. The npm package remains at v0.2.3 until the next explicit npm
+ForgeDesk v0.3.1 is prepared as a GitHub source release for local auto-profile
+configuration. The npm package remains at v0.2.3 until the next explicit npm
 publish.
 
 ## Development

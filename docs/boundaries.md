@@ -26,7 +26,8 @@ context, and an inspectable evidence pack.
 - It does not store API keys or credentials.
 - It does not upload repository contents.
 - It does not commit, push, open PRs, tag releases, or publish packages.
-- It does not run background automation.
+- It does not run hidden background automation, daemons, cron jobs, or system
+  services.
 - It does not provide a dashboard, task board, timeline, or team permission system.
 
 ## Evidence Is Not Review
@@ -48,6 +49,11 @@ The final judgment still belongs to the developer or reviewer.
 ForgeDesk may automatically capture, summarize, and package local context. It
 must mark generated or rule-derived material honestly and avoid correctness
 claims.
+
+ForgeDesk may provide explicit, opt-in local automation surfaces such as
+repository git hooks, foreground watch mode, or CI evidence gates. These
+surfaces must be visible, local, inspectable, removable, and bounded by the
+configured auto profile.
 
 ForgeDesk must not automatically perform irreversible project actions such as
 commit, push, pull request creation, merge, tag, release, or package publish.

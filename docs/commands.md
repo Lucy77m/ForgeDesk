@@ -68,6 +68,29 @@ front of a human.
 
 See [run-button.md](run-button.md) for the focused v0.3 workflow guide.
 
+## Auto Profile
+
+| Command | Purpose | Writes local data |
+|---|---|---|
+| `forgedesk auto-config` | Show the local automation profile. | no |
+| `forgedesk auto-config show` | Show the local automation profile. | no |
+| `forgedesk auto-config set <mode>` | Set the local automation profile. | yes |
+| `forgedesk auto-config --json` | Print the auto-profile report as JSON. | no |
+
+If `.forgedesk/auto.json` does not exist, ForgeDesk reports the default
+`manual` profile without writing a file.
+
+Modes:
+
+- `manual`: ForgeDesk only moves when a command is run.
+- `assist`: local automation may suggest the next step but should not write new evidence automatically.
+- `local-auto`: explicit local automation may refresh ForgeDesk evidence and exports.
+- `guarded`: local gates may block git actions when evidence is missing, stale, or not ready.
+
+`auto-config set` writes `.forgedesk/auto.json`. It does not call AI, edit
+product code, run tests, commit, push, open PRs, tag, release, publish, upload,
+or start a hidden background service.
+
 ## Auto Capture
 
 | Command | Purpose | Writes local data |

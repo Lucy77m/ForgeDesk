@@ -4,6 +4,7 @@ import type { ChangeSession } from '../types.js'
 import { readJson } from '../storage/json-store.js'
 import { displayPath } from '../templates/format.js'
 import { captureGitSnapshot } from '../git/snapshot.js'
+import { readAutoConfig } from './auto-config.js'
 import { EVIDENCE_FILE_NAMES } from './constants.js'
 import { evidenceCurrent } from './evidence-state.js'
 import { validateConfig, validateProject, validateSession } from './metadata.js'
@@ -27,6 +28,10 @@ export type DoctorReport = {
     id: string
     title: string
     status: ChangeSession['status']
+  }
+  autoConfig?: {
+    mode: string
+    source: 'file' | 'default'
   }
   checks: DoctorCheck[]
 }
@@ -179,6 +184,19 @@ export async function getDoctorReport(cwd: string): Promise<DoctorReport> {
     )
   )
 
+  let autoConfig: DoctorReport['autoConfig']
+  try {
+    const autoConfigState = await readAutoConfig(workspace)
+    autoConfig = {
+      mode: autoConfigState.config.mode,
+      source: autoConfigState.source
+    }
+    checks.push(check('autoConfig', 'ok', `Auto profile: ${autoConfig.mode} (${autoConfig.source}).`))
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
+    checks.push(check('autoConfig', 'error', message))
+  }
+
   for (const [name, dir] of [
     ['sessionsDir', paths.sessionsDir],
     ['evidenceDir', paths.evidenceDir],
@@ -259,6 +277,7 @@ export async function getDoctorReport(cwd: string): Promise<DoctorReport> {
         status: activeSession.status
       }
       : undefined,
+    autoConfig,
     checks
   }
 }
@@ -270,6 +289,7 @@ export function renderDoctorReport(report: DoctorReport): string {
     `Status: ${report.status}`,
     `Recommended next: ${report.recommendation}`,
     `Repo: ${report.repoPath}`,
+    report.autoConfig ? `Auto mode: ${report.autoConfig.mode} (${report.autoConfig.source})` : undefined,
     report.activeSession ? `Session: ${report.activeSession.title}` : undefined,
     report.activeSession ? `Session ID: ${report.activeSession.id}` : undefined,
     report.activeSession ? `Session status: ${report.activeSession.status}` : undefined,

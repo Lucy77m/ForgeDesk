@@ -4,6 +4,7 @@ import { realpathSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { addDecision, addManualCheck, addRisk, initProject, setIntent, startSession } from '../core/session.js'
 import { renderAutoCaptureReport, runAutoCapture } from '../core/auto.js'
+import { getAutoConfigReport, parseAutoMode, renderAutoConfigReport, setAutoConfigMode } from '../core/auto-config.js'
 import { copyToClipboard } from '../core/clipboard.js'
 import { getDoctorReport, renderDoctorReport } from '../core/doctor.js'
 import { generateEvidence, getLatestEvidencePack, listEvidencePacks } from '../core/evidence.js'
@@ -44,7 +45,7 @@ export function buildProgram(cwd = process.cwd()): Command {
   program
     .name('forgedesk')
     .description('A local auto-capture desk for AI-assisted code changes.')
-    .version('0.3.0')
+    .version('0.3.1')
 
   program
     .command('init')
@@ -65,6 +66,34 @@ export function buildProgram(cwd = process.cwd()): Command {
     .action(async (options: { noRun?: boolean; title?: string; json?: boolean }) => {
       const report = await runAutoCapture(cwd, options)
       console.log(options.json ? JSON.stringify(report, null, 2) : renderAutoCaptureReport(report))
+    })
+
+  const autoConfig = program
+    .command('auto-config')
+    .description('Show or set the local ForgeDesk automation profile.')
+    .option('--json', 'print the auto config report as JSON')
+    .action(async (options: { json?: boolean }) => {
+      const report = await getAutoConfigReport(cwd)
+      console.log(options.json ? JSON.stringify(report, null, 2) : renderAutoConfigReport(report))
+    })
+
+  autoConfig
+    .command('show')
+    .description('Show the local ForgeDesk automation profile.')
+    .option('--json', 'print the auto config report as JSON')
+    .action(async (options: { json?: boolean }) => {
+      const report = await getAutoConfigReport(cwd)
+      console.log(options.json ? JSON.stringify(report, null, 2) : renderAutoConfigReport(report))
+    })
+
+  autoConfig
+    .command('set')
+    .description('Set the local ForgeDesk automation profile.')
+    .argument('<mode>', 'manual, assist, local-auto, or guarded')
+    .option('--json', 'print the auto config report as JSON')
+    .action(async (mode: string, options: { json?: boolean }) => {
+      const report = await setAutoConfigMode(cwd, parseAutoMode(mode))
+      console.log(options.json ? JSON.stringify(report, null, 2) : renderAutoConfigReport(report))
     })
 
   program
