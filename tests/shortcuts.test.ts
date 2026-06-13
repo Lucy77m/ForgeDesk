@@ -40,7 +40,9 @@ describe('shortcuts', () => {
     const tasks = readJson(tasksPath(repo))
     expect(tasks.version).toBe('2.0.0')
     expect(tasks.tasks.map((task: { label: string }) => task.label)).toContain('ForgeDesk: Next')
-    expect(tasks.tasks.find((task: { label: string }) => task.label === 'ForgeDesk: Watch').command).toBe('forgedesk')
+    const watchTask = tasks.tasks.find((task: { label: string }) => task.label === 'ForgeDesk: Watch')
+    expect(watchTask.command).toBe('forgedesk')
+    expect(watchTask.args).toEqual(['watch', '--quiet'])
 
     const uninstall = runCli(repo, ['shortcuts', 'uninstall', '--json'])
     expect(uninstall.status).toBe(0)

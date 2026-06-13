@@ -40,6 +40,20 @@ describe('watch mode', () => {
     expect(sessionIds(repo)).toEqual([])
   })
 
+  it('prints compact output in quiet mode', () => {
+    const repo = tempDir()
+    dirs.push(repo)
+    initGitRepo(repo)
+    expect(runCli(repo, ['init', '--repo', '.']).status).toBe(0)
+    writeFileSync(path.join(repo, 'README.md'), '# Watch quiet change\n', 'utf8')
+
+    const result = runCli(repo, ['watch', '--once', '--quiet'])
+
+    expect(result.status).toBe(0)
+    expect(result.stdout).toContain('ForgeDesk watch: idle mode=manual wrote=no')
+    expect(result.stdout).not.toContain('## Blockers')
+  })
+
   it('suggests the next step in assist mode without writing files', () => {
     const repo = tempDir()
     dirs.push(repo)

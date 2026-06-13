@@ -88,7 +88,7 @@ const vscodeTasks: Required<Pick<VsCodeTask, 'label' | 'type' | 'command' | 'arg
     label: 'ForgeDesk: Watch',
     type: 'shell',
     command: 'forgedesk',
-    args: ['watch'],
+    args: ['watch', '--quiet'],
     problemMatcher: [],
     detail: marker
   },

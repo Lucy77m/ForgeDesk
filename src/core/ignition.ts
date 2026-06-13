@@ -69,7 +69,7 @@ function ignitionTask(): VsCodeTask {
     label: taskLabel,
     type: 'shell',
     command: 'forgedesk',
-    args: ['watch'],
+    args: ['watch', '--quiet'],
     isBackground: true,
     problemMatcher: [],
     detail: marker,

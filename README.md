@@ -59,6 +59,7 @@ forgedesk auto-config set assist
 forgedesk hooks install
 forgedesk hooks status
 forgedesk watch
+forgedesk watch --quiet
 forgedesk ignition install
 forgedesk now
 forgedesk episodes status
@@ -112,6 +113,7 @@ forgedesk hooks status
 forgedesk hooks uninstall
 forgedesk watch
 forgedesk watch --once
+forgedesk watch --quiet
 forgedesk ignition install
 forgedesk ignition status
 forgedesk ignition uninstall
@@ -176,8 +178,8 @@ See [CHANGELOG.md](CHANGELOG.md) for local source version notes.
 
 ## Project Status
 
-ForgeDesk v0.4.5 is prepared as a GitHub source release for safe local repair
-of ForgeDesk entry points. The npm package remains at v0.2.3 until the next explicit npm
+ForgeDesk v0.4.6 is prepared as a GitHub source release for quiet watch output
+in editor-run autopilot workflows. The npm package remains at v0.2.3 until the next explicit npm
 publish.
 
 ## Development

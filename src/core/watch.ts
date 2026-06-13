@@ -28,6 +28,7 @@ export type WatchReport = {
 
 export type WatchLoopOptions = WatchOptions & {
   json?: boolean
+  quiet?: boolean
   onReport?: (report: WatchReport) => void
 }
 
@@ -216,7 +217,7 @@ export async function startWatch(cwd: string, options: WatchLoopOptions = {}): P
       options.onReport(report)
       return
     }
-    console.log(options.json ? JSON.stringify(report, null, 2) : renderWatchReport(report))
+    console.log(options.json ? JSON.stringify(report, null, 2) : options.quiet ? renderQuietWatchReport(report) : renderWatchReport(report))
     console.log('')
   }
 
@@ -252,4 +253,10 @@ export function renderWatchReport(report: WatchReport): string {
     report.nextReport ? '## Next Preview' : undefined,
     report.nextReport ? renderNextReport(report.nextReport) : undefined
   ].filter((line): line is string => line !== undefined).join('\n')
+}
+
+export function renderQuietWatchReport(report: WatchReport): string {
+  const action = report.nextReport ? ` action=${report.nextReport.action} reason=${report.nextReport.reason}` : ''
+  const blockers = report.blockers.length > 0 ? ` blockers=${report.blockers.length}` : ''
+  return `ForgeDesk watch: ${report.status} mode=${report.autoMode} wrote=${report.wroteFiles ? 'yes' : 'no'}${action}${blockers} next="${report.recommendation}"`
 }

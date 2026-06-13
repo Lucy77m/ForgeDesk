@@ -4,6 +4,38 @@ All notable ForgeDesk changes are tracked here.
 
 Version entries describe source, GitHub release, and npm publishing state.
 
+## v0.4.6 - 2026-06-13
+
+Quiet watch output for editor-run autopilot.
+
+### Added
+
+- Added `forgedesk watch --quiet` for compact human-readable watch output.
+
+### Improved
+
+- `forgedesk ignition install` now starts `forgedesk watch --quiet`.
+- Generated `ForgeDesk: Watch` editor shortcuts now run `forgedesk watch
+  --quiet`.
+- Quiet mode preserves the same watch state machine and JSON output; it only
+  reduces terminal noise for human-readable foreground watch output.
+
+### Tests
+
+- Added quiet watch coverage and updated ignition/shortcut task assertions.
+- Increased the Vitest timeout for slower Windows CI integration runs.
+
+### Publishing
+
+- GitHub source release only.
+- No npm publish in this version.
+
+### Boundaries
+
+- Quiet watch remains a foreground local process. It does not install a daemon,
+  call AI, edit product code, run tests, commit, push, open PRs, tag, release,
+  publish, upload, or run as a hidden background service.
+
 ## v0.4.5 - 2026-06-13
 
 Safe local repair for ForgeDesk entry points.

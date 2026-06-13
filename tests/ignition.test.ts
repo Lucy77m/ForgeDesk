@@ -40,7 +40,7 @@ describe('ignition', () => {
     const tasks = readJson(tasksPath(repo))
     const task = tasks.tasks.find((item: { label: string }) => item.label === 'ForgeDesk: Ignition Watch')
     expect(task.command).toBe('forgedesk')
-    expect(task.args).toEqual(['watch'])
+    expect(task.args).toEqual(['watch', '--quiet'])
     expect(task.runOptions.runOn).toBe('folderOpen')
     expect(task.isBackground).toBe(true)
 

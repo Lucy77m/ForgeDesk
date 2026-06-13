@@ -66,12 +66,16 @@ forgedesk hooks uninstall
 ```bash
 forgedesk auto-config set assist
 forgedesk watch
+forgedesk watch --quiet
 ```
 
 Use `assist` when you want watch to explain the next step without writing files.
 Use `local-auto` when you want it to run one safe local `next` step as state
 changes. Use `guarded` when you want the watch output to make blockers obvious
 without modifying `.forgedesk/`.
+
+Use `watch --quiet` for editor tasks or side terminals where a compact status
+line is enough.
 
 `watch` is not a daemon. It runs in the terminal you started, and `Ctrl+C` stops
 it. For a one-shot check:
@@ -83,7 +87,7 @@ forgedesk watch --once
 ## Ignition
 
 `forgedesk ignition install` creates a folder-open task that starts
-`forgedesk watch` when the project opens in VS Code or Cursor.
+`forgedesk watch --quiet` when the project opens in VS Code or Cursor.
 
 ```bash
 forgedesk ignition install

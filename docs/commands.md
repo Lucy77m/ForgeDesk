@@ -121,6 +121,7 @@ release, publish, upload, or run as a hidden background service.
 | `forgedesk watch` | Run foreground local watch mode until stopped. | depends on auto mode |
 | `forgedesk watch --once` | Evaluate watch mode once and exit. | depends on auto mode |
 | `forgedesk watch --interval <ms>` | Set the polling interval; minimum 500 ms. | depends on auto mode |
+| `forgedesk watch --quiet` | Print compact human-readable watch output. | depends on auto mode |
 | `forgedesk watch --json` | Print watch reports as JSON. | depends on auto mode |
 
 Watch mode is a foreground process. It does not install a daemon, cron job, or
@@ -134,6 +135,9 @@ Watch behavior follows `forgedesk auto-config`:
 - `guarded`: watch reports blockers without writing files.
 
 Use `watch --once` for scripts, tests, or a one-shot no-loop check.
+Use `watch --quiet` when watch is running as an editor task and you only want a
+compact status line when the local state changes. JSON output remains full
+fidelity.
 
 ## Ignition
 
@@ -148,7 +152,7 @@ Watch` with `runOptions.runOn = folderOpen`. Editors may ask you to allow
 automatic tasks for the folder before it runs.
 
 Ignition refuses to overwrite a task with the same label unless ForgeDesk
-created it. It starts `forgedesk watch` as an explicit editor task; it does not
+created it. It starts `forgedesk watch --quiet` as an explicit editor task; it does not
 install a daemon, cron job, system service, AI reviewer, code fixer, committer,
 pusher, PR opener, publisher, uploader, or cloud sync process.
 
