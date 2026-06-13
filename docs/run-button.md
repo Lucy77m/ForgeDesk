@@ -3,11 +3,24 @@
 ForgeDesk v0.3 centers the local workflow on one repeated action:
 
 ```bash
+forgedesk setup
 forgedesk next
 ```
 
 `next` is a local run button. It advances one safe ForgeDesk step at a time and
 then tells you what to do next.
+
+`setup` is the first-run button. It initializes the local ForgeDesk workspace,
+sets safe advisory `assist` mode, refreshes `NOW.md`, and repairs editor
+shortcuts.
+
+Opt into stronger local entry points explicitly:
+
+```bash
+forgedesk setup --test-tasks
+forgedesk setup --ignition
+forgedesk setup --hooks
+```
 
 ## What The Button Does
 
@@ -228,6 +241,7 @@ forgedesk inspect --export
 ## Typical Loop
 
 ```bash
+forgedesk setup --test-tasks
 forgedesk next --dry-run
 forgedesk next
 forgedesk test -- npm test

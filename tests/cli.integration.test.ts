@@ -20,7 +20,7 @@ describe('cli integration', () => {
     const result = runCli(repo, ['--version'])
 
     expect(result.status).toBe(0)
-    expect(result.stdout.trim()).toBe('0.4.6')
+    expect(result.stdout.trim()).toBe('0.5.0')
   })
 
   it('shows and sets the local auto profile', () => {

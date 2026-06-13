@@ -4,6 +4,47 @@ All notable ForgeDesk changes are tracked here.
 
 Version entries describe source, GitHub release, and npm publishing state.
 
+## v0.5.0 - 2026-06-13
+
+Local autopilot setup milestone.
+
+### Added
+
+- Added `forgedesk setup` as a setup-first entry point for the local run-button
+  workflow.
+- Added `forgedesk setup --mode <mode>` to initialize the local auto profile,
+  defaulting to safe advisory `assist`.
+- Added `forgedesk setup --test-tasks` and `forgedesk setup --package-scripts`
+  to opt into additional local shortcuts during setup.
+- Added explicit `forgedesk setup --ignition` and `forgedesk setup --hooks`
+  flags for stronger local automation entry points.
+- Added `forgedesk setup --json` with the `forgedesk-setup-v1` report.
+
+### Improved
+
+- Setup initializes ForgeDesk in a git repo when needed, sets the auto profile,
+  refreshes NOW, repairs safe shortcuts, and reports the next local actions in
+  one pass.
+- The v0.5 docs now present `setup -> next -> test button -> next` as the main
+  low-friction workflow.
+
+### Tests
+
+- Added setup coverage for first-run initialization, safe default repair,
+  optional test tasks, explicit ignition, and explicit hooks.
+
+### Publishing
+
+- GitHub source release only.
+- No npm publish in this version. The npm package remains at v0.2.3 until the
+  next explicit npm publish.
+
+### Boundaries
+
+- Setup is an explicit local command. It does not call AI, edit product code,
+  run tests, commit, push, open PRs, tag, release, publish, upload, or install
+  hooks/ignition unless those flags are explicitly used.
+
 ## v0.4.6 - 2026-06-13
 
 Quiet watch output for editor-run autopilot.

@@ -2,17 +2,19 @@
 
 This roadmap is a planning reference, not a commitment list.
 
-ForgeDesk v0.4.6 is a local autopilot CLI with explicit auto profiles, optional
+ForgeDesk v0.5.0 is a setup-first local autopilot CLI with explicit auto profiles, optional
 repository git hooks, foreground watch mode, ignition folder-open tasks, editor
 shortcuts, opt-in test button discovery, local episode status, safe local repair, quiet watch output, `.forgedesk/NOW.md`, and an optional CI evidence gate for evidence-first AI-assisted code changes. The current
 direction is to make local workflow steps easier to preview, execute, diagnose,
 gate, and hand off while keeping ForgeDesk out of AI review, cloud sync, hidden
 background automation, and irreversible automation.
 
-## Now: v0.3 Run Button Milestone
+## Now: v0.5 Setup-First Local Autopilot
 
 Make the automatic local workflow boringly reliable and easier for humans.
 
+- Make `forgedesk setup` the first-run button for initializing and repairing a
+  local ForgeDesk workflow.
 - Make `forgedesk next` the primary run button for safe local workflow steps.
 - Support `forgedesk next --dry-run` as a safe button preview.
 - Detect stale evidence with local diff fingerprints before export.
@@ -55,15 +57,20 @@ Make the automatic local workflow boringly reliable and easier for humans.
 - Generate optional CI evidence gates for repositories that want evidence
   completeness and readiness checked before merge.
 
-## Next: v0.3.x Review Context Relief
+## Next: v0.5.x Human Friction Relief
 
-Reduce the friction of handing ForgeDesk material to humans or AI reviewers.
+Reduce the remaining friction around setup, test capture, and handoff.
 
+- Consider a local `forgedesk open` command that opens NOW, evidence, or export
+  paths with the operating system default app.
+- Improve setup recommendations based on repository shape without adding AI or
+  cloud behavior.
+- Make package/test discovery smarter for monorepos while keeping it explicit.
 - Keep improving PR body, review context, and handoff templates from dogfood.
 - Consider lightweight local review-note capture after external review.
 - Consider saving externally produced review notes back into a local session.
 
-## Later: v0.4.x Workflow Integration Polish
+## Later: v0.6 Workflow Integration Polish
 
 Embed ForgeDesk into existing local and PR workflows without becoming a platform.
 

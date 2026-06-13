@@ -37,6 +37,7 @@ import { discoverTestScripts, renderTestDiscoveryReport } from '../core/test-dis
 import { recordTestCommand, runTestCommand } from '../core/test-runner.js'
 import { getSessions } from '../core/sessions.js'
 import { archiveSession, markActiveSessionDone, reopenSession, showSession } from '../core/lifecycle.js'
+import { renderSetupReport, runSetup } from '../core/setup.js'
 import { getWatchReport, parseWatchInterval, renderQuietWatchReport, renderWatchReport, startWatch } from '../core/watch.js'
 import type { ChangeSession } from '../types.js'
 
@@ -63,7 +64,7 @@ export function buildProgram(cwd = process.cwd()): Command {
   program
     .name('forgedesk')
     .description('A local auto-capture desk for AI-assisted code changes.')
-    .version('0.4.6')
+    .version('0.5.0')
 
   program
     .command('init')
@@ -73,6 +74,37 @@ export function buildProgram(cwd = process.cwd()): Command {
       const project = await initProject(options.repo, cwd)
       console.log(`Initialized ForgeDesk for ${project.name}`)
       console.log(`Repo: ${project.repoPath}`)
+    })
+
+  program
+    .command('setup')
+    .description('Initialize and repair a local ForgeDesk run-button setup.')
+    .option('--mode <mode>', 'auto profile to set: manual, assist, local-auto, or guarded', 'assist')
+    .option('--package-scripts', 'also install ForgeDesk package scripts')
+    .option('--test-tasks', 'also install discovered package test tasks')
+    .option('--ignition', 'also install the folder-open watch task')
+    .option('--hooks', 'also install ForgeDesk-managed git hooks')
+    .option('--json', 'print the setup report as JSON')
+    .action(async (options: {
+      mode: string
+      packageScripts?: boolean
+      testTasks?: boolean
+      ignition?: boolean
+      hooks?: boolean
+      json?: boolean
+    }) => {
+      const report = await runSetup(cwd, {
+        mode: parseAutoMode(options.mode),
+        packageScripts: options.packageScripts,
+        testTasks: options.testTasks,
+        ignition: options.ignition,
+        hooks: options.hooks,
+        cliPath: process.argv[1] ?? fileURLToPath(import.meta.url)
+      })
+      console.log(options.json ? JSON.stringify(report, null, 2) : renderSetupReport(report))
+      if (report.repair.blockers.length > 0) {
+        process.exitCode = 1
+      }
     })
 
   program

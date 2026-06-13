@@ -6,6 +6,7 @@ the target repository unless a command explicitly runs a test process.
 ## Recommended Workflow
 
 ```bash
+forgedesk setup
 forgedesk next --dry-run
 forgedesk next
 ```
@@ -16,6 +17,7 @@ advanced control:
 
 ```bash
 forgedesk init --repo .
+forgedesk setup
 forgedesk next
 forgedesk start --title "Describe the change"
 forgedesk intent "Record the user-facing goal."
@@ -67,6 +69,25 @@ stable local state label such as `dirty-no-session`, `missing-evidence`,
 front of a human.
 
 See [run-button.md](run-button.md) for the focused v0.3 workflow guide.
+
+## Setup
+
+| Command | Purpose | Writes local data |
+|---|---|---|
+| `forgedesk setup` | Initialize ForgeDesk if needed and repair safe local entry points. | yes |
+| `forgedesk setup --mode <mode>` | Set the local auto profile during setup. | yes |
+| `forgedesk setup --test-tasks` | Also install discovered package test tasks. | yes |
+| `forgedesk setup --package-scripts` | Also install ForgeDesk package scripts. | yes |
+| `forgedesk setup --ignition` | Also install the folder-open watch task. | yes |
+| `forgedesk setup --hooks` | Also install ForgeDesk-managed git hooks. | yes |
+| `forgedesk setup --json` | Print the setup report as JSON. | yes |
+
+`setup` is the first-run local setup button. By default it initializes
+ForgeDesk in a git repo when needed, sets `assist` mode, refreshes `NOW.md`,
+and repairs safe editor shortcuts.
+
+Hooks and ignition are stronger local automation entry points, so setup only
+installs them when `--hooks` or `--ignition` is explicitly passed.
 
 ## Auto Profile
 

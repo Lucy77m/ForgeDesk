@@ -43,11 +43,16 @@ After installing from npm, run `forgedesk` directly. From a local checkout, use
 
 ```bash
 echo "Local change" >> README.md
+forgedesk setup
 forgedesk next --dry-run
 forgedesk next
 ```
 
-`forgedesk next` is the primary local run button. It auto-captures local changes,
+`forgedesk setup` is the first-run local setup button. It initializes
+ForgeDesk when needed, sets the safe advisory `assist` profile, refreshes
+`NOW.md`, and repairs editor shortcuts.
+
+`forgedesk next` is the daily local run button. It auto-captures local changes,
 generates or refreshes evidence, checks readiness, and exports ready evidence
 one safe step at a time.
 
@@ -103,6 +108,7 @@ intent, changed files, test evidence, and remaining risks easy to inspect.
 
 ```bash
 forgedesk init --repo .
+forgedesk setup
 forgedesk next --dry-run
 forgedesk next
 forgedesk auto --no-run
@@ -149,6 +155,7 @@ See [docs/commands.md](docs/commands.md) for the full command reference.
 ## What ForgeDesk Does
 
 - Reads local git status and changed files.
+- Sets up the local run-button workflow with one explicit command.
 - Auto-captures local change context.
 - Records change intent, decisions, risks, and tests.
 - Generates summaries, PR body, review context, risk hints, fix context, and evidence files.
@@ -178,9 +185,9 @@ See [CHANGELOG.md](CHANGELOG.md) for local source version notes.
 
 ## Project Status
 
-ForgeDesk v0.4.6 is prepared as a GitHub source release for quiet watch output
-in editor-run autopilot workflows. The npm package remains at v0.2.3 until the next explicit npm
-publish.
+ForgeDesk v0.5.0 is prepared as a GitHub source release for the setup-first
+local autopilot workflow. The npm package remains at v0.2.3 until the next
+explicit npm publish.
 
 ## Development
 
