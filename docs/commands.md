@@ -166,6 +166,30 @@ are local entry points for existing ForgeDesk commands; they do not call AI,
 edit product code, commit, push, open PRs, tag, release, publish, upload, or
 run as a hidden background service.
 
+## CI Evidence Gate
+
+| Command | Purpose | Writes local data |
+|---|---|---|
+| `forgedesk ci check` | Check active-session evidence for CI gating. | no |
+| `forgedesk ci check --session <id>` | Check a specific session. | no |
+| `forgedesk ci check --json` | Print the CI check report as JSON. | no |
+| `forgedesk ci print` | Print a GitHub Actions evidence gate workflow. | no |
+| `forgedesk ci init` | Write `.github/workflows/forgedesk-evidence.yml`. | yes |
+| `forgedesk ci init --force` | Overwrite the generated workflow. | yes |
+
+`ci check` verifies that evidence exists, expected evidence files are present,
+and readiness passes. If the local worktree is dirty, it also checks whether
+the evidence fingerprint is fresh for the current diff. In a clean checkout,
+local diff freshness is reported as `skipped-clean-worktree` rather than
+pretending to validate a PR diff.
+
+The generated workflow installs ForgeDesk from npm and runs `forgedesk ci
+check`. Review the workflow before committing it, especially while a GitHub
+source release is newer than the npm package.
+
+The CI gate does not call AI, upload repository contents, comment on PRs, review
+code, edit code, commit, push, open PRs, tag, release, or publish.
+
 ## Auto Capture
 
 | Command | Purpose | Writes local data |

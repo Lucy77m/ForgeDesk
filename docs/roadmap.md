@@ -2,12 +2,12 @@
 
 This roadmap is a planning reference, not a commitment list.
 
-ForgeDesk v0.3.4 is a local run-button CLI with explicit auto profiles,
-optional repository git hooks, foreground watch mode, and editor shortcuts for
-evidence-first AI-assisted code changes. The current direction is to make local
-workflow steps easier to preview, execute, diagnose, and hand off while keeping
-ForgeDesk out of AI review, cloud sync, hidden background automation, and
-irreversible automation.
+ForgeDesk v0.4.0 is a local autopilot CLI with explicit auto profiles, optional
+repository git hooks, foreground watch mode, editor shortcuts, and an optional
+CI evidence gate for evidence-first AI-assisted code changes. The current
+direction is to make local workflow steps easier to preview, execute, diagnose,
+gate, and hand off while keeping ForgeDesk out of AI review, cloud sync, hidden
+background automation, and irreversible automation.
 
 ## Now: v0.3 Run Button Milestone
 
@@ -41,6 +41,8 @@ Make the automatic local workflow boringly reliable and easier for humans.
   local step visible without becoming a daemon.
 - Generate editor shortcuts so common ForgeDesk buttons can be clicked from VS
   Code without memorizing commands.
+- Generate optional CI evidence gates for repositories that want evidence
+  completeness and readiness checked before merge.
 
 ## Next: v0.3.x Review Context Relief
 
@@ -50,12 +52,12 @@ Reduce the friction of handing ForgeDesk material to humans or AI reviewers.
 - Consider lightweight local review-note capture after external review.
 - Consider saving externally produced review notes back into a local session.
 
-## Later: v0.4 Workflow Integration
+## Later: v0.4.x Workflow Integration Polish
 
 Embed ForgeDesk into existing local and PR workflows without becoming a platform.
 
-- Consider optional git hooks.
-- Add CI checks for evidence completeness.
+- Improve CI gate setup docs for npm-published and source-checkout installs.
+- Explore PR-diff-aware freshness checks without uploading code or calling AI.
 - Define an Evidence Pack JSON schema for local tool interoperability.
 
 ## Future: v0.5+ Optional Ecosystem

@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url'
 import { addDecision, addManualCheck, addRisk, initProject, setIntent, startSession } from '../core/session.js'
 import { renderAutoCaptureReport, runAutoCapture } from '../core/auto.js'
 import { getAutoConfigReport, parseAutoMode, renderAutoConfigReport, setAutoConfigMode } from '../core/auto-config.js'
+import { getCiCheckReport, initCiWorkflow, renderCiCheckReport, renderCiInitReport, renderCiWorkflow } from '../core/ci.js'
 import { copyToClipboard } from '../core/clipboard.js'
 import { getDoctorReport, renderDoctorReport } from '../core/doctor.js'
 import { generateEvidence, getLatestEvidencePack, listEvidencePacks } from '../core/evidence.js'
@@ -57,7 +58,7 @@ export function buildProgram(cwd = process.cwd()): Command {
   program
     .name('forgedesk')
     .description('A local auto-capture desk for AI-assisted code changes.')
-    .version('0.3.4')
+    .version('0.4.0')
 
   program
     .command('init')
@@ -184,6 +185,40 @@ export function buildProgram(cwd = process.cwd()): Command {
     .action(async (options: { packageScripts?: boolean; json?: boolean }) => {
       const report = await getShortcutsStatus(cwd, { packageScripts: options.packageScripts })
       console.log(options.json ? JSON.stringify(report, null, 2) : renderShortcutsReport(report))
+    })
+
+  const ci = program
+    .command('ci')
+    .description('Check or generate a local ForgeDesk CI evidence gate.')
+
+  ci
+    .command('check')
+    .description('Check local ForgeDesk evidence for CI gating.')
+    .option('--session <id>', 'session id; defaults to the active session')
+    .option('--json', 'print the CI check report as JSON')
+    .action(async (options: { session?: string; json?: boolean }) => {
+      const report = await getCiCheckReport(cwd, { sessionId: options.session })
+      console.log(options.json ? JSON.stringify(report, null, 2) : renderCiCheckReport(report))
+      if (report.status !== 'pass') {
+        process.exitCode = 1
+      }
+    })
+
+  ci
+    .command('print')
+    .description('Print a GitHub Actions ForgeDesk evidence gate workflow.')
+    .action(() => {
+      process.stdout.write(renderCiWorkflow())
+    })
+
+  ci
+    .command('init')
+    .description('Write a GitHub Actions ForgeDesk evidence gate workflow.')
+    .option('--force', 'overwrite an existing ForgeDesk evidence workflow')
+    .option('--json', 'print the CI init report as JSON')
+    .action(async (options: { force?: boolean; json?: boolean }) => {
+      const report = await initCiWorkflow(cwd, { force: options.force })
+      console.log(options.json ? JSON.stringify(report, null, 2) : renderCiInitReport(report))
     })
 
   shortcuts

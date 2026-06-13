@@ -4,6 +4,43 @@ All notable ForgeDesk changes are tracked here.
 
 Version entries describe source, GitHub release, and npm publishing state.
 
+## v0.4.0 - 2026-06-13
+
+Local autopilot milestone with optional CI evidence gates.
+
+### Added
+
+- Added `forgedesk ci check` for CI-friendly evidence readiness checks.
+- Added `forgedesk ci print` to print a GitHub Actions evidence gate workflow.
+- Added `forgedesk ci init` to write `.github/workflows/forgedesk-evidence.yml`
+  when a repository explicitly opts in.
+
+### Improved
+
+- `ci check` verifies evidence presence, expected files, readiness, and dirty
+  worktree freshness.
+- Clean checkouts report freshness as `skipped-clean-worktree` instead of
+  pretending to reconstruct a PR diff fingerprint.
+- The roadmap now treats v0.4 as the local autopilot + optional evidence gate
+  milestone.
+
+### Tests
+
+- Added CI gate integration coverage for passing ready evidence, missing
+  evidence, stale dirty evidence, workflow printing, workflow init, and
+  overwrite protection.
+
+### Publishing
+
+- GitHub source release only.
+- No npm publish in this version.
+
+### Boundaries
+
+- The CI gate checks local ForgeDesk evidence. It does not call AI, upload
+  repository contents, comment on PRs, review code, edit code, commit, push,
+  open PRs, tag, release, publish, or cloud sync.
+
 ## v0.3.4 - 2026-06-13
 
 Zero-terminal editor shortcuts for the local run-button workflow.

@@ -61,5 +61,9 @@ ForgeDesk may generate editor tasks or package scripts only after an explicit
 local command. Those shortcuts must remain inspectable and removable, and they
 must not hide irreversible actions behind a click.
 
+ForgeDesk may generate a CI evidence gate workflow and may run `forgedesk ci
+check` in CI. The gate verifies local evidence files and readiness; it must not
+upload repository contents, call AI, comment on PRs, or make review verdicts.
+
 ForgeDesk must not automatically perform irreversible project actions such as
 commit, push, pull request creation, merge, tag, release, or package publish.

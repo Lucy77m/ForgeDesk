@@ -110,6 +110,26 @@ forgedesk shortcuts uninstall
 forgedesk shortcuts uninstall --package-scripts
 ```
 
+## CI Evidence Gate
+
+`forgedesk ci check` turns the same local evidence rules into a CI-friendly
+gate.
+
+```bash
+forgedesk ci check
+forgedesk ci print
+forgedesk ci init
+```
+
+The generated workflow is optional. It is meant for repositories that want CI
+to fail when ForgeDesk evidence is missing or not ready. Review the workflow
+before committing it.
+
+In a dirty local worktree, `ci check` also checks evidence freshness for the
+current diff. In a clean CI checkout, freshness is reported as
+`skipped-clean-worktree` because ForgeDesk is not claiming to reconstruct the PR
+diff fingerprint.
+
 ## Supporting Buttons
 
 These commands support the run-button path:
