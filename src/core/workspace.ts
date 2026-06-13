@@ -1,4 +1,4 @@
-import { access, mkdir, readdir } from 'node:fs/promises'
+import { access, mkdir, readdir, writeFile } from 'node:fs/promises'
 import { constants } from 'node:fs'
 import path from 'node:path'
 import type { ChangeSession, Config, Project } from '../types.js'
@@ -120,6 +120,11 @@ export async function writeProject(repoPath: string, project: Project): Promise<
 
 export async function writeConfig(repoPath: string, config: Config): Promise<void> {
   await writeJson(pathsFor(repoPath).configFile, config)
+}
+
+export async function writeTextFile(filePath: string, text: string): Promise<void> {
+  await mkdir(path.dirname(filePath), { recursive: true })
+  await writeFile(filePath, text, 'utf8')
 }
 
 export async function readSession(repoPath: string, sessionId: string): Promise<ChangeSession> {

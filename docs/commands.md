@@ -152,6 +152,20 @@ created it. It starts `forgedesk watch` as an explicit editor task; it does not
 install a daemon, cron job, system service, AI reviewer, code fixer, committer,
 pusher, PR opener, publisher, uploader, or cloud sync process.
 
+## NOW
+
+| Command | Purpose | Writes local data |
+|---|---|---|
+| `forgedesk now` | Refresh and print `.forgedesk/NOW.md`. | yes |
+| `forgedesk now --json` | Refresh `NOW.md` and print the structured report. | yes |
+
+`NOW.md` is the fixed local status entry for the current repository. It includes
+the current session, auto mode, readiness state, evidence/export paths,
+blockers, warnings, and next suggested action.
+
+`next`, `doctor`, `watch --once`, and `ci check` also refresh `NOW.md` when
+possible. `NOW.md` is local status, not a review verdict.
+
 ## Shortcuts
 
 | Command | Purpose | Writes local data |

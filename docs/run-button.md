@@ -99,6 +99,19 @@ Remove ignition with:
 forgedesk ignition uninstall
 ```
 
+## NOW.md
+
+`forgedesk now` refreshes `.forgedesk/NOW.md`, the fixed local status entry for
+humans and future AI windows.
+
+```bash
+forgedesk now
+```
+
+`NOW.md` records the active session, auto mode, readiness state, evidence and
+export paths, blockers, warnings, and the next suggested action. It is refreshed
+by `next`, `doctor`, `watch --once`, and `ci check` when possible.
+
 ## Editor Shortcuts
 
 `forgedesk shortcuts install` creates VS Code tasks so the most common

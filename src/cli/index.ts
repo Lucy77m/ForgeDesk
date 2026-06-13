@@ -26,6 +26,7 @@ import {
 import { getIgnitionStatus, installIgnition, renderIgnitionReport, uninstallIgnition } from '../core/ignition.js'
 import { getInspectReport, renderInspectReport } from '../core/inspect.js'
 import { getNextReport, renderNextReport } from '../core/next.js'
+import { refreshNowFile, renderNowReport } from '../core/now.js'
 import { getReadyReport, renderReadyReport } from '../core/ready.js'
 import { getReviewOutput } from '../core/review-output.js'
 import { getShortcutsStatus, installShortcuts, renderShortcutsReport, uninstallShortcuts } from '../core/shortcuts.js'
@@ -59,7 +60,7 @@ export function buildProgram(cwd = process.cwd()): Command {
   program
     .name('forgedesk')
     .description('A local auto-capture desk for AI-assisted code changes.')
-    .version('0.4.1')
+    .version('0.4.2')
 
   program
     .command('init')
@@ -164,6 +165,7 @@ export function buildProgram(cwd = process.cwd()): Command {
       const intervalMs = parseWatchInterval(options.interval)
       if (options.once) {
         const report = await getWatchReport(cwd)
+        await refreshNowFile(cwd).catch(() => undefined)
         console.log(options.json ? JSON.stringify(report, null, 2) : renderWatchReport(report))
         if (report.status === 'error') {
           process.exitCode = 1
@@ -230,6 +232,7 @@ export function buildProgram(cwd = process.cwd()): Command {
     .option('--json', 'print the CI check report as JSON')
     .action(async (options: { session?: string; json?: boolean }) => {
       const report = await getCiCheckReport(cwd, { sessionId: options.session })
+      await refreshNowFile(cwd).catch(() => undefined)
       console.log(options.json ? JSON.stringify(report, null, 2) : renderCiCheckReport(report))
       if (report.status !== 'pass') {
         process.exitCode = 1
@@ -271,6 +274,15 @@ export function buildProgram(cwd = process.cwd()): Command {
     .action(async (options: { packageScripts?: boolean; json?: boolean }) => {
       const report = await uninstallShortcuts(cwd, { packageScripts: options.packageScripts })
       console.log(options.json ? JSON.stringify(report, null, 2) : renderShortcutsReport(report))
+    })
+
+  program
+    .command('now')
+    .description('Refresh and print the local ForgeDesk NOW.md status file.')
+    .option('--json', 'print the NOW report as JSON')
+    .action(async (options: { json?: boolean }) => {
+      const report = await refreshNowFile(cwd)
+      console.log(options.json ? JSON.stringify(report, null, 2) : renderNowReport(report))
     })
 
   program
@@ -356,6 +368,7 @@ export function buildProgram(cwd = process.cwd()): Command {
     .option('--json', 'print the next-step report as JSON')
     .action(async (options: { dryRun?: boolean; json?: boolean }) => {
       const report = await getNextReport(cwd, { dryRun: options.dryRun })
+      await refreshNowFile(cwd).catch(() => undefined)
       console.log(options.json ? JSON.stringify(report, null, 2) : renderNextReport(report))
       if (report.action === 'blocked') {
         process.exitCode = 1
@@ -368,6 +381,7 @@ export function buildProgram(cwd = process.cwd()): Command {
     .option('--json', 'print the doctor report as JSON')
     .action(async (options: { json?: boolean }) => {
       const report = await getDoctorReport(cwd)
+      await refreshNowFile(cwd).catch(() => undefined)
       console.log(options.json ? JSON.stringify(report, null, 2) : renderDoctorReport(report))
       if (report.status === 'error') {
         process.exitCode = 1

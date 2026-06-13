@@ -3,6 +3,7 @@ import type { AutoMode } from '../types.js'
 import { readAutoConfig } from './auto-config.js'
 import { ForgeDeskError, isForgeDeskError } from './errors.js'
 import { getNextReport, renderNextReport, type NextReport } from './next.js'
+import { refreshNowFile } from './now.js'
 import { loadWorkspace } from './workspace.js'
 
 export type WatchStatus = 'idle' | 'suggested' | 'ran' | 'blocked' | 'error'
@@ -205,6 +206,7 @@ export async function startWatch(cwd: string, options: WatchLoopOptions = {}): P
 
   const emit = async (): Promise<void> => {
     const report = await getWatchReport(cwd)
+    await refreshNowFile(cwd).catch(() => undefined)
     const key = reportKey(report)
     if (key === lastKey) {
       return

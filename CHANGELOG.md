@@ -4,6 +4,38 @@ All notable ForgeDesk changes are tracked here.
 
 Version entries describe source, GitHub release, and npm publishing state.
 
+## v0.4.2 - 2026-06-13
+
+`NOW.md` as the fixed local autopilot status entry.
+
+### Added
+
+- Added `forgedesk now` to refresh and print `.forgedesk/NOW.md`.
+- Added `forgedesk now --json` for structured status output.
+- Added automatic NOW refresh after `next`, `doctor`, `watch --once`, and `ci
+  check` when possible.
+
+### Improved
+
+- `NOW.md` summarizes active session, auto mode, readiness, inspect status,
+  evidence/review/export paths, blockers, warnings, and next suggested action.
+
+### Tests
+
+- Added NOW integration coverage for manual refresh, `next` refresh, and
+  `watch --once` refresh.
+
+### Publishing
+
+- GitHub source release only.
+- No npm publish in this version.
+
+### Boundaries
+
+- `NOW.md` is local status, not a review verdict. It does not call AI, edit
+  product code, commit, push, open PRs, tag, release, publish, upload, or run as
+  a hidden background service.
+
 ## v0.4.1 - 2026-06-13
 
 Ignition setup for folder-open local watch mode.
