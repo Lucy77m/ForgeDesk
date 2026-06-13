@@ -4,6 +4,41 @@ All notable ForgeDesk changes are tracked here.
 
 Version entries describe source, GitHub release, and npm publishing state.
 
+## v0.4.3 - 2026-06-13
+
+Test button discovery for editor shortcuts.
+
+### Added
+
+- Added `forgedesk tests discover` to find common package scripts without
+  running them.
+- Added `forgedesk tests discover --json` for structured local discovery.
+- Added `forgedesk shortcuts install --test-tasks` to generate VS Code tasks
+  such as `ForgeDesk Test: test` and `ForgeDesk Test: typecheck`.
+- Added matching `shortcuts status --test-tasks` and
+  `shortcuts uninstall --test-tasks` support.
+
+### Improved
+
+- Discovered test tasks route through `forgedesk test -- <runner> run <script>`
+  so explicit user-triggered test runs are captured as ForgeDesk evidence.
+
+### Tests
+
+- Added test discovery coverage for package-manager detection, missing
+  `package.json`, CLI JSON output, and generated editor task arguments.
+
+### Publishing
+
+- GitHub source release only.
+- No npm publish in this version.
+
+### Boundaries
+
+- Test discovery does not run tests automatically. Generated tasks are explicit
+  local buttons and do not call AI, edit product code, commit, push, open PRs,
+  tag, release, publish, upload, or run as hidden background services.
+
 ## v0.4.2 - 2026-06-13
 
 `NOW.md` as the fixed local autopilot status entry.

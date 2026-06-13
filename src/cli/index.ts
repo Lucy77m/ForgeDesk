@@ -31,6 +31,7 @@ import { getReadyReport, renderReadyReport } from '../core/ready.js'
 import { getReviewOutput } from '../core/review-output.js'
 import { getShortcutsStatus, installShortcuts, renderShortcutsReport, uninstallShortcuts } from '../core/shortcuts.js'
 import { getStatus } from '../core/status.js'
+import { discoverTestScripts, renderTestDiscoveryReport } from '../core/test-discovery.js'
 import { recordTestCommand, runTestCommand } from '../core/test-runner.js'
 import { getSessions } from '../core/sessions.js'
 import { archiveSession, markActiveSessionDone, reopenSession, showSession } from '../core/lifecycle.js'
@@ -60,7 +61,7 @@ export function buildProgram(cwd = process.cwd()): Command {
   program
     .name('forgedesk')
     .description('A local auto-capture desk for AI-assisted code changes.')
-    .version('0.4.2')
+    .version('0.4.3')
 
   program
     .command('init')
@@ -215,9 +216,13 @@ export function buildProgram(cwd = process.cwd()): Command {
     .command('status')
     .description('Show local ForgeDesk shortcut status.')
     .option('--package-scripts', 'include package.json script status')
+    .option('--test-tasks', 'include discovered package test task status')
     .option('--json', 'print the shortcuts report as JSON')
-    .action(async (options: { packageScripts?: boolean; json?: boolean }) => {
-      const report = await getShortcutsStatus(cwd, { packageScripts: options.packageScripts })
+    .action(async (options: { packageScripts?: boolean; testTasks?: boolean; json?: boolean }) => {
+      const report = await getShortcutsStatus(cwd, {
+        packageScripts: options.packageScripts,
+        testTasks: options.testTasks
+      })
       console.log(options.json ? JSON.stringify(report, null, 2) : renderShortcutsReport(report))
     })
 
@@ -260,9 +265,13 @@ export function buildProgram(cwd = process.cwd()): Command {
     .command('install')
     .description('Install VS Code tasks and optional package scripts for ForgeDesk.')
     .option('--package-scripts', 'also install package.json scripts')
+    .option('--test-tasks', 'also install discovered package test tasks')
     .option('--json', 'print the shortcuts report as JSON')
-    .action(async (options: { packageScripts?: boolean; json?: boolean }) => {
-      const report = await installShortcuts(cwd, { packageScripts: options.packageScripts })
+    .action(async (options: { packageScripts?: boolean; testTasks?: boolean; json?: boolean }) => {
+      const report = await installShortcuts(cwd, {
+        packageScripts: options.packageScripts,
+        testTasks: options.testTasks
+      })
       console.log(options.json ? JSON.stringify(report, null, 2) : renderShortcutsReport(report))
     })
 
@@ -270,10 +279,27 @@ export function buildProgram(cwd = process.cwd()): Command {
     .command('uninstall')
     .description('Remove ForgeDesk-managed VS Code tasks and optional package scripts.')
     .option('--package-scripts', 'also remove ForgeDesk package.json scripts')
+    .option('--test-tasks', 'also remove ForgeDesk-managed package test tasks')
     .option('--json', 'print the shortcuts report as JSON')
-    .action(async (options: { packageScripts?: boolean; json?: boolean }) => {
-      const report = await uninstallShortcuts(cwd, { packageScripts: options.packageScripts })
+    .action(async (options: { packageScripts?: boolean; testTasks?: boolean; json?: boolean }) => {
+      const report = await uninstallShortcuts(cwd, {
+        packageScripts: options.packageScripts,
+        testTasks: options.testTasks
+      })
       console.log(options.json ? JSON.stringify(report, null, 2) : renderShortcutsReport(report))
+    })
+
+  const tests = program
+    .command('tests')
+    .description('Discover local test commands for ForgeDesk buttons.')
+
+  tests
+    .command('discover')
+    .description('Discover common package test scripts without running them.')
+    .option('--json', 'print the test discovery report as JSON')
+    .action(async (options: { json?: boolean }) => {
+      const report = await discoverTestScripts(cwd)
+      console.log(options.json ? JSON.stringify(report, null, 2) : renderTestDiscoveryReport(report))
     })
 
   program

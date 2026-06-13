@@ -135,11 +135,24 @@ Package scripts are opt-in:
 forgedesk shortcuts install --package-scripts
 ```
 
+Test buttons are also opt-in:
+
+```bash
+forgedesk tests discover
+forgedesk shortcuts install --test-tasks
+```
+
+ForgeDesk discovers common package scripts such as `test`, `typecheck`,
+`build`, `lint`, and `check`. Generated test tasks run through
+`forgedesk test -- <runner> run <script>` so the result is recorded in the
+active session when you click the button.
+
 ForgeDesk only removes shortcuts that it generated:
 
 ```bash
 forgedesk shortcuts uninstall
 forgedesk shortcuts uninstall --package-scripts
+forgedesk shortcuts uninstall --test-tasks
 ```
 
 ## CI Evidence Gate

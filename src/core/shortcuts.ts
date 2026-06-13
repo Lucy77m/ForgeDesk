@@ -2,6 +2,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { displayPath, listLinesOrNone } from '../templates/format.js'
 import { ForgeDeskError } from './errors.js'
+import { discoverTestScripts, type DiscoveredTestScript } from './test-discovery.js'
 import { loadWorkspace, pathExists } from './workspace.js'
 
 type ShortcutAction = 'status' | 'installed' | 'uninstalled'
@@ -30,6 +31,7 @@ type PackageJson = {
 
 export type ShortcutsOptions = {
   packageScripts?: boolean
+  testTasks?: boolean
 }
 
 export type ShortcutsReport = {
@@ -39,6 +41,10 @@ export type ShortcutsReport = {
   repoPath: string
   vscode: {
     path: string
+    state: ShortcutState
+    labels: string[]
+  }
+  testTasks: {
     state: ShortcutState
     labels: string[]
   }
@@ -120,6 +126,21 @@ function taskLabels(): string[] {
   return vscodeTasks.map((task) => task.label)
 }
 
+function testTaskLabel(script: DiscoveredTestScript): string {
+  return `ForgeDesk Test: ${script.name}`
+}
+
+function testTasksFor(scripts: DiscoveredTestScript[]): VsCodeTask[] {
+  return scripts.map((script) => ({
+    label: testTaskLabel(script),
+    type: 'shell',
+    command: 'forgedesk',
+    args: ['test', '--', script.runner, 'run', script.name],
+    problemMatcher: [],
+    detail: marker
+  }))
+}
+
 function scriptNames(): string[] {
   return Object.keys(packageScripts)
 }
@@ -153,6 +174,26 @@ function taskState(tasksFile: VsCodeTasksFile | undefined): ShortcutState {
   return managed.length === labels.size ? 'installed' : 'partial'
 }
 
+function testTaskState(tasksFile: VsCodeTasksFile | undefined, labels: string[], includeTestTasks: boolean): ShortcutState {
+  if (!includeTestTasks) {
+    return 'skipped'
+  }
+  if (labels.length === 0) {
+    return 'missing'
+  }
+  const tasks = Array.isArray(tasksFile?.tasks) ? tasksFile.tasks : []
+  const labelSet = new Set(labels)
+  const managed = tasks.filter((task) => task.label && labelSet.has(task.label) && task.detail === marker)
+  const conflicts = tasks.filter((task) => task.label && labelSet.has(task.label) && task.detail !== marker)
+  if (conflicts.length > 0) {
+    return 'conflict'
+  }
+  if (managed.length === 0) {
+    return 'missing'
+  }
+  return managed.length === labels.length ? 'installed' : 'partial'
+}
+
 function scriptsState(pkg: PackageJson | undefined, includePackageScripts: boolean): ShortcutState {
   if (!includePackageScripts) {
     return 'skipped'
@@ -173,10 +214,11 @@ function scriptsState(pkg: PackageJson | undefined, includePackageScripts: boole
   return matching.length === entries.length ? 'installed' : 'partial'
 }
 
-async function readState(repoPath: string, includePackageScripts: boolean): Promise<{
+async function readState(repoPath: string, includePackageScripts: boolean, testTaskLabels: string[] = [], includeTestTasks = false): Promise<{
   tasks: VsCodeTasksFile | undefined
   pkg: PackageJson | undefined
   vscodeState: ShortcutState
+  testTaskState: ShortcutState
   packageState: ShortcutState
 }> {
   const tasks = await readJsonFile<VsCodeTasksFile>(vscodeTasksPath(repoPath), 'VS Code tasks')
@@ -185,6 +227,7 @@ async function readState(repoPath: string, includePackageScripts: boolean): Prom
     tasks,
     pkg,
     vscodeState: taskState(tasks),
+    testTaskState: testTaskState(tasks, testTaskLabels, includeTestTasks),
     packageState: scriptsState(pkg, includePackageScripts)
   }
 }
@@ -193,6 +236,8 @@ function report(
   action: ShortcutAction,
   repoPath: string,
   vscodeState: ShortcutState,
+  testTaskStateValue: ShortcutState,
+  testTaskLabels: string[],
   packageState: ShortcutState,
   warnings: string[],
   next: string[]
@@ -207,6 +252,10 @@ function report(
       state: vscodeState,
       labels: taskLabels()
     },
+    testTasks: {
+      state: testTaskStateValue,
+      labels: testTaskLabels
+    },
     packageScripts: {
       path: packageJsonPath(repoPath),
       state: packageState,
@@ -217,9 +266,9 @@ function report(
   }
 }
 
-function mergeTasks(tasksFile: VsCodeTasksFile | undefined): VsCodeTasksFile {
+function mergeTasks(tasksFile: VsCodeTasksFile | undefined, extraTasks: VsCodeTask[] = []): VsCodeTasksFile {
   const currentTasks = Array.isArray(tasksFile?.tasks) ? tasksFile.tasks : []
-  const labels = new Set(taskLabels())
+  const labels = new Set([...taskLabels(), ...extraTasks.map((task) => task.label).filter((label): label is string => Boolean(label))])
   const conflicts = currentTasks.filter((task) => task.label && labels.has(task.label) && task.detail !== marker)
   if (conflicts.length > 0) {
     throw new ForgeDeskError(
@@ -231,14 +280,15 @@ function mergeTasks(tasksFile: VsCodeTasksFile | undefined): VsCodeTasksFile {
     ...tasksFile,
     tasks: [
       ...currentTasks.filter((task) => !task.label || !labels.has(task.label)),
-      ...vscodeTasks
+      ...vscodeTasks,
+      ...extraTasks
     ]
   }
 }
 
-function removeTasks(tasksFile: VsCodeTasksFile | undefined): VsCodeTasksFile {
+function removeTasks(tasksFile: VsCodeTasksFile | undefined, extraLabels: string[] = []): VsCodeTasksFile {
   const currentTasks = Array.isArray(tasksFile?.tasks) ? tasksFile.tasks : []
-  const labels = new Set(taskLabels())
+  const labels = new Set([...taskLabels(), ...extraLabels])
   return {
     version: tasksFile?.version ?? '2.0.0',
     ...tasksFile,
@@ -288,11 +338,15 @@ async function writeJson(filePath: string, value: unknown): Promise<void> {
 
 export async function getShortcutsStatus(cwd: string, options: ShortcutsOptions = {}): Promise<ShortcutsReport> {
   const workspace = await loadWorkspace(cwd)
-  const state = await readState(workspace.repoPath, options.packageScripts === true)
+  const discovered = options.testTasks ? await discoverTestScripts(cwd) : undefined
+  const testLabels = discovered?.scripts.map(testTaskLabel) ?? []
+  const state = await readState(workspace.repoPath, options.packageScripts === true, testLabels, options.testTasks === true)
   return report(
     'status',
     workspace.repoPath,
     state.vscodeState,
+    state.testTaskState,
+    testLabels,
     state.packageState,
     [],
     ['Run "forgedesk shortcuts install" to generate editor tasks.']
@@ -302,8 +356,11 @@ export async function getShortcutsStatus(cwd: string, options: ShortcutsOptions 
 export async function installShortcuts(cwd: string, options: ShortcutsOptions = {}): Promise<ShortcutsReport> {
   const workspace = await loadWorkspace(cwd)
   const includePackageScripts = options.packageScripts === true
-  const state = await readState(workspace.repoPath, includePackageScripts)
-  const nextTasks = mergeTasks(state.tasks)
+  const discovered = options.testTasks ? await discoverTestScripts(cwd) : undefined
+  const testTasks = discovered ? testTasksFor(discovered.scripts) : []
+  const testLabels = discovered?.scripts.map(testTaskLabel) ?? []
+  const state = await readState(workspace.repoPath, includePackageScripts, testLabels, options.testTasks === true)
+  const nextTasks = mergeTasks(state.tasks, testTasks)
   const nextPackage = includePackageScripts && state.pkg ? mergeScripts(state.pkg) : undefined
 
   const warnings: string[] = []
@@ -312,17 +369,22 @@ export async function installShortcuts(cwd: string, options: ShortcutsOptions = 
       warnings.push('package.json was not found; package scripts were skipped.')
     }
   }
+  if (options.testTasks && discovered && discovered.scripts.length === 0) {
+    warnings.push('No test tasks were installed because no common package scripts were discovered.')
+  }
 
   await writeJson(vscodeTasksPath(workspace.repoPath), nextTasks)
   if (nextPackage) {
     await writeJson(packageJsonPath(workspace.repoPath), nextPackage)
   }
 
-  const nextState = await readState(workspace.repoPath, includePackageScripts)
+  const nextState = await readState(workspace.repoPath, includePackageScripts, testLabels, options.testTasks === true)
   return report(
     'installed',
     workspace.repoPath,
     nextState.vscodeState,
+    nextState.testTaskState,
+    testLabels,
     nextState.packageState,
     warnings,
     ['Open VS Code Tasks and run "ForgeDesk: Next" or "ForgeDesk: Watch".']
@@ -332,18 +394,22 @@ export async function installShortcuts(cwd: string, options: ShortcutsOptions = 
 export async function uninstallShortcuts(cwd: string, options: ShortcutsOptions = {}): Promise<ShortcutsReport> {
   const workspace = await loadWorkspace(cwd)
   const includePackageScripts = options.packageScripts === true
-  const state = await readState(workspace.repoPath, includePackageScripts)
+  const discovered = options.testTasks ? await discoverTestScripts(cwd) : undefined
+  const testLabels = discovered?.scripts.map(testTaskLabel) ?? []
+  const state = await readState(workspace.repoPath, includePackageScripts, testLabels, options.testTasks === true)
 
-  await writeJson(vscodeTasksPath(workspace.repoPath), removeTasks(state.tasks))
+  await writeJson(vscodeTasksPath(workspace.repoPath), removeTasks(state.tasks, testLabels))
   if (includePackageScripts && state.pkg) {
     await writeJson(packageJsonPath(workspace.repoPath), removeScripts(state.pkg))
   }
 
-  const nextState = await readState(workspace.repoPath, includePackageScripts)
+  const nextState = await readState(workspace.repoPath, includePackageScripts, testLabels, options.testTasks === true)
   return report(
     'uninstalled',
     workspace.repoPath,
     nextState.vscodeState,
+    nextState.testTaskState,
+    testLabels,
     nextState.packageState,
     [],
     ['Run "forgedesk shortcuts install" to recreate editor tasks.']
@@ -357,6 +423,7 @@ export function renderShortcutsReport(report: ShortcutsReport): string {
     `Action: ${report.action}`,
     `Repo: ${displayPath(report.repoPath)}`,
     `VS Code tasks: ${report.vscode.state} (${displayPath(report.vscode.path)})`,
+    `Test tasks: ${report.testTasks.state}`,
     `Package scripts: ${report.packageScripts.state} (${displayPath(report.packageScripts.path)})`,
     '',
     '## VS Code Tasks',
@@ -364,6 +431,9 @@ export function renderShortcutsReport(report: ShortcutsReport): string {
     '',
     '## Package Scripts',
     ...report.packageScripts.names.map((name) => `- ${name}`),
+    '',
+    '## Test Tasks',
+    ...listLinesOrNone(report.testTasks.labels),
     '',
     '## Warnings',
     ...listLinesOrNone(report.warnings),

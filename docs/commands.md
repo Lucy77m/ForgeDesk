@@ -171,10 +171,13 @@ possible. `NOW.md` is local status, not a review verdict.
 | Command | Purpose | Writes local data |
 |---|---|---|
 | `forgedesk shortcuts status` | Show local editor shortcut status. | no |
+| `forgedesk shortcuts status --test-tasks` | Include discovered package test task status. | no |
 | `forgedesk shortcuts install` | Install ForgeDesk VS Code tasks. | yes |
 | `forgedesk shortcuts install --package-scripts` | Also add ForgeDesk npm scripts when `package.json` exists. | yes |
+| `forgedesk shortcuts install --test-tasks` | Also add discovered package test tasks. | yes |
 | `forgedesk shortcuts uninstall` | Remove ForgeDesk-managed VS Code tasks. | yes |
 | `forgedesk shortcuts uninstall --package-scripts` | Also remove ForgeDesk-managed package scripts. | yes |
+| `forgedesk shortcuts uninstall --test-tasks` | Also remove ForgeDesk-managed package test tasks. | yes |
 
 Installed VS Code tasks:
 
@@ -192,10 +195,25 @@ Optional package scripts:
 - `forgedesk:watch`
 - `forgedesk:inspect-export`
 
+Optional test tasks are generated from common package scripts discovered by
+`forgedesk tests discover`, such as `test`, `typecheck`, `build`, `lint`, and
+`check`. They run through `forgedesk test -- <runner> run <script>` so the
+explicit test result is captured in the active session.
+
 ForgeDesk refuses to overwrite tasks or scripts it does not manage. Shortcuts
 are local entry points for existing ForgeDesk commands; they do not call AI,
 edit product code, commit, push, open PRs, tag, release, publish, upload, or
 run as a hidden background service.
+
+## Test Discovery
+
+| Command | Purpose | Writes local data |
+|---|---|---|
+| `forgedesk tests discover` | Discover common package test scripts without running them. | no |
+| `forgedesk tests discover --json` | Print the discovery report as JSON. | no |
+
+Discovery reads the local `package.json` and reports common scripts that can be
+used as explicit ForgeDesk test buttons. It does not execute scripts.
 
 ## CI Evidence Gate
 

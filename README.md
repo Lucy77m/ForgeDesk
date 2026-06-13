@@ -61,7 +61,9 @@ forgedesk hooks status
 forgedesk watch
 forgedesk ignition install
 forgedesk now
+forgedesk tests discover
 forgedesk shortcuts install
+forgedesk shortcuts install --test-tasks
 forgedesk ci print
 ```
 
@@ -112,7 +114,9 @@ forgedesk ignition install
 forgedesk ignition status
 forgedesk ignition uninstall
 forgedesk now
+forgedesk tests discover
 forgedesk shortcuts install
+forgedesk shortcuts install --test-tasks
 forgedesk shortcuts status
 forgedesk shortcuts uninstall
 forgedesk ci check
@@ -166,8 +170,8 @@ See [CHANGELOG.md](CHANGELOG.md) for local source version notes.
 
 ## Project Status
 
-ForgeDesk v0.4.2 is prepared as a GitHub source release for `.forgedesk/NOW.md`
-as the fixed local autopilot status entry. The npm package remains at v0.2.3 until the next explicit npm
+ForgeDesk v0.4.3 is prepared as a GitHub source release for test button
+discovery and optional editor test tasks. The npm package remains at v0.2.3 until the next explicit npm
 publish.
 
 ## Development

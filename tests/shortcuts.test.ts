@@ -95,6 +95,38 @@ describe('shortcuts', () => {
     expect(JSON.parse(uninstall.stdout).packageScripts.state).toBe('missing')
   })
 
+  it('optionally installs and removes discovered package test tasks', () => {
+    const repo = tempDir()
+    dirs.push(repo)
+    initGitRepo(repo)
+    expect(runCli(repo, ['init', '--repo', '.']).status).toBe(0)
+    writeFileSync(
+      path.join(repo, 'package.json'),
+      '{"packageManager":"pnpm@11.1.3","scripts":{"test":"vitest run","typecheck":"tsc --noEmit","dev":"tsx src/index.ts"}}\n',
+      'utf8'
+    )
+
+    const install = runCli(repo, ['shortcuts', 'install', '--test-tasks', '--json'])
+
+    expect(install.status).toBe(0)
+    const installReport = JSON.parse(install.stdout)
+    expect(installReport.testTasks.state).toBe('installed')
+    expect(installReport.testTasks.labels).toEqual(['ForgeDesk Test: test', 'ForgeDesk Test: typecheck'])
+    const tasks = readJson(tasksPath(repo))
+    const testTask = tasks.tasks.find((task: { label: string }) => task.label === 'ForgeDesk Test: test')
+    expect(testTask.command).toBe('forgedesk')
+    expect(testTask.args).toEqual(['test', '--', 'pnpm', 'run', 'test'])
+
+    const status = runCli(repo, ['shortcuts', 'status', '--test-tasks', '--json'])
+    expect(status.status).toBe(0)
+    expect(JSON.parse(status.stdout).testTasks.state).toBe('installed')
+
+    const uninstall = runCli(repo, ['shortcuts', 'uninstall', '--test-tasks', '--json'])
+    expect(uninstall.status).toBe(0)
+    expect(JSON.parse(uninstall.stdout).testTasks.state).toBe('missing')
+    expect(readJson(tasksPath(repo)).tasks.map((task: { label: string }) => task.label)).not.toContain('ForgeDesk Test: test')
+  })
+
   it('skips package scripts when package.json is absent', () => {
     const repo = tempDir()
     dirs.push(repo)
