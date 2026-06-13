@@ -114,6 +114,27 @@ Hook behavior follows `forgedesk auto-config`:
 Hooks do not call AI, edit product code, run tests, commit, push, open PRs, tag,
 release, publish, upload, or run as a hidden background service.
 
+## Watch
+
+| Command | Purpose | Writes local data |
+|---|---|---|
+| `forgedesk watch` | Run foreground local watch mode until stopped. | depends on auto mode |
+| `forgedesk watch --once` | Evaluate watch mode once and exit. | depends on auto mode |
+| `forgedesk watch --interval <ms>` | Set the polling interval; minimum 500 ms. | depends on auto mode |
+| `forgedesk watch --json` | Print watch reports as JSON. | depends on auto mode |
+
+Watch mode is a foreground process. It does not install a daemon, cron job, or
+system service. Press `Ctrl+C` to stop it.
+
+Watch behavior follows `forgedesk auto-config`:
+
+- `manual`: watch stays idle.
+- `assist`: watch previews the next local step without writing files.
+- `local-auto`: watch may run one safe `forgedesk next` step per observed state change.
+- `guarded`: watch reports blockers without writing files.
+
+Use `watch --once` for scripts, tests, or a one-shot no-loop check.
+
 ## Auto Capture
 
 | Command | Purpose | Writes local data |

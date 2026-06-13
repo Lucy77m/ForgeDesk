@@ -30,6 +30,7 @@ import { getStatus } from '../core/status.js'
 import { recordTestCommand, runTestCommand } from '../core/test-runner.js'
 import { getSessions } from '../core/sessions.js'
 import { archiveSession, markActiveSessionDone, reopenSession, showSession } from '../core/lifecycle.js'
+import { getWatchReport, parseWatchInterval, renderWatchReport, startWatch } from '../core/watch.js'
 import type { ChangeSession } from '../types.js'
 
 const riskSeverities = ['low', 'medium', 'high'] as const
@@ -55,7 +56,7 @@ export function buildProgram(cwd = process.cwd()): Command {
   program
     .name('forgedesk')
     .description('A local auto-capture desk for AI-assisted code changes.')
-    .version('0.3.2')
+    .version('0.3.3')
 
   program
     .command('init')
@@ -148,6 +149,26 @@ export function buildProgram(cwd = process.cwd()): Command {
       if (report.outcome === 'blocked') {
         process.exitCode = 1
       }
+    })
+
+  program
+    .command('watch')
+    .description('Run foreground local ForgeDesk watch mode.')
+    .option('--once', 'evaluate once and exit')
+    .option('--interval <ms>', 'polling interval in milliseconds; minimum 500', '2000')
+    .option('--json', 'print watch reports as JSON')
+    .action(async (options: { once?: boolean; interval?: string; json?: boolean }) => {
+      const intervalMs = parseWatchInterval(options.interval)
+      if (options.once) {
+        const report = await getWatchReport(cwd)
+        console.log(options.json ? JSON.stringify(report, null, 2) : renderWatchReport(report))
+        if (report.status === 'error') {
+          process.exitCode = 1
+        }
+        return
+      }
+      console.log('ForgeDesk watch is running in the foreground. Press Ctrl+C to stop.')
+      await startWatch(cwd, { intervalMs, json: options.json })
     })
 
   program

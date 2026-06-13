@@ -59,6 +59,27 @@ ForgeDesk refuses to overwrite hooks it does not manage. Remove hooks with:
 forgedesk hooks uninstall
 ```
 
+## Foreground Watch
+
+`forgedesk watch` keeps the run button open in the foreground.
+
+```bash
+forgedesk auto-config set assist
+forgedesk watch
+```
+
+Use `assist` when you want watch to explain the next step without writing files.
+Use `local-auto` when you want it to run one safe local `next` step as state
+changes. Use `guarded` when you want the watch output to make blockers obvious
+without modifying `.forgedesk/`.
+
+`watch` is not a daemon. It runs in the terminal you started, and `Ctrl+C` stops
+it. For a one-shot check:
+
+```bash
+forgedesk watch --once
+```
+
 ## Supporting Buttons
 
 These commands support the run-button path:

@@ -4,6 +4,41 @@ All notable ForgeDesk changes are tracked here.
 
 Version entries describe source, GitHub release, and npm publishing state.
 
+## v0.3.3 - 2026-06-13
+
+Foreground watch mode for local run-button automation.
+
+### Added
+
+- Added `forgedesk watch` as a foreground local watch mode.
+- Added `forgedesk watch --once` for one-shot checks, tests, and scripts.
+- Added `forgedesk watch --interval <ms>` with a minimum 500 ms polling
+  interval.
+
+### Improved
+
+- Watch mode follows the auto profile:
+  - `manual` stays idle.
+  - `assist` previews the next local step without writing files.
+  - `local-auto` may run one safe `forgedesk next` step.
+  - `guarded` reports blockers without writing files.
+
+### Tests
+
+- Added watch integration coverage for `manual`, `assist`, `local-auto`,
+  `guarded`, and invalid interval handling.
+
+### Publishing
+
+- GitHub source release only.
+- No npm publish in this version.
+
+### Boundaries
+
+- Watch is a foreground process started by the user and stopped with `Ctrl+C`.
+  It is not a daemon, cron job, system service, AI reviewer, code fixer,
+  committer, pusher, PR opener, publisher, uploader, or cloud sync process.
+
 ## v0.3.2 - 2026-06-13
 
 Optional local git hooks for the auto-profile workflow.
