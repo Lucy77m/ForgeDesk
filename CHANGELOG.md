@@ -4,6 +4,38 @@ All notable ForgeDesk changes are tracked here.
 
 Version entries describe source, GitHub release, and npm publishing state.
 
+## v0.2.9 - 2026-06-13
+
+Review and handoff output polish.
+
+### Improved
+
+- Added reviewer checklist and known-limits sections to generated `PR_BODY.md`.
+- Added at-a-glance metadata, reviewer checklist, and known-limits sections to
+  generated `REVIEW_CONTEXT.md`.
+- Added suggested review order and local follow-up commands to handoff reports
+  and exported `HANDOFF.md`.
+
+### Tests
+
+- Extended template tests for the new review-context and PR-body sections.
+- Extended handoff integration coverage for suggested review order and command
+  output.
+
+### Publishing
+
+- GitHub source release only.
+- No npm publish in this version.
+
+### Boundaries
+
+- Output polish remains local Markdown generation. ForgeDesk still does not call
+  AI, decide correctness, modify product code, commit, push, open PRs, tag,
+  release, or publish.
+- No AI provider calls, Web UI, cloud sync, background automation, plugin
+  system, automatic code fixing, automatic commit, push, PR, tag, release, or
+  npm publish behavior inside ForgeDesk.
+
 ## v0.2.8 - 2026-06-13
 
 Doctor and troubleshooting polish for the local run-button workflow.

@@ -167,6 +167,11 @@ warnings when they are not the active session.
 do not generate evidence or fix code. With `--copy`, they attempt to use the
 local system clipboard and fail clearly if no clipboard command is available.
 
+Generated `PR_BODY.md` and `REVIEW_CONTEXT.md` include reviewer checklist and
+known-limits sections so the material can be pasted or handed off with less
+manual rearranging. `handoff` and exported `HANDOFF.md` include a suggested
+review order plus local commands for reopening the same session context.
+
 `ready`, `handoff`, `review-context`, `pr`, `fix-context`, and `inspect` do not
 decide whether the code is correct. They only organize local evidence for human
 review.

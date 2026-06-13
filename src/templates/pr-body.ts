@@ -1,8 +1,9 @@
 import type { EvidenceBundle } from '../types.js'
-import { listOrNone, renderChangedFiles, testSummary } from './format.js'
+import { listOrNone, notVerified, renderChangedFiles, testSummary } from './format.js'
 
 export function renderPrBody(bundle: EvidenceBundle): string {
   const riskHints = bundle.autoCapture?.riskHints ?? []
+  const gaps = notVerified(bundle.session)
 
   return `## Summary
 
@@ -16,9 +17,19 @@ ${renderChangedFiles(bundle.gitSnapshot)}
 
 ${testSummary(bundle.session)}
 
+## Reviewer Checklist
+
+- [ ] Confirm the diff matches the stated intent.
+- [ ] Review the changed files and risk focus before relying on tests.
+- [ ] Check any known limits before merge or release.
+
 ## Risks / Review Focus
 
 ${listOrNone(riskHints.map((hint) => hint.text), 'No risk hints generated.')}
+
+## Known Limits
+
+${listOrNone(gaps, 'No known gaps recorded.')}
 
 ## Notes
 

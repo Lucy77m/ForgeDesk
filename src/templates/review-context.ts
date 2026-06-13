@@ -1,10 +1,19 @@
 import type { EvidenceBundle } from '../types.js'
-import { listOrNone, renderChangedFiles, testSummary } from './format.js'
+import { changedFileCount, listOrNone, notVerified, renderChangedFiles, testSummary } from './format.js'
 
 export function renderReviewContext(bundle: EvidenceBundle): string {
   const riskHints = bundle.autoCapture?.riskHints ?? []
+  const gaps = notVerified(bundle.session)
 
   return `# Review Context
+
+## At A Glance
+
+- Session: ${bundle.session.title}
+- Status: ${bundle.session.status}
+- Branch: ${bundle.gitSnapshot.branch}
+- HEAD: ${bundle.gitSnapshot.head}
+- Changed files: ${changedFileCount(bundle.gitSnapshot)}
 
 ## Change Intent
 
@@ -21,6 +30,17 @@ ${listOrNone(riskHints.map((hint) => `${hint.text} (${hint.source}, ${hint.sever
 ## Test Evidence
 
 ${testSummary(bundle.session)}
+
+## Reviewer Checklist
+
+- Confirm the implementation matches the stated intent.
+- Inspect the changed files before relying on generated summaries.
+- Treat failed, missing, or recorded-only tests as blockers until addressed.
+- Review risk hints and known limits explicitly.
+
+## Known Limits
+
+${listOrNone(gaps, 'No known gaps recorded.')}
 
 ## Review Instructions
 

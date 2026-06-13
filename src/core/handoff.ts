@@ -24,7 +24,9 @@ export type HandoffReport = {
     manualChecks: number
     changedFiles?: number
   }
+  suggestedReviewOrder: string[]
   recommendedFiles: string[]
+  commands: string[]
 }
 
 function recommendedFiles(session: ChangeSession): string[] {
@@ -33,6 +35,28 @@ function recommendedFiles(session: ChangeSession): string[] {
   }
 
   return EVIDENCE_FILE_NAMES.map((file) => displayPath(path.join(session.evidenceDir!, file)))
+}
+
+function suggestedReviewOrder(session: ChangeSession): string[] {
+  if (!session.evidenceDir) {
+    return []
+  }
+
+  return [
+    path.join(session.evidenceDir, 'REVIEW_CONTEXT.md'),
+    path.join(session.evidenceDir, 'PR_BODY.md'),
+    path.join(session.evidenceDir, 'TEST_EVIDENCE.md'),
+    path.join(session.evidenceDir, 'PR_EVIDENCE.md')
+  ].map(displayPath)
+}
+
+function handoffCommands(session: ChangeSession): string[] {
+  return [
+    `forgedesk review-context --session ${session.id}`,
+    `forgedesk pr --session ${session.id}`,
+    `forgedesk ready --session ${session.id}`,
+    `forgedesk inspect --session ${session.id}`
+  ]
 }
 
 export async function getHandoffReport(cwd: string, sessionId?: string): Promise<HandoffReport> {
@@ -59,7 +83,9 @@ export async function getHandoffReport(cwd: string, sessionId?: string): Promise
       manualChecks: session.manualChecks?.length ?? 0,
       changedFiles: session.gitSnapshot ? changedFileCount(session.gitSnapshot) : undefined
     },
-    recommendedFiles: recommendedFiles(session)
+    suggestedReviewOrder: suggestedReviewOrder(session),
+    recommendedFiles: recommendedFiles(session),
+    commands: handoffCommands(session)
   }
 }
 
@@ -92,8 +118,14 @@ export function renderHandoffReport(report: HandoffReport): string {
     '## Ready Warnings',
     ...listLinesOrNone(report.ready.warnings),
     '',
+    '## Suggested Review Order',
+    ...listLinesOrNone(report.suggestedReviewOrder, 'Generate evidence before handoff.'),
+    '',
     '## Recommended Files',
     ...listLinesOrNone(report.recommendedFiles, 'Generate evidence before handoff.'),
+    '',
+    '## Commands',
+    ...listLinesOrNone(report.commands),
     '',
     'This is a local evidence handoff summary, not an AI review or code correctness verdict.'
   ].join('\n')

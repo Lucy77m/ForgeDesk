@@ -20,7 +20,7 @@ describe('cli integration', () => {
     const result = runCli(repo, ['--version'])
 
     expect(result.status).toBe(0)
-    expect(result.stdout.trim()).toBe('0.2.8')
+    expect(result.stdout.trim()).toBe('0.2.9')
   })
 
   it('auto-captures a local change without running checks', () => {
@@ -592,6 +592,9 @@ describe('cli integration', () => {
     expect(handoff.stdout).toContain('PR_EVIDENCE.md')
     expect(handoff.stdout).toContain('REVIEW_PROMPT.md')
     expect(handoff.stdout).toContain('Changed files: 1')
+    expect(handoff.stdout).toContain('## Suggested Review Order')
+    expect(handoff.stdout).toContain('## Commands')
+    expect(handoff.stdout).toContain(`forgedesk review-context --session ${sessionId}`)
     expect(handoff.stdout).not.toContain('.forgedesk\\evidence')
 
     const json = runCli(repo, ['handoff', '--session', sessionId, '--json'])
@@ -599,6 +602,8 @@ describe('cli integration', () => {
     const report = JSON.parse(json.stdout)
     expect(report.schemaVersion).toBe('forgedesk-handoff-v1')
     expect(report.ready.ready).toBe(true)
+    expect(report.suggestedReviewOrder).toContain('.forgedesk/evidence/' + sessionId + '/REVIEW_CONTEXT.md')
+    expect(report.commands).toContain('forgedesk pr --session ' + sessionId)
     expect(report.recommendedFiles).toContain('.forgedesk/evidence/' + sessionId + '/PR_EVIDENCE.md')
   })
 

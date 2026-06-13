@@ -9,6 +9,9 @@ ForgeDesk captures local git changes and prepares review-ready material:
 summary, PR body, test evidence, risk hints, review context, failed-test fix
 context, and an evidence pack.
 
+Generated review material includes reviewer checklists, known limits, suggested
+review order, and local follow-up commands where useful.
+
 It does not review code for you. It prepares the material before humans or AI
 reviewers inspect the change.
 
@@ -122,8 +125,8 @@ See [CHANGELOG.md](CHANGELOG.md) for local source version notes.
 
 ## Project Status
 
-ForgeDesk v0.2.8 is prepared as a GitHub source release for local doctor and
-troubleshooting hardening. The npm package remains at v0.2.3 until the next explicit npm
+ForgeDesk v0.2.9 is prepared as a GitHub source release for review and handoff
+output polish. The npm package remains at v0.2.3 until the next explicit npm
 publish.
 
 ## Development
