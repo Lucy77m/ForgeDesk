@@ -23,6 +23,7 @@ import {
   runHook,
   uninstallHooks
 } from '../core/hooks.js'
+import { getIgnitionStatus, installIgnition, renderIgnitionReport, uninstallIgnition } from '../core/ignition.js'
 import { getInspectReport, renderInspectReport } from '../core/inspect.js'
 import { getNextReport, renderNextReport } from '../core/next.js'
 import { getReadyReport, renderReadyReport } from '../core/ready.js'
@@ -58,7 +59,7 @@ export function buildProgram(cwd = process.cwd()): Command {
   program
     .name('forgedesk')
     .description('A local auto-capture desk for AI-assisted code changes.')
-    .version('0.4.0')
+    .version('0.4.1')
 
   program
     .command('init')
@@ -176,6 +177,37 @@ export function buildProgram(cwd = process.cwd()): Command {
   const shortcuts = program
     .command('shortcuts')
     .description('Install or remove local editor and package shortcuts for ForgeDesk.')
+
+  const ignition = program
+    .command('ignition')
+    .description('Install or remove the local folder-open ForgeDesk watch task.')
+
+  ignition
+    .command('status')
+    .description('Show local ForgeDesk ignition task status.')
+    .option('--json', 'print the ignition report as JSON')
+    .action(async (options: { json?: boolean }) => {
+      const report = await getIgnitionStatus(cwd)
+      console.log(options.json ? JSON.stringify(report, null, 2) : renderIgnitionReport(report))
+    })
+
+  ignition
+    .command('install')
+    .description('Install the folder-open ForgeDesk watch task.')
+    .option('--json', 'print the ignition report as JSON')
+    .action(async (options: { json?: boolean }) => {
+      const report = await installIgnition(cwd)
+      console.log(options.json ? JSON.stringify(report, null, 2) : renderIgnitionReport(report))
+    })
+
+  ignition
+    .command('uninstall')
+    .description('Remove the ForgeDesk-managed ignition task.')
+    .option('--json', 'print the ignition report as JSON')
+    .action(async (options: { json?: boolean }) => {
+      const report = await uninstallIgnition(cwd)
+      console.log(options.json ? JSON.stringify(report, null, 2) : renderIgnitionReport(report))
+    })
 
   shortcuts
     .command('status')

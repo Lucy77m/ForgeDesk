@@ -57,6 +57,10 @@ configured auto profile. Git hooks must be installed per repository and must not
 overwrite user-managed hooks. Watch mode must run as a foreground process that
 the user starts and stops explicitly.
 
+ForgeDesk may install a repository-local editor task that starts `forgedesk
+watch` when the folder opens. The editor must still control whether automatic
+tasks are allowed for the folder.
+
 ForgeDesk may generate editor tasks or package scripts only after an explicit
 local command. Those shortcuts must remain inspectable and removable, and they
 must not hide irreversible actions behind a click.

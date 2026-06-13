@@ -135,6 +135,23 @@ Watch behavior follows `forgedesk auto-config`:
 
 Use `watch --once` for scripts, tests, or a one-shot no-loop check.
 
+## Ignition
+
+| Command | Purpose | Writes local data |
+|---|---|---|
+| `forgedesk ignition status` | Show whether the folder-open watch task is installed. | no |
+| `forgedesk ignition install` | Install a ForgeDesk-managed folder-open watch task. | yes |
+| `forgedesk ignition uninstall` | Remove the ForgeDesk-managed ignition task. | yes |
+
+Ignition writes a VS Code/Cursor-compatible task named `ForgeDesk: Ignition
+Watch` with `runOptions.runOn = folderOpen`. Editors may ask you to allow
+automatic tasks for the folder before it runs.
+
+Ignition refuses to overwrite a task with the same label unless ForgeDesk
+created it. It starts `forgedesk watch` as an explicit editor task; it does not
+install a daemon, cron job, system service, AI reviewer, code fixer, committer,
+pusher, PR opener, publisher, uploader, or cloud sync process.
+
 ## Shortcuts
 
 | Command | Purpose | Writes local data |

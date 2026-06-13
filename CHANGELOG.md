@@ -4,6 +4,40 @@ All notable ForgeDesk changes are tracked here.
 
 Version entries describe source, GitHub release, and npm publishing state.
 
+## v0.4.1 - 2026-06-13
+
+Ignition setup for folder-open local watch mode.
+
+### Added
+
+- Added `forgedesk ignition status`.
+- Added `forgedesk ignition install` to create a VS Code/Cursor-compatible
+  folder-open task that starts `forgedesk watch`.
+- Added `forgedesk ignition uninstall` to remove the ForgeDesk-managed ignition
+  task.
+
+### Improved
+
+- Ignition refuses to overwrite unmanaged tasks with the same label.
+- Documentation now explains that editors may ask the user to allow automatic
+  tasks for the folder.
+
+### Tests
+
+- Added ignition integration coverage for install/status/uninstall,
+  `runOptions.runOn = folderOpen`, and unmanaged-task refusal.
+
+### Publishing
+
+- GitHub source release only.
+- No npm publish in this version.
+
+### Boundaries
+
+- Ignition is an explicit local editor task. It does not install a daemon, call
+  AI, edit product code, commit, push, open PRs, tag, release, publish, upload,
+  or run as a hidden background service.
+
 ## v0.4.0 - 2026-06-13
 
 Local autopilot milestone with optional CI evidence gates.

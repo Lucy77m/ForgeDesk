@@ -80,6 +80,25 @@ it. For a one-shot check:
 forgedesk watch --once
 ```
 
+## Ignition
+
+`forgedesk ignition install` creates a folder-open task that starts
+`forgedesk watch` when the project opens in VS Code or Cursor.
+
+```bash
+forgedesk ignition install
+forgedesk ignition status
+```
+
+The editor may ask you to allow automatic tasks for the folder. ForgeDesk does
+not bypass that prompt.
+
+Remove ignition with:
+
+```bash
+forgedesk ignition uninstall
+```
+
 ## Editor Shortcuts
 
 `forgedesk shortcuts install` creates VS Code tasks so the most common

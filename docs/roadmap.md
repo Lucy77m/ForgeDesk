@@ -2,9 +2,9 @@
 
 This roadmap is a planning reference, not a commitment list.
 
-ForgeDesk v0.4.0 is a local autopilot CLI with explicit auto profiles, optional
-repository git hooks, foreground watch mode, editor shortcuts, and an optional
-CI evidence gate for evidence-first AI-assisted code changes. The current
+ForgeDesk v0.4.1 is a local autopilot CLI with explicit auto profiles, optional
+repository git hooks, foreground watch mode, ignition folder-open tasks, editor
+shortcuts, and an optional CI evidence gate for evidence-first AI-assisted code changes. The current
 direction is to make local workflow steps easier to preview, execute, diagnose,
 gate, and hand off while keeping ForgeDesk out of AI review, cloud sync, hidden
 background automation, and irreversible automation.
@@ -39,6 +39,8 @@ Make the automatic local workflow boringly reliable and easier for humans.
   evidence checks.
 - Support foreground watch mode for users who want ForgeDesk to keep the next
   local step visible without becoming a daemon.
+- Support local ignition tasks so opening the project can start watch after the
+  editor's automatic-task approval.
 - Generate editor shortcuts so common ForgeDesk buttons can be clicked from VS
   Code without memorizing commands.
 - Generate optional CI evidence gates for repositories that want evidence

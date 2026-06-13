@@ -59,6 +59,7 @@ forgedesk auto-config set assist
 forgedesk hooks install
 forgedesk hooks status
 forgedesk watch
+forgedesk ignition install
 forgedesk shortcuts install
 forgedesk ci print
 ```
@@ -106,6 +107,9 @@ forgedesk hooks status
 forgedesk hooks uninstall
 forgedesk watch
 forgedesk watch --once
+forgedesk ignition install
+forgedesk ignition status
+forgedesk ignition uninstall
 forgedesk shortcuts install
 forgedesk shortcuts status
 forgedesk shortcuts uninstall
@@ -160,8 +164,8 @@ See [CHANGELOG.md](CHANGELOG.md) for local source version notes.
 
 ## Project Status
 
-ForgeDesk v0.4.0 is prepared as a GitHub source release for the local autopilot
-and optional CI evidence gate milestone. The npm package remains at v0.2.3 until the next explicit npm
+ForgeDesk v0.4.1 is prepared as a GitHub source release for local ignition
+folder-open watch tasks. The npm package remains at v0.2.3 until the next explicit npm
 publish.
 
 ## Development
