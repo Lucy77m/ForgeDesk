@@ -66,6 +66,8 @@ stable local state label such as `dirty-no-session`, `missing-evidence`,
 `exported`; the recommendation is the single next step ForgeDesk would put in
 front of a human.
 
+See [run-button.md](run-button.md) for the focused v0.3 workflow guide.
+
 ## Auto Capture
 
 | Command | Purpose | Writes local data |

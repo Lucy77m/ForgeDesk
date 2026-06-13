@@ -44,7 +44,7 @@ export function buildProgram(cwd = process.cwd()): Command {
   program
     .name('forgedesk')
     .description('A local auto-capture desk for AI-assisted code changes.')
-    .version('0.2.9')
+    .version('0.3.0')
 
   program
     .command('init')

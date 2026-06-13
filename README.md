@@ -47,6 +47,10 @@ forgedesk next --dry-run
 forgedesk next
 ```
 
+`forgedesk next` is the primary local run button. It auto-captures local changes,
+generates or refreshes evidence, checks readiness, and exports ready evidence
+one safe step at a time.
+
 ## Output
 
 ```text
@@ -115,6 +119,8 @@ See [docs/commands.md](docs/commands.md) for the full command reference.
 
 See [docs/boundaries.md](docs/boundaries.md) for the product boundary contract.
 See [docs/commands.md](docs/commands.md) for all CLI commands and side effects.
+See [docs/run-button.md](docs/run-button.md) for the v0.3 local run-button
+workflow.
 See [docs/reviewer-guide.md](docs/reviewer-guide.md) for how to inspect an
 evidence pack.
 See [docs/local-workflow.md](docs/local-workflow.md) for a local demo workflow.
@@ -125,8 +131,8 @@ See [CHANGELOG.md](CHANGELOG.md) for local source version notes.
 
 ## Project Status
 
-ForgeDesk v0.2.9 is prepared as a GitHub source release for review and handoff
-output polish. The npm package remains at v0.2.3 until the next explicit npm
+ForgeDesk v0.3.0 is prepared as a GitHub source release for the local run-button
+milestone. The npm package remains at v0.2.3 until the next explicit npm
 publish.
 
 ## Development

@@ -4,6 +4,39 @@ All notable ForgeDesk changes are tracked here.
 
 Version entries describe source, GitHub release, and npm publishing state.
 
+## v0.3.0 - 2026-06-13
+
+Local run-button milestone release.
+
+### Improved
+
+- Marked the v0.3 line as the local run-button workflow: `forgedesk next` is
+  the primary safe step runner, with `doctor`, `fix-context`, review outputs,
+  handoff, export, and inspect as supporting local buttons.
+- Added `docs/run-button.md` as the focused guide for the v0.3 workflow and
+  boundary.
+- Updated README and roadmap status around the run-button milestone and the
+  next v0.3.x review-context direction.
+
+### Tests
+
+- Kept the full typecheck, unit/integration test, build, smoke, package-smoke,
+  version, pack, and ForgeDesk dogfood gates.
+
+### Publishing
+
+- GitHub source release only.
+- No npm publish in this version.
+
+### Boundaries
+
+- The run button remains local, deterministic, and user-invoked. It does not
+  call AI, edit product code, run tests unless explicitly requested, commit,
+  push, open PRs, tag, release, publish, upload, or run in the background.
+- No AI provider calls, Web UI, cloud sync, background automation, plugin
+  system, automatic code fixing, automatic commit, push, PR, tag, release, or
+  npm publish behavior inside ForgeDesk.
+
 ## v0.2.9 - 2026-06-13
 
 Review and handoff output polish.
