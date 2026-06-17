@@ -225,6 +225,8 @@ forgedesk doctor
 forgedesk episodes status
 forgedesk repair
 forgedesk fix-context
+forgedesk open
+forgedesk open export
 forgedesk review-context
 forgedesk pr
 forgedesk handoff
@@ -233,6 +235,8 @@ forgedesk inspect --export
 
 - `doctor` explains local project, session, evidence, and verification state.
 - `fix-context` packages failed-test context without modifying code.
+- `open` opens existing local ForgeDesk files or directories such as `NOW.md`,
+  evidence, export, review context, and PR body.
 - `review-context` prints the generated reviewer context.
 - `pr` prints the generated PR body.
 - `handoff` prints a compact local handoff summary.
@@ -247,6 +251,7 @@ forgedesk next
 forgedesk test -- npm test
 forgedesk next
 forgedesk next
+forgedesk open export
 forgedesk inspect --export
 ```
 

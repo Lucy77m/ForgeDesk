@@ -4,6 +4,38 @@ All notable ForgeDesk changes are tracked here.
 
 Version entries describe source, GitHub release, and npm publishing state.
 
+## v0.5.1 - 2026-06-13
+
+Open and first-time friction polish.
+
+### Added
+
+- Added `forgedesk open` as a local file/folder opener for existing ForgeDesk
+  outputs.
+- Added targets for `now`, `evidence`, `export`, `review-context`, and `pr`.
+- Added injectable opener coverage so tests do not launch real desktop apps.
+
+### Improved
+
+- README now includes a first-decision tree for setup, local changes, status,
+  failed tests, and handoff.
+- Project `AGENTS.md` now reflects the setup-first v0.5 local autopilot
+  direction instead of the old v0.1 evidence-pack framing.
+- Added a first-time walkthrough integration test through setup, next, test,
+  export, open-path validation, and inspect.
+
+### Publishing
+
+- GitHub source release preparation only.
+- No npm publish in this version. The npm package remains at v0.2.3 until the
+  next explicit npm publish.
+
+### Boundaries
+
+- `open` only opens existing local files or directories with the system opener.
+  It does not generate evidence, call AI, edit product code, commit, push, open
+  PRs, tag, release, publish, upload, or run in the background.
+
 ## v0.5.0 - 2026-06-13
 
 Local autopilot setup milestone.

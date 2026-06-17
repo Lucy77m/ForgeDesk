@@ -56,6 +56,14 @@ ForgeDesk when needed, sets the safe advisory `assist` profile, refreshes
 generates or refreshes evidence, checks readiness, and exports ready evidence
 one safe step at a time.
 
+Decision tree:
+
+- Just starting: `forgedesk setup`
+- Have local changes: `forgedesk next`
+- Not sure what state you are in: `forgedesk doctor` or `forgedesk episodes status`
+- Tests failed: `forgedesk fix-context`
+- Ready to hand off: `forgedesk open export`
+
 Set the local automation profile before using hooks or watch mode:
 
 ```bash
@@ -137,6 +145,12 @@ forgedesk ci init
 forgedesk review-context
 forgedesk pr
 forgedesk fix-context
+forgedesk open
+forgedesk open now
+forgedesk open evidence
+forgedesk open export
+forgedesk open review-context
+forgedesk open pr
 forgedesk start --title "Describe the change"
 forgedesk intent "Record the user-facing goal."
 forgedesk decision "Record an implementation decision."
@@ -185,7 +199,7 @@ See [CHANGELOG.md](CHANGELOG.md) for local source version notes.
 
 ## Project Status
 
-ForgeDesk v0.5.0 is prepared as a GitHub source release for the setup-first
+ForgeDesk v0.5.1 is prepared as a GitHub source release for the setup-first
 local autopilot workflow. The npm package remains at v0.2.3 until the next
 explicit npm publish.
 

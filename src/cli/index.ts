@@ -28,6 +28,7 @@ import { getIgnitionStatus, installIgnition, renderIgnitionReport, uninstallIgni
 import { getInspectReport, renderInspectReport } from '../core/inspect.js'
 import { getNextReport, renderNextReport } from '../core/next.js'
 import { refreshNowFile, renderNowReport } from '../core/now.js'
+import { openLocalTarget, parseOpenTarget, renderOpenReport } from '../core/open.js'
 import { getReadyReport, renderReadyReport } from '../core/ready.js'
 import { renderRepairReport, repairLocalSetup } from '../core/repair.js'
 import { getReviewOutput } from '../core/review-output.js'
@@ -64,7 +65,7 @@ export function buildProgram(cwd = process.cwd()): Command {
   program
     .name('forgedesk')
     .description('A local auto-capture desk for AI-assisted code changes.')
-    .version('0.5.0')
+    .version('0.5.1')
 
   program
     .command('init')
@@ -346,6 +347,15 @@ export function buildProgram(cwd = process.cwd()): Command {
     .action(async (options: { json?: boolean }) => {
       const report = await refreshNowFile(cwd)
       console.log(options.json ? JSON.stringify(report, null, 2) : renderNowReport(report))
+    })
+
+  program
+    .command('open')
+    .description('Open an existing local ForgeDesk file or directory.')
+    .argument('[target]', 'now, evidence, export, review-context, or pr', 'now')
+    .action(async (target: string | undefined) => {
+      const report = await openLocalTarget(cwd, parseOpenTarget(target))
+      console.log(renderOpenReport(report))
     })
 
   const episodes = program

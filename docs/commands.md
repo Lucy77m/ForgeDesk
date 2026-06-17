@@ -29,6 +29,7 @@ forgedesk evidence
 forgedesk review-context
 forgedesk pr
 forgedesk fix-context
+forgedesk open export
 forgedesk ready
 forgedesk handoff
 forgedesk export
@@ -190,6 +191,22 @@ blockers, warnings, and next suggested action.
 
 `next`, `doctor`, `watch --once`, and `ci check` also refresh `NOW.md` when
 possible. `NOW.md` is local status, not a review verdict.
+
+## Open
+
+| Command | Purpose | Writes local data |
+|---|---|---|
+| `forgedesk open` | Open `.forgedesk/NOW.md`. | no |
+| `forgedesk open now` | Open `.forgedesk/NOW.md`. | no |
+| `forgedesk open evidence` | Open the active session evidence directory. | no |
+| `forgedesk open export` | Open the active session export directory. | no |
+| `forgedesk open review-context` | Open `REVIEW_CONTEXT.md` for the active session. | no |
+| `forgedesk open pr` | Open `PR_BODY.md` for the active session. | no |
+
+`open` uses the local system opener: Windows `start`, macOS `open`, and Linux
+`xdg-open`. It only opens existing local ForgeDesk files or directories. If
+the target has not been generated or exported yet, it fails clearly instead of
+pretending the open succeeded.
 
 ## Episodes
 

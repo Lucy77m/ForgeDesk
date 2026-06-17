@@ -1,6 +1,7 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
+import { openLocalTarget } from '../src/core/open.js'
 import { cleanupDir, initEmptyGitRepo, initGitRepo, runCli, tempDir } from './helpers.js'
 
 describe('cli integration', () => {
@@ -20,7 +21,60 @@ describe('cli integration', () => {
     const result = runCli(repo, ['--version'])
 
     expect(result.status).toBe(0)
-    expect(result.stdout.trim()).toBe('0.5.0')
+    expect(result.stdout.trim()).toBe('0.5.1')
+  })
+
+  it('walks through first-time setup, next, test, export, open, and inspect', async () => {
+    const repo = tempDir()
+    dirs.push(repo)
+    initGitRepo(repo)
+    writeFileSync(
+      path.join(repo, 'package.json'),
+      JSON.stringify({ scripts: { test: 'node test-pass.js' } }, null, 2),
+      'utf8'
+    )
+    writeFileSync(path.join(repo, 'test-pass.js'), "console.log('ok')\n", 'utf8')
+    writeFileSync(path.join(repo, 'README.md'), '# Demo changed\n', 'utf8')
+
+    const setup = runCli(repo, ['setup', '--test-tasks'])
+    expect(setup.status).toBe(0)
+    expect(setup.stdout).toContain('ForgeDesk Setup')
+
+    const preview = runCli(repo, ['next', '--dry-run'])
+    expect(preview.status).toBe(0)
+    expect(preview.stdout).toContain('Action: auto-capture')
+    expect(preview.stdout).toContain('Dry run: yes')
+
+    const capture = runCli(repo, ['next'])
+    expect(capture.status).toBe(0)
+    expect(capture.stdout).toContain('Action: auto-capture')
+
+    const test = runCli(repo, ['test', '--', 'node', 'test-pass.js'])
+    expect(test.status).toBe(0)
+    expect(test.stdout).toContain('Status: passed')
+
+    const refreshed = runCli(repo, ['next'])
+    expect(refreshed.status).toBe(0)
+    expect(refreshed.stdout).toContain('Action: generate-evidence')
+
+    const exported = runCli(repo, ['next'])
+    expect(exported.status).toBe(0)
+    expect(exported.stdout).toContain('Action: export')
+
+    const inspect = runCli(repo, ['inspect', '--export'])
+    expect(inspect.status).toBe(0)
+    expect(inspect.stdout).toContain('Target: export')
+    expect(inspect.stdout).toContain('OK: yes')
+
+    const calls: Array<{ command: string; args: string[] }> = []
+    const open = await openLocalTarget(repo, 'export', (command, args) => {
+      calls.push({ command, args })
+      return { status: 0 }
+    })
+
+    expect(open.target).toBe('export')
+    expect(open.path).toContain('.forgedesk/exports/')
+    expect(calls).toHaveLength(1)
   })
 
   it('shows and sets the local auto profile', () => {
