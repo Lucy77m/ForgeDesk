@@ -4,6 +4,23 @@ All notable ForgeDesk changes are tracked here.
 
 Version entries describe source, GitHub release, and npm publishing state.
 
+## v0.6.3 - 2026-06-18
+
+Test hardening.
+
+### Tests
+
+- Added 4 json-store tests: stale lock cleanup, lock timeout error, corrupted
+  JSON read, and parent directory creation on write.
+- Added 4 watch tests: getWatchReport for no-project error, no-session idle,
+  assist mode suggest, and guarded mode block.
+- Added 1 errors test: ForgeDeskError without a code is still recognized.
+- Total tests: 212.
+
+### Publishing
+
+- GitHub source release and npm publish preparation.
+
 ## v0.6.2 - 2026-06-18
 
 Code review cleanup.

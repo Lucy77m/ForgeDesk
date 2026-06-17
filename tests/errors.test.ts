@@ -19,4 +19,11 @@ describe('ForgeDeskError', () => {
     expect(isForgeDeskError(error, 'PROJECT_NOT_FOUND')).toBe(false)
     expect(isForgeDeskError(new Error('Unknown session: demo'), 'SESSION_NOT_FOUND')).toBe(false)
   })
+
+  it('matches ForgeDesk errors without a code', () => {
+    const error = new ForgeDeskError('Something went wrong.')
+
+    expect(isForgeDeskError(error)).toBe(true)
+    expect(error.code).toBeUndefined()
+  })
 })

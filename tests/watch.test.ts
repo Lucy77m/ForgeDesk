@@ -1,6 +1,7 @@
 import { existsSync, readdirSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
+import { getWatchReport } from '../src/core/watch.js'
 import { cleanupDir, initGitRepo, runCli, tempDir } from './helpers.js'
 
 function sessionIds(repo: string): string[] {
@@ -123,5 +124,59 @@ describe('watch mode', () => {
 
     expect(result.status).not.toBe(0)
     expect(result.stderr).toContain('Watch interval must be at least 500 milliseconds')
+  })
+
+  it('getWatchReport throws when no ForgeDesk project exists', async () => {
+    const repo = tempDir()
+    dirs.push(repo)
+    initGitRepo(repo)
+
+    await expect(getWatchReport(repo)).rejects.toThrow('Could not find a ForgeDesk project')
+  })
+
+  it('getWatchReport returns idle when no active session exists', async () => {
+    const repo = tempDir()
+    dirs.push(repo)
+    initGitRepo(repo)
+    expect(runCli(repo, ['init', '--repo', '.']).status).toBe(0)
+    expect(runCli(repo, ['auto-config', 'set', 'assist']).status).toBe(0)
+
+    const report = await getWatchReport(repo)
+
+    expect(report.status).toBe('idle')
+    expect(report.autoMode).toBe('assist')
+    expect(report.summary).toContain('no active local evidence work')
+  })
+
+  it('getWatchReport suggests in assist mode when dirty changes exist', async () => {
+    const repo = tempDir()
+    dirs.push(repo)
+    initGitRepo(repo)
+    expect(runCli(repo, ['init', '--repo', '.']).status).toBe(0)
+    expect(runCli(repo, ['auto-config', 'set', 'assist']).status).toBe(0)
+    writeFileSync(path.join(repo, 'README.md'), '# Watch suggest\n', 'utf8')
+
+    const report = await getWatchReport(repo)
+
+    expect(report.status).toBe('suggested')
+    expect(report.autoMode).toBe('assist')
+    expect(report.wroteFiles).toBe(false)
+    expect(report.nextReport).toBeDefined()
+    expect(report.nextReport!.action).toBe('auto-capture')
+  })
+
+  it('getWatchReport blocks in guarded mode when evidence is not ready', async () => {
+    const repo = tempDir()
+    dirs.push(repo)
+    initGitRepo(repo)
+    expect(runCli(repo, ['init', '--repo', '.']).status).toBe(0)
+    expect(runCli(repo, ['auto-config', 'set', 'guarded']).status).toBe(0)
+    writeFileSync(path.join(repo, 'README.md'), '# Watch guarded\n', 'utf8')
+
+    const report = await getWatchReport(repo)
+
+    expect(report.status).toBe('blocked')
+    expect(report.autoMode).toBe('guarded')
+    expect(report.wroteFiles).toBe(false)
   })
 })
