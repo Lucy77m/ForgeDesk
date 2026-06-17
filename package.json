@@ -1,6 +1,6 @@
 {
   "name": "forgedesk",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "A local auto-capture desk for AI-assisted code changes.",
   "type": "module",
   "license": "MIT",

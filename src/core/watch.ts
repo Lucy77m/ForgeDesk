@@ -222,12 +222,20 @@ export async function startWatch(cwd: string, options: WatchLoopOptions = {}): P
   }
 
   await emit()
-  setInterval(() => {
-    emit().catch((error) => {
-      const message = error instanceof Error ? error.message : String(error)
-      console.error(`Error: ${message}`)
-    })
-  }, intervalMs)
+
+  const schedule = (): void => {
+    setTimeout(async () => {
+      try {
+        await emit()
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error)
+        console.error(`Error: ${message}`)
+      }
+      schedule()
+    }, intervalMs)
+  }
+
+  schedule()
 
   return new Promise<never>(() => undefined)
 }

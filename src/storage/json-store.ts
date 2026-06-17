@@ -49,11 +49,15 @@ async function acquireJsonLock(filePath: string): Promise<{ handle: FileHandle; 
   const startedAt = Date.now()
 
   while (true) {
+    let handle: FileHandle | undefined
     try {
-      const handle = await open(lockPath, 'wx')
+      handle = await open(lockPath, 'wx')
       await handle.writeFile(`${process.pid}\n${new Date().toISOString()}\n`, 'utf8')
       return { handle, lockPath }
     } catch (error) {
+      if (handle) {
+        await handle.close().catch(() => undefined)
+      }
       if (isLockBusyError(error) && Date.now() - startedAt <= lockTimeoutMs) {
         await removeStaleLock(lockPath)
         await sleep(lockPollMs)

@@ -111,8 +111,11 @@ async function activeSessionForAuto(workspace: Workspace): Promise<ChangeSession
   try {
     const session = await getActiveSession(workspace)
     return session.status === 'active' && !session.evidenceDir ? session : undefined
-  } catch {
-    return undefined
+  } catch (error) {
+    if (isForgeDeskError(error, 'NO_ACTIVE_SESSION') || isForgeDeskError(error, 'SESSION_NOT_FOUND')) {
+      return undefined
+    }
+    throw error
   }
 }
 

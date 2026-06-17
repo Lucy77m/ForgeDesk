@@ -4,6 +4,25 @@ All notable ForgeDesk changes are tracked here.
 
 Version entries describe source, GitHub release, and npm publishing state.
 
+## v0.6.1 - 2026-06-18
+
+Stability fixes from code review.
+
+### Fixed
+
+- Fixed Watch mode race condition: replaced `setInterval` with recursive
+  `setTimeout` to prevent concurrent `emit()` calls in `local-auto` mode.
+- Fixed JSON Store file handle leak: `acquireJsonLock` now closes the handle on
+  `writeFile` failure via `try/finally`.
+- Fixed `activeSessionForAuto` silently swallowing unexpected errors (disk
+  errors, JSON corruption). Now only catches `NO_ACTIVE_SESSION` and
+  `SESSION_NOT_FOUND`.
+- Removed dead code null check in `evidence.ts` that could never be reached.
+
+### Publishing
+
+- GitHub source release and npm publish preparation.
+
 ## v0.6.0 - 2026-06-17
 
 pnpm workspace test discovery milestone.

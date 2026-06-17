@@ -48,10 +48,6 @@ export async function generateEvidence(cwd: string, options: GenerateEvidenceOpt
     ? await readSession(workspace.repoPath, options.sessionId)
     : await getActiveSession(workspace)
 
-  if (!session) {
-    throw new ForgeDeskError('No session found for evidence generation.')
-  }
-
   const snapshot = captureGitSnapshot(workspace.repoPath)
   const bundle: EvidenceBundle = {
     schemaVersion: EVIDENCE_SCHEMA_VERSION,
