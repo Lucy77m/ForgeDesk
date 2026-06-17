@@ -4,6 +4,7 @@ import { displayPath, listLinesOrNone } from '../templates/format.js'
 import type { ChangeSession } from '../types.js'
 import { runAutoCapture } from './auto.js'
 import { evidenceCurrent } from './evidence-state.js'
+import { getEvidenceScore, type EvidenceScore } from './evidence-score.js'
 import { generateEvidence } from './evidence.js'
 import { ForgeDeskError, isForgeDeskError } from './errors.js'
 import { exportEvidencePack } from './export.js'
@@ -41,6 +42,7 @@ export type NextReport = {
   reason: NextReason
   recommendation: string
   evidenceFresh?: boolean
+  evidenceScore?: EvidenceScore
   session?: NextSession
   outputDir?: string
   ready?: boolean
@@ -173,6 +175,7 @@ export async function getNextReport(cwd: string, options: NextOptions = {}): Pro
   }
 
   const currentEvidence = await evidenceCurrent(workspace.repoPath, session, snapshot)
+  const evidenceScore = await getEvidenceScore(workspace.repoPath, session)
   if (!session.evidenceDir || !currentEvidence) {
     const defaultOutputDir = displayPath(path.join(pathsFor(workspace.repoPath).evidenceDir, session.id))
     if (dryRun) {
@@ -190,6 +193,7 @@ export async function getNextReport(cwd: string, options: NextOptions = {}): Pro
         session: sessionSummary(session),
         outputDir: defaultOutputDir,
         evidenceFresh: false,
+        evidenceScore,
         blockers: [],
         warnings: session.evidenceDir
           ? ['Evidence is stale for the current local diff. Dry run only. No files were written.']
@@ -215,6 +219,7 @@ export async function getNextReport(cwd: string, options: NextOptions = {}): Pro
       },
       outputDir: displayPath(outputDir),
       evidenceFresh: true,
+      evidenceScore,
       blockers: [],
       warnings: ['Evidence was generated. Run "forgedesk next" again to check readiness.'],
       next: ['Run "forgedesk next" again.'],
@@ -240,6 +245,7 @@ export async function getNextReport(cwd: string, options: NextOptions = {}): Pro
       ),
       session: ready.session,
       ready: false,
+      evidenceScore,
       blockers: ready.blockers,
       warnings: ready.warnings,
       next: failedTestBlocker
@@ -262,6 +268,7 @@ export async function getNextReport(cwd: string, options: NextOptions = {}): Pro
       session: sessionSummary(session),
       outputDir: displayPath(path.join(pathsFor(workspace.repoPath).exportsDir, session.id)),
       ready: true,
+      evidenceScore,
       blockers: [],
       warnings: ready.warnings,
       next: ['Run "forgedesk next" to export the ready evidence pack.'],
@@ -286,6 +293,7 @@ export async function getNextReport(cwd: string, options: NextOptions = {}): Pro
     },
     outputDir: exported.outputDir,
     ready: true,
+    evidenceScore,
     blockers: [],
     warnings: ready.warnings,
     next: ['Open the export directory, or run "forgedesk review-context" / "forgedesk pr".'],
@@ -309,6 +317,7 @@ export function renderNextReport(report: NextReport): string {
     report.session ? `Status: ${report.session.status}` : undefined,
     report.ready === undefined ? undefined : `Ready: ${report.ready ? 'yes' : 'no'}`,
     report.evidenceFresh === undefined ? undefined : `Evidence fresh: ${report.evidenceFresh ? 'yes' : 'no'}`,
+    report.evidenceScore ? `Evidence Score: ${report.evidenceScore.total}/${report.evidenceScore.max} (${report.evidenceScore.percent}%)` : undefined,
     report.outputDir ? `Output: ${displayPath(report.outputDir)}` : undefined,
     '',
     '## Blockers',

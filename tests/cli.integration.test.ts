@@ -21,7 +21,7 @@ describe('cli integration', () => {
     const result = runCli(repo, ['--version'])
 
     expect(result.status).toBe(0)
-    expect(result.stdout.trim()).toBe('0.5.3')
+    expect(result.stdout.trim()).toBe('0.5.4')
   })
 
   it('walks through first-time setup, next, test, export, open, and inspect', async () => {
@@ -1271,6 +1271,69 @@ describe('cli integration', () => {
     const report = JSON.parse(result.stdout)
     expect(report.session.id).toBe(firstSessionId)
     expect(report.session.title).toBe('First context')
+  })
+
+  it('includes evidence score in doctor output', () => {
+    const repo = tempDir()
+    dirs.push(repo)
+    initGitRepo(repo)
+
+    expect(runCli(repo, ['init', '--repo', '.']).status).toBe(0)
+    expect(runCli(repo, ['start', '--title', 'Score doctor']).status).toBe(0)
+    expect(runCli(repo, ['intent', 'Test evidence score in doctor.']).status).toBe(0)
+    expect(runCli(repo, ['decision', 'Record a decision.']).status).toBe(0)
+    expect(runCli(repo, ['check', 'Reviewed output.']).status).toBe(0)
+    expect(runCli(repo, ['evidence']).status).toBe(0)
+
+    const result = runCli(repo, ['doctor', '--json'])
+
+    expect(result.status).toBe(0)
+    const report = JSON.parse(result.stdout)
+    expect(report.evidenceScore).toBeDefined()
+    expect(report.evidenceScore.total).toBeGreaterThanOrEqual(4)
+    expect(report.evidenceScore.max).toBe(7)
+    expect(report.evidenceScore.percent).toBeGreaterThanOrEqual(57)
+    expect(report.evidenceScore.dimensions).toHaveLength(7)
+    expect(report.evidenceScore.dimensions.find((d: any) => d.name === 'intent').score).toBe(1)
+    expect(report.evidenceScore.dimensions.find((d: any) => d.name === 'decisions').score).toBe(1)
+  })
+
+  it('includes evidence score in now output', () => {
+    const repo = tempDir()
+    dirs.push(repo)
+    initGitRepo(repo)
+
+    expect(runCli(repo, ['init', '--repo', '.']).status).toBe(0)
+    expect(runCli(repo, ['start', '--title', 'Score now']).status).toBe(0)
+    expect(runCli(repo, ['intent', 'Test evidence score in now.']).status).toBe(0)
+    expect(runCli(repo, ['check', 'Reviewed.']).status).toBe(0)
+    expect(runCli(repo, ['evidence']).status).toBe(0)
+
+    const result = runCli(repo, ['now', '--json'])
+
+    expect(result.status).toBe(0)
+    const report = JSON.parse(result.stdout)
+    expect(report.evidenceScore).toBeDefined()
+    expect(report.evidenceScore.max).toBe(7)
+  })
+
+  it('includes evidence score in next output', () => {
+    const repo = tempDir()
+    dirs.push(repo)
+    initGitRepo(repo)
+
+    expect(runCli(repo, ['init', '--repo', '.']).status).toBe(0)
+    expect(runCli(repo, ['start', '--title', 'Score next']).status).toBe(0)
+    expect(runCli(repo, ['intent', 'Test evidence score in next.']).status).toBe(0)
+    expect(runCli(repo, ['check', 'Reviewed.']).status).toBe(0)
+    expect(runCli(repo, ['evidence']).status).toBe(0)
+
+    const result = runCli(repo, ['next', '--json'])
+
+    expect(result.status).toBe(0)
+    const report = JSON.parse(result.stdout)
+    expect(report.evidenceScore).toBeDefined()
+    expect(report.evidenceScore.max).toBe(7)
   })
 
   it('supports status in a git repo with no commits', () => {

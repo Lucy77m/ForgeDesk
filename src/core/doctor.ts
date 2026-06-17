@@ -7,6 +7,7 @@ import { captureGitSnapshot } from '../git/snapshot.js'
 import { readAutoConfig } from './auto-config.js'
 import { EVIDENCE_FILE_NAMES } from './constants.js'
 import { evidenceCurrent } from './evidence-state.js'
+import { getEvidenceScore, type EvidenceScore } from './evidence-score.js'
 import { validateConfig, validateProject, validateSession } from './metadata.js'
 import { loadWorkspace, pathExists, pathsFor } from './workspace.js'
 
@@ -33,6 +34,7 @@ export type DoctorReport = {
     mode: string
     source: 'file' | 'default'
   }
+  evidenceScore?: EvidenceScore
   checks: DoctorCheck[]
 }
 
@@ -264,6 +266,11 @@ export async function getDoctorReport(cwd: string): Promise<DoctorReport> {
 
   const recommendation = recommendationFor(checks, context)
 
+  let evidenceScore: EvidenceScore | undefined
+  if (activeSession) {
+    evidenceScore = await getEvidenceScore(workspace.repoPath, activeSession)
+  }
+
   return {
     schemaVersion: 'forgedesk-doctor-v1',
     generatedAt: new Date().toISOString(),
@@ -278,6 +285,7 @@ export async function getDoctorReport(cwd: string): Promise<DoctorReport> {
       }
       : undefined,
     autoConfig,
+    evidenceScore,
     checks
   }
 }
@@ -293,6 +301,7 @@ export function renderDoctorReport(report: DoctorReport): string {
     report.activeSession ? `Session: ${report.activeSession.title}` : undefined,
     report.activeSession ? `Session ID: ${report.activeSession.id}` : undefined,
     report.activeSession ? `Session status: ${report.activeSession.status}` : undefined,
+    report.evidenceScore ? `Evidence Score: ${report.evidenceScore.total}/${report.evidenceScore.max} (${report.evidenceScore.percent}%)` : undefined,
     '',
     '## Checks',
     ...report.checks.map((item) => `- ${item.status}: ${item.name} - ${item.message}`)

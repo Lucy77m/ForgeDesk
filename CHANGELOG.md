@@ -4,6 +4,50 @@ All notable ForgeDesk changes are tracked here.
 
 Version entries describe source, GitHub release, and npm publishing state.
 
+## v0.5.4 - 2026-06-17
+
+Transparent deterministic Evidence Score.
+
+### Added
+
+- Added `Evidence Score` (0-7) to `forgedesk doctor`, `forgedesk now`, and
+  `forgedesk next` output.
+- Added `evidenceScore` to `doctor --json`, `now --json`, and `next --json`
+  reports.
+- Score dimensions: intent recorded, tests recorded, decisions recorded, risks
+  recorded, manual checks recorded, evidence files complete, evidence fresh.
+- Each dimension is binary (0 or 1). Total is the sum; percent is
+  `Math.round(total / 7 * 100)`.
+- Score is deterministic: same session and evidence state always produces the
+  same score.
+
+### Improved
+
+- `NOW.md` now includes `Evidence Score: X/7 (Y%)` when an active session
+  exists.
+- Doctor human-readable output now includes `Evidence Score: X/7 (Y%)` after
+  session status.
+- `next` human-readable output now includes `Evidence Score: X/7 (Y%)`.
+
+### Tests
+
+- Added 7 unit tests for `computeEvidenceScore` covering full score, zero score,
+  partial score, missing evidence files, stale evidence, full IO path, and
+  absent evidenceDir.
+- Added 3 CLI integration tests verifying `doctor --json`, `now --json`, and
+  `next --json` include `evidenceScore`.
+
+### Publishing
+
+- GitHub source release and npm publish preparation.
+- No npm publish in this version.
+
+### Boundaries
+
+- Evidence Score is a deterministic local metric over existing session data. It
+  does not call AI, judge code quality, edit product code, commit, push, open
+  PRs, tag, release, publish, upload, or run in the background.
+
 ## v0.5.3 - 2026-06-17
 
 AI-friendly local context generation.

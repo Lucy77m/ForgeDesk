@@ -406,8 +406,9 @@ evidence.json
 
 `doctor` checks local ForgeDesk metadata, session files, evidence file
 integrity, the active session's verification state, and whether active evidence
-matches the current local diff. Human-readable output includes `Recommended
-next`; JSON output includes the same `recommendation` field. Older evidence
+matches the current local diff. Human-readable output includes `Evidence Score`,
+`Recommended next`; JSON output includes `evidenceScore` and the same
+`recommendation` field. Older evidence
 packs created by previous ForgeDesk versions are summarized as historical
 warnings when they are not the active session.
 

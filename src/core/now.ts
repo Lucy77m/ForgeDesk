@@ -2,6 +2,7 @@ import path from 'node:path'
 import { displayPath, listLinesOrNone } from '../templates/format.js'
 import type { ChangeSession } from '../types.js'
 import { readAutoConfig } from './auto-config.js'
+import { getEvidenceScore, type EvidenceScore } from './evidence-score.js'
 import { getEpisodeStatus, type EpisodeStatusReport } from './episodes.js'
 import { ForgeDeskError, isForgeDeskError } from './errors.js'
 import { getInspectReport } from './inspect.js'
@@ -26,6 +27,7 @@ export type NowReport = {
   }
   ready?: boolean
   inspectOk?: boolean
+  evidenceScore?: EvidenceScore
   exportDir?: string
   reviewContext?: string
   prBody?: string
@@ -109,6 +111,11 @@ export async function getNowReport(cwd: string): Promise<NowReport> {
 
   const evidenceDir = session?.evidenceDir ? path.resolve(workspace.repoPath, session.evidenceDir) : undefined
 
+  let evidenceScore: EvidenceScore | undefined
+  if (session) {
+    evidenceScore = await getEvidenceScore(workspace.repoPath, session)
+  }
+
   return {
     schemaVersion: 'forgedesk-now-v1',
     generatedAt: new Date().toISOString(),
@@ -122,6 +129,7 @@ export async function getNowReport(cwd: string): Promise<NowReport> {
     },
     ready,
     inspectOk,
+    evidenceScore,
     exportDir: session ? path.join(pathsFor(workspace.repoPath).exportsDir, session.id) : undefined,
     reviewContext: evidenceDir ? path.join(evidenceDir, 'REVIEW_CONTEXT.md') : undefined,
     prBody: evidenceDir ? path.join(evidenceDir, 'PR_BODY.md') : undefined,
@@ -145,6 +153,7 @@ export function renderNowMarkdown(report: NowReport): string {
     report.episode ? `Episode summary: ${report.episode.summary}` : undefined,
     report.ready === undefined ? undefined : `Ready: ${report.ready ? 'yes' : 'no'}`,
     report.inspectOk === undefined ? undefined : `Inspect OK: ${report.inspectOk ? 'yes' : 'no'}`,
+    report.evidenceScore ? `Evidence Score: ${report.evidenceScore.total}/${report.evidenceScore.max} (${report.evidenceScore.percent}%)` : undefined,
     report.session?.evidenceDir ? `Evidence: ${displayPath(report.session.evidenceDir)}` : undefined,
     report.exportDir ? `Export: ${displayPath(report.exportDir)}` : undefined,
     report.reviewContext ? `Review context: ${displayPath(report.reviewContext)}` : undefined,
@@ -183,6 +192,7 @@ export function renderNowReport(report: NowReport): string {
     report.episode ? `Episode phase: ${report.episode.phase}` : undefined,
     report.ready === undefined ? undefined : `Ready: ${report.ready ? 'yes' : 'no'}`,
     report.inspectOk === undefined ? undefined : `Inspect OK: ${report.inspectOk ? 'yes' : 'no'}`,
+    report.evidenceScore ? `Evidence Score: ${report.evidenceScore.total}/${report.evidenceScore.max} (${report.evidenceScore.percent}%)` : undefined,
     '',
     '## Blockers',
     ...listLinesOrNone(report.blockers),
