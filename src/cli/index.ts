@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { Command } from 'commander'
-import { realpathSync } from 'node:fs'
+import { readFileSync, realpathSync } from 'node:fs'
+import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { addDecision, addManualCheck, addRisk, initProject, setIntent, startSession } from '../core/session.js'
 import { renderAutoCaptureReport, runAutoCapture } from '../core/auto.js'
@@ -60,13 +61,16 @@ function parseSessionStatus(status: string | undefined): ChangeSession['status']
   return status
 }
 
+const cliDir = path.dirname(fileURLToPath(import.meta.url))
+const pkg = JSON.parse(readFileSync(path.join(cliDir, '..', '..', 'package.json'), 'utf8')) as { version: string }
+
 export function buildProgram(cwd = process.cwd()): Command {
   const program = new Command()
 
   program
     .name('forgedesk')
     .description('A local auto-capture desk for AI-assisted code changes.')
-    .version('0.6.1')
+    .version(pkg.version)
 
   program
     .command('init')

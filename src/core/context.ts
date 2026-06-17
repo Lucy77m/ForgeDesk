@@ -10,7 +10,7 @@ import {
 } from '../templates/format.js'
 import type { ChangeSession, GitSnapshot } from '../types.js'
 import { getReadyReport, type ReadyReport } from './ready.js'
-import { pathsFor, resolveSession, writeTextFile } from './workspace.js'
+import { pathsFor, resolveSession, writeTextFile, type Workspace } from './workspace.js'
 
 export type ContextOptions = {
   sessionId?: string
@@ -77,26 +77,39 @@ function manualCheckLines(session: ChangeSession): string[] {
   return (session.manualChecks ?? []).map((c) => `- ${c.text}`)
 }
 
-export async function getContextReport(cwd: string, options: ContextOptions = {}): Promise<ContextReport> {
+async function buildContextReport(cwd: string, options: ContextOptions = {}): Promise<{
+  workspace: Workspace
+  session: ChangeSession
+  ready: ReadyReport
+  report: ContextReport
+}> {
   const { workspace, session } = await resolveSession(cwd, options.sessionId)
   const ready = await getReadyReport(cwd, session.id)
-
   return {
-    schemaVersion: 'forgedesk-context-v1',
-    generatedAt: new Date().toISOString(),
-    repoPath: workspace.repoPath,
-    path: contextPath(workspace.repoPath),
-    session: {
-      id: session.id,
-      title: session.title,
-      status: session.status,
-      intent: session.intent
-    },
-    ready: ready.ready,
-    blockers: ready.blockers,
-    warnings: ready.warnings,
-    next: nextAction(session, ready)
+    workspace,
+    session,
+    ready,
+    report: {
+      schemaVersion: 'forgedesk-context-v1',
+      generatedAt: new Date().toISOString(),
+      repoPath: workspace.repoPath,
+      path: contextPath(workspace.repoPath),
+      session: {
+        id: session.id,
+        title: session.title,
+        status: session.status,
+        intent: session.intent
+      },
+      ready: ready.ready,
+      blockers: ready.blockers,
+      warnings: ready.warnings,
+      next: nextAction(session, ready)
+    }
   }
+}
+
+export async function getContextReport(cwd: string, options: ContextOptions = {}): Promise<ContextReport> {
+  return (await buildContextReport(cwd, options)).report
 }
 
 export function renderContextMarkdown(report: ContextReport): string {
@@ -140,9 +153,8 @@ export function renderContextReport(report: ContextReport): string {
 }
 
 export async function refreshContextFile(cwd: string, options: ContextOptions = {}): Promise<ContextReport> {
-  const { workspace, session } = await resolveSession(cwd, options.sessionId)
+  const { workspace, session, ready, report } = await buildContextReport(cwd, options)
   const repoPath = workspace.repoPath
-  const ready = await getReadyReport(cwd, session.id)
   const snapshot = session.gitSnapshot ?? captureGitSnapshot(repoPath)
 
   const lines: string[] = [
@@ -217,20 +229,5 @@ export async function refreshContextFile(cwd: string, options: ContextOptions = 
   const filePath = contextPath(repoPath)
   await writeTextFile(filePath, lines.join('\n'))
 
-  return {
-    schemaVersion: 'forgedesk-context-v1',
-    generatedAt: new Date().toISOString(),
-    repoPath,
-    path: filePath,
-    session: {
-      id: session.id,
-      title: session.title,
-      status: session.status,
-      intent: session.intent
-    },
-    ready: ready.ready,
-    blockers: ready.blockers,
-    warnings: ready.warnings,
-    next: nextAction(session, ready)
-  }
+  return report
 }

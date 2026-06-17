@@ -8,6 +8,7 @@ import { readAutoConfig } from './auto-config.js'
 import { EVIDENCE_FILE_NAMES } from './constants.js'
 import { evidenceCurrent } from './evidence-state.js'
 import { getEvidenceScore, type EvidenceScore } from './evidence-score.js'
+import { loadCustomRules } from './risk-rules.js'
 import { validateConfig, validateProject, validateSession } from './metadata.js'
 import { loadWorkspace, pathExists, pathsFor } from './workspace.js'
 
@@ -200,7 +201,6 @@ export async function getDoctorReport(cwd: string): Promise<DoctorReport> {
   }
 
   try {
-    const { loadCustomRules } = await import('./risk-rules.js')
     const rules = await loadCustomRules(workspace.repoPath)
     const rulesPath = path.join(paths.forgedeskDir, 'rules.json')
     if (await pathExists(rulesPath)) {

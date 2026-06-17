@@ -63,7 +63,6 @@ export async function initProject(repoInput: string, cwd: string): Promise<Proje
 
   await writeProject(repoPath, project)
   await writeConfig(repoPath, config)
-  await ensureForgeDeskDirs(repoPath)
 
   return project
 }

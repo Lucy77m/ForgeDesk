@@ -4,6 +4,25 @@ All notable ForgeDesk changes are tracked here.
 
 Version entries describe source, GitHub release, and npm publishing state.
 
+## v0.6.2 - 2026-06-18
+
+Code review cleanup.
+
+### Fixed
+
+- CLI version is now read from `package.json` at runtime instead of being
+  hardcoded in `src/cli/index.ts`.
+- `doctor.ts` uses a static import for `loadCustomRules` instead of a dynamic
+  `await import()`.
+- `context.ts` extracts shared `buildContextReport` to eliminate duplicated
+  `resolveSession` / `getReadyReport` / report construction logic between
+  `getContextReport` and `refreshContextFile`.
+- Removed duplicate `ensureForgeDeskDirs` call in `initProject`.
+
+### Publishing
+
+- GitHub source release and npm publish preparation.
+
 ## v0.6.1 - 2026-06-18
 
 Stability fixes from code review.
