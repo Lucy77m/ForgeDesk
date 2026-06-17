@@ -6,6 +6,7 @@ import { addDecision, addManualCheck, addRisk, initProject, setIntent, startSess
 import { renderAutoCaptureReport, runAutoCapture } from '../core/auto.js'
 import { getAutoConfigReport, parseAutoMode, renderAutoConfigReport, setAutoConfigMode } from '../core/auto-config.js'
 import { getCiCheckReport, initCiWorkflow, renderCiCheckReport, renderCiInitReport, renderCiWorkflow } from '../core/ci.js'
+import { getContextReport, refreshContextFile, renderContextReport } from '../core/context.js'
 import { copyToClipboard } from '../core/clipboard.js'
 import { getDoctorReport, renderDoctorReport } from '../core/doctor.js'
 import { getEpisodeStatus, renderEpisodeStatus } from '../core/episodes.js'
@@ -65,7 +66,7 @@ export function buildProgram(cwd = process.cwd()): Command {
   program
     .name('forgedesk')
     .description('A local auto-capture desk for AI-assisted code changes.')
-    .version('0.5.1')
+    .version('0.5.3')
 
   program
     .command('init')
@@ -338,6 +339,16 @@ export function buildProgram(cwd = process.cwd()): Command {
     .action(async (options: { json?: boolean }) => {
       const report = await discoverTestScripts(cwd)
       console.log(options.json ? JSON.stringify(report, null, 2) : renderTestDiscoveryReport(report))
+    })
+
+  program
+    .command('context')
+    .description('Generate a local AI-friendly context file for the active session.')
+    .option('--session <id>', 'session id; defaults to the active session')
+    .option('--json', 'print the context report as JSON')
+    .action(async (options: { session?: string; json?: boolean }) => {
+      const report = await refreshContextFile(cwd, { sessionId: options.session })
+      console.log(options.json ? JSON.stringify(report, null, 2) : renderContextReport(report))
     })
 
   program

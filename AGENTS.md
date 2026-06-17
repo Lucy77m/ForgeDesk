@@ -11,7 +11,7 @@ The main workflow is:
 - status/readiness: `forgedesk now`, `forgedesk doctor`, `forgedesk episodes status`
 - repair: `forgedesk repair`
 - local automation surfaces: `hooks`, `watch`, `ignition`, `shortcuts`
-- handoff exits: `review-context`, `pr`, `fix-context`, `handoff`, `export`, `inspect`, `open`
+- handoff exits: `review-context`, `pr`, `fix-context`, `handoff`, `export`, `inspect`, `open`, `context`
 
 Do not expand ForgeDesk into a dashboard, hosted service, IDE extension, AI
 reviewer, or project-management platform unless the user explicitly changes

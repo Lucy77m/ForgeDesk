@@ -4,6 +4,63 @@ All notable ForgeDesk changes are tracked here.
 
 Version entries describe source, GitHub release, and npm publishing state.
 
+## v0.5.3 - 2026-06-17
+
+AI-friendly local context generation.
+
+### Added
+
+- Added `forgedesk context` to generate a single AI-friendly context file at
+  `.forgedesk/CONTEXT.md`.
+- Added `forgedesk context --session <id>` to target an explicit session.
+- Added `forgedesk context --json` with the `forgedesk-context-v1` report.
+- Context bundles session metadata, intent, git snapshot, changed files, recent
+  commits, decisions, risks, tests, manual checks, readiness, and recommended
+  next action into one local Markdown file.
+
+### Tests
+
+- Added context unit tests for report generation, full file content, missing
+  intent, missing tests, console rendering, and explicit session resolution.
+- Added context CLI integration tests for file generation, JSON output, and
+  explicit session support.
+
+### Publishing
+
+- GitHub source release preparation only.
+- No npm publish in this version. The npm package remains at v0.2.3 until the
+  next explicit npm publish.
+
+### Boundaries
+
+- Context generates a local Markdown file from existing session and git data. It
+  does not call AI, edit product code, commit, push, open PRs, tag, release,
+  publish, upload, or run in the background.
+
+## v0.5.2 - 2026-06-17
+
+Test maintainability hardening.
+
+### Improved
+
+- Added focused unit tests for `handoff.ts`, `lifecycle.ts`, and `export.ts`.
+- Added `createSessionWithEvidence`, `assertEvidenceFiles`, and
+  `simulateDirtyWorkspace` test helpers to reduce boilerplate in future tests.
+- Added coverage for corrupted session data, missing evidence files, export edge
+  cases, explicit session vs active session resolution, and session lifecycle
+  transitions.
+
+### Tests
+
+- 22 new tests across `lifecycle.test.ts`, `handoff.test.ts`, and
+  `export.test.ts`. Total test count: 168.
+
+### Publishing
+
+- GitHub source release preparation only.
+- No npm publish in this version. The npm package remains at v0.2.3 until the
+  next explicit npm publish.
+
 ## v0.5.1 - 2026-06-13
 
 Open and first-time friction polish.

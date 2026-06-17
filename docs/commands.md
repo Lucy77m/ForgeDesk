@@ -396,6 +396,9 @@ evidence.json
 | `forgedesk fix-context` | Print bounded context for fixing failed tests. | no |
 | `forgedesk fix-context --session <id>` | Print fix context for a specific session. | no |
 | `forgedesk fix-context --copy` | Copy fix context to the system clipboard. | no |
+| `forgedesk context` | Generate a local AI-friendly context file at `.forgedesk/CONTEXT.md`. | yes |
+| `forgedesk context --session <id>` | Generate context for a specific session. | yes |
+| `forgedesk context --json` | Print the context report as JSON. | yes |
 | `forgedesk inspect` | Check expected evidence files and file sizes. | no |
 | `forgedesk inspect --session <id>` | Inspect a specific session's evidence files. | no |
 | `forgedesk inspect --export` | Inspect the default export directory for the session. | no |

@@ -21,7 +21,7 @@ describe('cli integration', () => {
     const result = runCli(repo, ['--version'])
 
     expect(result.status).toBe(0)
-    expect(result.stdout.trim()).toBe('0.5.1')
+    expect(result.stdout.trim()).toBe('0.5.3')
   })
 
   it('walks through first-time setup, next, test, export, open, and inspect', async () => {
@@ -1195,6 +1195,82 @@ describe('cli integration', () => {
       expect(result.status).not.toBe(0)
       expect(result.stderr).toContain('No active change session')
     }
+  })
+
+  it('generates a local context file for the active session', () => {
+    const repo = tempDir()
+    dirs.push(repo)
+    initGitRepo(repo)
+
+    expect(runCli(repo, ['init', '--repo', '.']).status).toBe(0)
+    expect(runCli(repo, ['start', '--title', 'Context demo']).status).toBe(0)
+    expect(runCli(repo, ['intent', 'Generate AI-friendly context.']).status).toBe(0)
+    expect(runCli(repo, ['decision', 'Keep context as a single file.']).status).toBe(0)
+    expect(runCli(repo, ['check', 'Reviewed context output.']).status).toBe(0)
+    expect(runCli(repo, ['evidence']).status).toBe(0)
+
+    const result = runCli(repo, ['context'])
+
+    expect(result.status).toBe(0)
+    expect(result.stdout).toContain('ForgeDesk Context')
+    expect(result.stdout).toContain('CONTEXT.md')
+    expect(result.stdout).toContain('Context demo')
+    expect(result.stdout).toContain('Ready: yes')
+
+    const sessionId = JSON.parse(readFileSync(path.join(repo, '.forgedesk', 'config.json'), 'utf8')).activeSessionId
+    const contextPath = path.join(repo, '.forgedesk', 'CONTEXT.md')
+    expect(existsSync(contextPath)).toBe(true)
+    const content = readFileSync(contextPath, 'utf8')
+    expect(content).toContain('# ForgeDesk Context')
+    expect(content).toContain('Generate AI-friendly context.')
+    expect(content).toContain('Keep context as a single file.')
+    expect(content).toContain('## Git')
+    expect(content).toContain('## Tests')
+    expect(content).toContain('## Readiness')
+    expect(content).toContain('## Boundary')
+  })
+
+  it('outputs context report as JSON', () => {
+    const repo = tempDir()
+    dirs.push(repo)
+    initGitRepo(repo)
+
+    expect(runCli(repo, ['init', '--repo', '.']).status).toBe(0)
+    expect(runCli(repo, ['start', '--title', 'Context JSON']).status).toBe(0)
+    expect(runCli(repo, ['intent', 'JSON context output.']).status).toBe(0)
+    expect(runCli(repo, ['check', 'Reviewed JSON output.']).status).toBe(0)
+    expect(runCli(repo, ['evidence']).status).toBe(0)
+
+    const result = runCli(repo, ['context', '--json'])
+
+    expect(result.status).toBe(0)
+    const report = JSON.parse(result.stdout)
+    expect(report.schemaVersion).toBe('forgedesk-context-v1')
+    expect(report.ready).toBe(true)
+    expect(report.session.title).toBe('Context JSON')
+    expect(report.path).toContain('CONTEXT.md')
+  })
+
+  it('generates context for an explicit session', () => {
+    const repo = tempDir()
+    dirs.push(repo)
+    initGitRepo(repo)
+
+    expect(runCli(repo, ['init', '--repo', '.']).status).toBe(0)
+    expect(runCli(repo, ['start', '--title', 'First context']).status).toBe(0)
+    const firstSessionId = JSON.parse(readFileSync(path.join(repo, '.forgedesk', 'config.json'), 'utf8')).activeSessionId
+    expect(runCli(repo, ['intent', 'First session context.']).status).toBe(0)
+    expect(runCli(repo, ['check', 'Reviewed first context.']).status).toBe(0)
+    expect(runCli(repo, ['evidence']).status).toBe(0)
+
+    expect(runCli(repo, ['start', '--title', 'Second context']).status).toBe(0)
+
+    const result = runCli(repo, ['context', '--session', firstSessionId, '--json'])
+
+    expect(result.status).toBe(0)
+    const report = JSON.parse(result.stdout)
+    expect(report.session.id).toBe(firstSessionId)
+    expect(report.session.title).toBe('First context')
   })
 
   it('supports status in a git repo with no commits', () => {

@@ -62,6 +62,7 @@ Decision tree:
 - Have local changes: `forgedesk next`
 - Not sure what state you are in: `forgedesk doctor` or `forgedesk episodes status`
 - Tests failed: `forgedesk fix-context`
+- Need AI-friendly context: `forgedesk context`
 - Ready to hand off: `forgedesk open export`
 
 Set the local automation profile before using hooks or watch mode:
@@ -199,7 +200,7 @@ See [CHANGELOG.md](CHANGELOG.md) for local source version notes.
 
 ## Project Status
 
-ForgeDesk v0.5.1 is prepared as a GitHub source release for the setup-first
+ForgeDesk v0.5.3 is prepared as a GitHub source release for the setup-first
 local autopilot workflow. The npm package remains at v0.2.3 until the next
 explicit npm publish.
 
