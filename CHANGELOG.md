@@ -4,6 +4,48 @@ All notable ForgeDesk changes are tracked here.
 
 Version entries describe source, GitHub release, and npm publishing state.
 
+## v0.6.0 - 2026-06-17
+
+pnpm workspace test discovery milestone.
+
+### Added
+
+- `forgedesk tests discover` now detects `pnpm-workspace.yaml` and discovers
+  test scripts across all workspace packages.
+- Workspace packages are listed with `--filter` syntax for `forgedesk test`
+  commands (e.g., `forgedesk test -- pnpm --filter @myapp/core run test`).
+- Added `isWorkspace` and `workspacePackages` fields to `forgedesk tests
+  discover --json` reports.
+- Added `package` field to each discovered script indicating which workspace
+  package it belongs to.
+- Human-readable output groups scripts by root and workspace package.
+
+### Improved
+
+- Workspace discovery uses simple YAML parsing to extract `packages` glob
+  patterns from `pnpm-workspace.yaml`. Falls back to single-package mode if
+  `pnpm-workspace.yaml` is missing or has no `packages` field.
+- Workspace packages without a `name` field in `package.json` fall back to the
+  directory name.
+- Workspace directories without `package.json` are silently skipped.
+
+### Tests
+
+- Added 8 tests for workspace discovery: multi-package discovery, root + package
+  scripts, `--filter` syntax, no workspace, no packages field, missing name,
+  missing package.json, and render output grouping.
+
+### Publishing
+
+- GitHub source release and npm publish preparation.
+
+### Boundaries
+
+- Workspace discovery is a read-only scan of local `package.json` files. It does
+  not run tests, call AI, edit product code, commit, push, open PRs, tag,
+  release, publish, upload, or run in the background. Only pnpm workspaces are
+  supported; npm and yarn workspaces are not covered in this version.
+
 ## v0.5.5 - 2026-06-17
 
 Configurable risk rules via `.forgedesk/rules.json`.

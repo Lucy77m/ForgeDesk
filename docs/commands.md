@@ -285,7 +285,10 @@ run as a hidden background service.
 | `forgedesk tests discover --json` | Print the discovery report as JSON. | no |
 
 Discovery reads the local `package.json` and reports common scripts that can be
-used as explicit ForgeDesk test buttons. It does not execute scripts.
+used as explicit ForgeDesk test buttons. In pnpm workspace repositories,
+discovery also reads `pnpm-workspace.yaml` and scans all workspace packages.
+Workspace test commands use `pnpm --filter <package>` syntax. It does not
+execute scripts.
 
 ## CI Evidence Gate
 

@@ -200,8 +200,8 @@ See [CHANGELOG.md](CHANGELOG.md) for local source version notes.
 
 ## Project Status
 
-ForgeDesk v0.5.5 is prepared as a GitHub source release for the setup-first
-local autopilot workflow. The npm package remains at v0.5.4 until the next
+ForgeDesk v0.6.0 is prepared as a GitHub source release for the setup-first
+local autopilot workflow. The npm package remains at v0.5.5 until the next
 explicit npm publish.
 
 ## Development
