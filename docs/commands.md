@@ -437,6 +437,39 @@ review.
 Export copies local files only. It does not upload, publish, compress, or
 regenerate evidence.
 
+## Risk Rules
+
+ForgeDesk includes built-in risk rules that detect common change patterns such
+as auth, payment, config, database, CI, package metadata, deleted files, and
+large changes.
+
+You can add custom rules by creating `.forgedesk/rules.json`:
+
+```json
+{
+  "schemaVersion": "forgedesk-rules-v1",
+  "rules": [
+    {
+      "name": "internal-api",
+      "pattern": "(^|/)internal/api/",
+      "message": "Internal API files changed. Review backward compatibility.",
+      "severity": "high",
+      "confidence": "medium"
+    }
+  ]
+}
+```
+
+Each rule requires `name`, `pattern` (regex), `message`, `severity`, and
+`confidence`. Add `"enabled": false` to disable a rule. Custom rules are merged
+with built-in rules; same-name custom rules override the built-in version.
+
+If `rules.json` is missing or invalid, ForgeDesk silently falls back to built-in
+rules only. `forgedesk doctor` reports whether `rules.json` was found.
+
+Risk rules do not call AI, edit product code, commit, push, open PRs, tag,
+release, publish, upload, or run in the background.
+
 ## Session Lifecycle
 
 | Command | Purpose | Writes local data |

@@ -199,6 +199,19 @@ export async function getDoctorReport(cwd: string): Promise<DoctorReport> {
     checks.push(check('autoConfig', 'error', message))
   }
 
+  try {
+    const { loadCustomRules } = await import('./risk-rules.js')
+    const rules = await loadCustomRules(workspace.repoPath)
+    const rulesPath = path.join(paths.forgedeskDir, 'rules.json')
+    if (await pathExists(rulesPath)) {
+      checks.push(check('rules', 'ok', `rules.json loaded with ${rules.length} custom rule(s).`))
+    } else {
+      checks.push(check('rules', 'ok', 'No rules.json found; using built-in risk rules only.'))
+    }
+  } catch {
+    checks.push(check('rules', 'warning', 'Could not read rules.json.'))
+  }
+
   for (const [name, dir] of [
     ['sessionsDir', paths.sessionsDir],
     ['evidenceDir', paths.evidenceDir],

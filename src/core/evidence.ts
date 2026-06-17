@@ -12,7 +12,7 @@ import { renderSummary } from '../templates/summary.js'
 import { renderTestEvidence } from '../templates/test-evidence.js'
 import { renderTestResults } from '../templates/test-results.js'
 import { displayPath } from '../templates/format.js'
-import { deriveRiskHints } from './risk-rules.js'
+import { deriveRiskHintsAsync } from './risk-rules.js'
 import { ForgeDeskError } from './errors.js'
 import {
   getActiveSession,
@@ -62,7 +62,7 @@ export async function generateEvidence(cwd: string, options: GenerateEvidenceOpt
     autoCapture: {
       title: options.autoCapture?.title,
       intent: options.autoCapture?.intent,
-      riskHints: deriveRiskHints(snapshot),
+      riskHints: await deriveRiskHintsAsync(workspace.repoPath, snapshot),
       checks: options.autoCapture?.checks ?? session.tests.map((test) => ({
         command: test.command,
         status: test.status,

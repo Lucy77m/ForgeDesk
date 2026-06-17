@@ -4,6 +4,42 @@ All notable ForgeDesk changes are tracked here.
 
 Version entries describe source, GitHub release, and npm publishing state.
 
+## v0.5.5 - 2026-06-17
+
+Configurable risk rules via `.forgedesk/rules.json`.
+
+### Added
+
+- Added `.forgedesk/rules.json` support for user-defined risk rules.
+- Custom rules are merged with built-in rules; same-name custom rules override
+  built-in rules.
+- Rules can be disabled with `"enabled": false`.
+- Invalid or missing `rules.json` silently falls back to built-in rules.
+- `forgedesk doctor` now reports `rules.json` status as a check item.
+
+### Improved
+
+- `forgedesk evidence` and `forgedesk auto` now load custom risk rules from
+  `.forgedesk/rules.json` when generating evidence.
+- Added `deriveRiskHintsAsync` for rule loading; the existing synchronous
+  `deriveRiskHints` is preserved for backward compatibility.
+
+### Tests
+
+- Added 8 tests for custom rules: loading, merging, override, disabled rules,
+  invalid JSON fallback, schema version mismatch, missing fields, and builtin
+  without rules.json.
+
+### Publishing
+
+- GitHub source release and npm publish preparation.
+
+### Boundaries
+
+- Custom rules are local file-based configuration. ForgeDesk does not call AI,
+  fetch rules from the network, edit product code, commit, push, open PRs, tag,
+  release, publish, upload, or run in the background.
+
 ## v0.5.4 - 2026-06-17
 
 Transparent deterministic Evidence Score.
