@@ -35,7 +35,7 @@ import { openLocalTarget, parseOpenTarget, renderOpenReport } from '../core/open
 import { getReadyReport, renderReadyReport } from '../core/ready.js'
 import { renderRepairReport, repairLocalSetup } from '../core/repair.js'
 import { getRulesReport, renderRulesReport } from '../core/rules.js'
-import { getTemplatesReport, initTemplates } from '../core/templates.js'
+import { getTemplatesReport, initTemplates, resetTemplates } from '../core/templates.js'
 import { getReviewOutput } from '../core/review-output.js'
 import { getShortcutsStatus, installShortcuts, renderShortcutsReport, uninstallShortcuts } from '../core/shortcuts.js'
 import { getStatus } from '../core/status.js'
@@ -384,10 +384,12 @@ export function buildProgram(cwd = process.cwd()): Command {
 
   program
     .command('templates')
-    .description('Show or initialize custom review templates.')
+    .description('Show, initialize, or reset custom review templates.')
     .option('--init', 'generate example templates in .forgedesk/templates/')
+    .option('--reset', 'remove custom templates and restore built-in defaults')
+    .option('--force', 'required with --reset to confirm deletion')
     .option('--json', 'print the templates report as JSON')
-    .action(async (options: { init?: boolean; json?: boolean }) => {
+    .action(async (options: { init?: boolean; reset?: boolean; force?: boolean; json?: boolean }) => {
       if (options.init) {
         const { loadWorkspace } = await import('../core/workspace.js')
         const workspace = await loadWorkspace(cwd)
@@ -396,6 +398,20 @@ export function buildProgram(cwd = process.cwd()): Command {
           console.log(`Initialized ${written.length} template(s): ${written.join(', ')}`)
         } else {
           console.log('All templates already exist. No files written.')
+        }
+        return
+      }
+      if (options.reset) {
+        if (!options.force) {
+          throw new ForgeDeskError('Use --force to confirm template reset. This will delete all custom templates.')
+        }
+        const { loadWorkspace } = await import('../core/workspace.js')
+        const workspace = await loadWorkspace(cwd)
+        const removed = await resetTemplates(workspace.repoPath)
+        if (removed.length > 0) {
+          console.log(`Removed ${removed.length} custom template(s): ${removed.join(', ')}`)
+        } else {
+          console.log('No custom templates to remove.')
         }
         return
       }

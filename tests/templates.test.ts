@@ -10,7 +10,7 @@ import { renderSummary } from '../src/templates/summary.js'
 import { renderTestEvidence } from '../src/templates/test-evidence.js'
 import { renderTestResults } from '../src/templates/test-results.js'
 import type { EvidenceBundle } from '../src/types.js'
-import { buildTemplateVars, getTemplatesReport, initTemplates, loadCustomTemplate, renderTemplate } from '../src/core/templates.js'
+import { buildTemplateVars, getTemplatesReport, initTemplates, KNOWN_TEMPLATE_VARS, loadCustomTemplate, renderTemplate, resetTemplates, validateTemplate } from '../src/core/templates.js'
 import { cleanupDir, createSessionWithEvidence, initGitRepo, runCli, tempDir } from './helpers.js'
 
 function bundle(): EvidenceBundle {
@@ -282,7 +282,7 @@ describe('templates', () => {
 
       const written = await initTemplates(repo)
 
-      expect(written).toHaveLength(3)
+      expect(written).toHaveLength(4)
       expect(existsSync(path.join(repo, '.forgedesk', 'templates', 'PR_BODY.md'))).toBe(true)
       const content = readFileSync(path.join(repo, '.forgedesk', 'templates', 'PR_BODY.md'), 'utf8')
       expect(content).toContain('{{session.intent}}')
@@ -298,7 +298,7 @@ describe('templates', () => {
 
       const written = await initTemplates(repo)
 
-      expect(written).toHaveLength(2)
+      expect(written).toHaveLength(3)
       expect(readFileSync(path.join(templatesDir, 'PR_BODY.md'), 'utf8')).toBe('My custom')
     })
 
@@ -354,7 +354,69 @@ describe('templates', () => {
       const result = runCli(repo, ['templates', '--init'])
 
       expect(result.status).toBe(0)
-      expect(result.stdout).toContain('Initialized 3 template(s)')
+      expect(result.stdout).toContain('Initialized 4 template(s)')
+    })
+
+    it('validateTemplate detects unknown variables', () => {
+      const warnings = validateTemplate('{{session.title}} and {{typo_var}}', KNOWN_TEMPLATE_VARS)
+
+      expect(warnings).toHaveLength(1)
+      expect(warnings[0]).toContain('{{typo_var}}')
+    })
+
+    it('validateTemplate returns empty for valid variables', () => {
+      const warnings = validateTemplate('{{session.title}} {{git.branch}} {{testSummary}}', KNOWN_TEMPLATE_VARS)
+
+      expect(warnings).toEqual([])
+    })
+
+    it('resetTemplates removes custom templates', async () => {
+      const repo = tempDir()
+      dirs.push(repo)
+      initGitRepo(repo)
+      await initTemplates(repo)
+
+      const removed = await resetTemplates(repo)
+
+      expect(removed).toHaveLength(4)
+      expect(existsSync(path.join(repo, '.forgedesk', 'templates', 'PR_BODY.md'))).toBe(false)
+    })
+
+    it('resetTemplates returns empty when no custom templates exist', async () => {
+      const repo = tempDir()
+      dirs.push(repo)
+      initGitRepo(repo)
+
+      const removed = await resetTemplates(repo)
+
+      expect(removed).toEqual([])
+    })
+
+    it('templates --reset requires --force', () => {
+      const repo = tempDir()
+      dirs.push(repo)
+      initGitRepo(repo)
+      expect(runCli(repo, ['init', '--repo', '.']).status).toBe(0)
+      expect(runCli(repo, ['templates', '--init']).status).toBe(0)
+
+      const result = runCli(repo, ['templates', '--reset'])
+
+      expect(result.status).not.toBe(0)
+      expect(result.stderr).toContain('--force')
+    })
+
+    it('templates --reset --force removes custom templates', () => {
+      const repo = tempDir()
+      dirs.push(repo)
+      initGitRepo(repo)
+      expect(runCli(repo, ['init', '--repo', '.']).status).toBe(0)
+      expect(runCli(repo, ['templates', '--init']).status).toBe(0)
+
+      const result = runCli(repo, ['templates', '--reset', '--force'])
+
+      expect(result.status).toBe(0)
+      expect(result.stdout).toContain('Removed 4 custom template(s)')
+      expect(existsSync(path.join(repo, '.forgedesk', 'templates', 'PR_BODY.md'))).toBe(false)
     })
   })
 })

@@ -1,4 +1,4 @@
-import { mkdir, readFile, writeFile } from 'node:fs/promises'
+import { mkdir, readFile, rm, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import type { EvidenceBundle } from '../types.js'
 import {
@@ -6,6 +6,7 @@ import {
   listOrNone,
   notVerified,
   renderChangedFiles,
+  renderTestGroup,
   testSummary
 } from '../templates/format.js'
 import { pathExists, pathsFor } from './workspace.js'
@@ -26,7 +27,16 @@ export type TemplatesReport = {
   warnings: string[]
 }
 
-const CUSTOMIZABLE_TEMPLATES = ['PR_BODY.md', 'SUMMARY.md', 'REVIEW_CONTEXT.md'] as const
+const CUSTOMIZABLE_TEMPLATES = ['PR_BODY.md', 'SUMMARY.md', 'REVIEW_CONTEXT.md', 'TEST_EVIDENCE.md'] as const
+
+export const KNOWN_TEMPLATE_VARS = new Set([
+  'session.title', 'session.status', 'session.intent',
+  'git.branch', 'git.head', 'git.changedFiles',
+  'project.name',
+  'testSummary', 'testDetails',
+  'riskHints', 'changedFiles',
+  'decisions', 'manualChecks', 'notVerified'
+])
 
 export function templatesDirFor(repoPath: string): string {
   return path.join(pathsFor(repoPath).forgedeskDir, 'templates')
@@ -50,6 +60,31 @@ export function renderTemplate(template: string, vars: Record<string, string>): 
   })
 }
 
+export function validateTemplate(template: string, knownVars: Set<string> = KNOWN_TEMPLATE_VARS): string[] {
+  const warnings: string[] = []
+  const pattern = /\{\{(\w+(?:\.\w+)?)\}\}/g
+  let match
+  while ((match = pattern.exec(template)) !== null) {
+    if (!knownVars.has(match[1])) {
+      warnings.push(`Unknown template variable: {{${match[1]}}}`)
+    }
+  }
+  return warnings
+}
+
+export async function resetTemplates(repoPath: string): Promise<string[]> {
+  const dir = templatesDirFor(repoPath)
+  const removed: string[] = []
+  for (const name of CUSTOMIZABLE_TEMPLATES) {
+    const filePath = path.join(dir, name)
+    if (await pathExists(filePath)) {
+      await rm(filePath)
+      removed.push(name)
+    }
+  }
+  return removed
+}
+
 export function buildTemplateVars(bundle: EvidenceBundle): Record<string, string> {
   const riskHints = bundle.autoCapture?.riskHints ?? []
   const gaps = notVerified(bundle.session)
@@ -63,6 +98,7 @@ export function buildTemplateVars(bundle: EvidenceBundle): Record<string, string
     'git.changedFiles': String(changedFileCount(bundle.gitSnapshot)),
     'project.name': bundle.project.name,
     'testSummary': testSummary(bundle.session),
+    'testDetails': renderTestGroup(bundle.session.tests),
     'riskHints': listOrNone(
       riskHints.map((h) => `${h.text} (${h.source}, ${h.confidence})`),
       'No risk hints generated.'
@@ -194,6 +230,30 @@ This summary prepares review context. It is not a code review verdict.
 - Do not assume correctness based only on this context.
 
 ForgeDesk prepares review context. It does not review or approve code.
+`,
+  'TEST_EVIDENCE.md': `# Test Evidence
+
+## Summary
+
+{{testSummary}}
+
+## Details
+
+{{testDetails}}
+
+## Decisions
+
+{{decisions}}
+
+## Manual Checks
+
+{{manualChecks}}
+
+## Not Verified
+
+{{notVerified}}
+
+This is local test evidence, not a correctness verdict.
 `
 }
 

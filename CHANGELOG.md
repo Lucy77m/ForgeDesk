@@ -4,6 +4,35 @@ All notable ForgeDesk changes are tracked here.
 
 Version entries describe source, GitHub release, and npm publishing state.
 
+## v0.9.1 - 2026-06-22
+
+Template enhancements: validation, reset, and TEST_EVIDENCE.md support.
+
+### Added
+
+- Template variable validation: unknown `{{variables}}` in custom templates now
+  produce warnings on stderr during evidence generation.
+- Added `forgedesk templates --reset --force` to remove all custom templates and
+  restore built-in defaults.
+- `TEST_EVIDENCE.md` is now customizable via `.forgedesk/templates/`.
+- Added `{{testDetails}}` variable for rendered test detail output.
+- Added `KNOWN_TEMPLATE_VARS` export for validation reference.
+
+### Improved
+
+- `forgedesk templates --init` now generates 4 example templates (was 3).
+- Template validation warns about typos without interrupting evidence generation.
+
+### Tests
+
+- Added 6 tests: validateTemplate unknown/valid vars, resetTemplates
+  remove/empty, CLI --reset requires --force, CLI --reset --force works.
+- Total tests: 246.
+
+### Publishing
+
+- GitHub source release and npm publish preparation.
+
 ## v0.9.0 - 2026-06-22
 
 Project-level review templates.
