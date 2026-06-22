@@ -21,7 +21,7 @@ describe('cli integration', () => {
     const result = runCli(repo, ['--version'])
 
     expect(result.status).toBe(0)
-    expect(result.stdout.trim()).toBe('0.9.1')
+    expect(result.stdout.trim()).toBe('1.0.0')
   })
 
   it('walks through first-time setup, next, test, export, open, and inspect', async () => {

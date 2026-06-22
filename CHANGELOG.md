@@ -4,6 +4,46 @@ All notable ForgeDesk changes are tracked here.
 
 Version entries describe source, GitHub release, and npm publishing state.
 
+## Version Summary
+
+| Version | Date | Highlights |
+|---|---|---|
+| v1.0.0 | 2026-06-22 | Stable release, API contract freeze |
+| v0.9.1 | 2026-06-22 | Template validation, reset, TEST_EVIDENCE customization |
+| v0.9.0 | 2026-06-22 | Project-level review templates |
+| v0.8.0 | 2026-06-22 | Diff-aware content risk rules |
+| v0.7.0 | 2026-06-22 | Evidence-as-Code (schema, validation, presets) |
+| v0.6.3 | 2026-06-18 | Test hardening |
+| v0.6.0 | 2026-06-17 | pnpm workspace test discovery |
+| v0.5.5 | 2026-06-17 | Configurable risk rules (rules.json) |
+| v0.5.4 | 2026-06-17 | Evidence Score |
+| v0.5.3 | 2026-06-17 | Context generation |
+| v0.5.2 | 2026-06-17 | Test maintainability |
+| v0.5.1 | 2026-06-13 | Local open command |
+| v0.2.3 | 2026-06-12 | First npm publish |
+
+## v1.0.0 - 2026-06-22
+
+Stable release with API contract freeze.
+
+### Stability
+
+- All `--json` output schemas are now frozen under semver.
+- All `schemaVersion` fields maintain backward compatibility within v1.x.
+- New optional fields may be added without breaking consumers.
+- Removing or modifying existing fields requires v2.0.
+
+### Documentation
+
+- Added `docs/api-contract.md` with full stability commitments.
+- Added version summary table to CHANGELOG.md.
+- Updated roadmap to reflect v1.0 stable status.
+
+### Publishing
+
+- Published to npm as `forgedesk@1.0.0`.
+- GitHub source release with tag `v1.0.0`.
+
 ## v0.9.1 - 2026-06-22
 
 Template enhancements: validation, reset, and TEST_EVIDENCE.md support.

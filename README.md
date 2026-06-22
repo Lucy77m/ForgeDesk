@@ -200,9 +200,9 @@ See [CHANGELOG.md](CHANGELOG.md) for local source version notes.
 
 ## Project Status
 
-ForgeDesk v0.9.1 is prepared as a GitHub source release for the setup-first
-local autopilot workflow. The npm package remains at v0.9.0 until the next
-explicit npm publish.
+ForgeDesk v1.0.0 is the stable release of the setup-first local autopilot CLI.
+All `--json` output schemas are frozen under semver. See
+[docs/api-contract.md](docs/api-contract.md) for details.
 
 ## Development
 
