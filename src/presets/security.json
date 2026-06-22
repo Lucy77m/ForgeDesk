@@ -3,15 +3,25 @@
   "rules": [
     {
       "name": "secrets-detected",
-      "pattern": "(api[_-]?key|secret[_-]?key|private[_-]?key|access[_-]?token|auth[_-]?token|password|credential)",
-      "message": "Possible secrets or credentials detected in changed files. Review for hardcoded sensitive values.",
+      "match": "content",
+      "pattern": "(api[_-]?key|secret[_-]?key|private[_-]?key|access[_-]?token|password)\\s*[:=]\\s*['\"][^'\"]{8,}",
+      "message": "Possible hardcoded secret or API key in added code. Review for exposed credentials.",
       "severity": "high",
       "confidence": "medium"
     },
     {
       "name": "sql-injection-risk",
-      "pattern": "(query|sql|execute|raw\\()",
-      "message": "SQL or query-related files changed. Review for injection risks and parameterized queries.",
+      "match": "content",
+      "pattern": "(query|execute)\\s*\\(\\s*['\"].*\\$\\{|\\.query\\s*\\(\\s*`.*\\$\\{",
+      "message": "Possible SQL injection via string interpolation. Use parameterized queries.",
+      "severity": "high",
+      "confidence": "medium"
+    },
+    {
+      "name": "eval-exec-usage",
+      "match": "content",
+      "pattern": "\\b(eval|Function)\\s*\\(",
+      "message": "Dynamic code execution (eval/Function) detected in added code. Review for injection risks.",
       "severity": "high",
       "confidence": "medium"
     },

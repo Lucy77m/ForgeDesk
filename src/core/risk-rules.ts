@@ -1,4 +1,5 @@
 import path from 'node:path'
+import { readDiffContent } from '../git/snapshot.js'
 import { readJson } from '../storage/json-store.js'
 import type { GitSnapshot, RiskHint } from '../types.js'
 import { pathExists, pathsFor } from './workspace.js'
@@ -9,6 +10,7 @@ export type RiskRule = {
   message: string
   severity: RiskHint['severity']
   confidence: RiskHint['confidence']
+  match: 'path' | 'content'
 }
 
 type RulesFile = {
@@ -20,6 +22,7 @@ type RulesFile = {
     severity?: unknown
     confidence?: unknown
     enabled?: unknown
+    match?: unknown
   }>
 }
 
@@ -38,6 +41,14 @@ function hasPath(files: string[], pattern: RegExp): boolean {
 
 function hint(text: string, source: string, severity: RiskHint['severity'], confidence: RiskHint['confidence']): RiskHint {
   return { text, source, severity, confidence }
+}
+
+function addedLines(diff: string): string[] {
+  return diff.split('\n').filter((line) => line.startsWith('+') && !line.startsWith('+++'))
+}
+
+function hasContentMatch(diff: string, pattern: RegExp): boolean {
+  return addedLines(diff).some((line) => pattern.test(line))
 }
 
 export function deriveRiskHints(snapshot: GitSnapshot): RiskHint[] {
@@ -87,12 +98,15 @@ function parseRule(entry: RulesFile['rules'][number]): RiskRule | undefined {
   if (!isValidSeverity(entry.confidence)) return undefined
   if (entry.enabled === false) return undefined
 
+  const match = entry.match === 'content' ? 'content' : 'path'
+
   return {
     name: entry.name.trim(),
     pattern: entry.pattern.trim(),
     message: entry.message.trim(),
     severity: entry.severity,
-    confidence: entry.confidence
+    confidence: entry.confidence,
+    match
   }
 }
 
@@ -120,7 +134,19 @@ export async function deriveRiskHintsAsync(repoPath: string, snapshot: GitSnapsh
   const builtin = deriveRiskHints(snapshot)
   const custom = await loadCustomRules(repoPath)
 
-  if (custom.length === 0) {
+  // Built-in content rules
+  const diff = readDiffContent(repoPath)
+  const contentHints: RiskHint[] = []
+  if (diff) {
+    if (hasContentMatch(diff, /(api[_-]?key|secret[_-]?key|private[_-]?key|access[_-]?token|password)\s*[:=]\s*['"][^'"]{8,}/i)) {
+      contentHints.push(hint('Possible hardcoded secret or API key in added code. Review for exposed credentials.', 'rule:hardcoded-secrets', 'high', 'medium'))
+    }
+    if (hasContentMatch(diff, /\b(eval|Function)\s*\(/)) {
+      contentHints.push(hint('Dynamic code execution (eval/Function) detected in added code. Review for injection risks.', 'rule:eval-exec-usage', 'high', 'medium'))
+    }
+  }
+
+  if (custom.length === 0 && contentHints.length === 0) {
     return builtin
   }
 
@@ -130,8 +156,14 @@ export async function deriveRiskHintsAsync(repoPath: string, snapshot: GitSnapsh
 
   for (const rule of custom) {
     try {
-      if (hasPath(files, new RegExp(rule.pattern, 'i'))) {
-        customHints.push(hint(rule.message, `rule:${rule.name}`, rule.severity, rule.confidence))
+      if (rule.match === 'content') {
+        if (diff && hasContentMatch(diff, new RegExp(rule.pattern, 'i'))) {
+          customHints.push(hint(rule.message, `rule:${rule.name}`, rule.severity, rule.confidence))
+        }
+      } else {
+        if (hasPath(files, new RegExp(rule.pattern, 'i'))) {
+          customHints.push(hint(rule.message, `rule:${rule.name}`, rule.severity, rule.confidence))
+        }
       }
     } catch {
       // Invalid regex pattern — skip this rule
@@ -140,6 +172,7 @@ export async function deriveRiskHintsAsync(repoPath: string, snapshot: GitSnapsh
 
   return [
     ...builtin.filter((h) => !overrideNames.has(h.source.replace('rule:', ''))),
+    ...contentHints.filter((h) => !overrideNames.has(h.source.replace('rule:', ''))),
     ...customHints
   ]
 }

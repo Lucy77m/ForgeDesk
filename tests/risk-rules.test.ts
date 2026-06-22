@@ -217,5 +217,91 @@ describe('risk rules', () => {
 
       expect(hints.some((h) => h.source === 'rule:path-auth')).toBe(true)
     })
+
+    it('loads custom rules with content match type', async () => {
+      const repo = tempDir()
+      dirs.push(repo)
+      initGitRepo(repo)
+      writeRules(repo, {
+        schemaVersion: 'forgedesk-rules-v1',
+        rules: [
+          {
+            name: 'my-content-rule',
+            match: 'content',
+            pattern: 'TODO',
+            message: 'TODO found.',
+            severity: 'low',
+            confidence: 'low'
+          }
+        ]
+      })
+
+      const rules = await loadCustomRules(repo)
+
+      expect(rules).toHaveLength(1)
+      expect(rules[0].match).toBe('content')
+    })
+
+    it('defaults match to path when not specified', async () => {
+      const repo = tempDir()
+      dirs.push(repo)
+      initGitRepo(repo)
+      writeRules(repo, {
+        schemaVersion: 'forgedesk-rules-v1',
+        rules: [
+          {
+            name: 'no-match-field',
+            pattern: '(^|/)test/',
+            message: 'Test.',
+            severity: 'low',
+            confidence: 'low'
+          }
+        ]
+      })
+
+      const rules = await loadCustomRules(repo)
+
+      expect(rules[0].match).toBe('path')
+    })
+
+    it('builtin content rules detect hardcoded secrets in diff', async () => {
+      const repo = tempDir()
+      dirs.push(repo)
+      initGitRepo(repo)
+      // Write a file with a hardcoded secret to create a diff
+      writeFileSync(path.join(repo, 'README.md'), '# Changed\napi_key = "sk-1234567890abcdef"\n', 'utf8')
+
+      const hints = await deriveRiskHintsAsync(repo, snapshot({
+        modifiedFiles: ['README.md']
+      }))
+
+      expect(hints.some((h) => h.source === 'rule:hardcoded-secrets')).toBe(true)
+    })
+
+    it('builtin content rules detect eval usage in diff', async () => {
+      const repo = tempDir()
+      dirs.push(repo)
+      initGitRepo(repo)
+      writeFileSync(path.join(repo, 'README.md'), '# Changed\neval(userInput)\n', 'utf8')
+
+      const hints = await deriveRiskHintsAsync(repo, snapshot({
+        modifiedFiles: ['README.md']
+      }))
+
+      expect(hints.some((h) => h.source === 'rule:eval-exec-usage')).toBe(true)
+    })
+
+    it('content rules do not trigger on removed lines', async () => {
+      const repo = tempDir()
+      dirs.push(repo)
+      initGitRepo(repo)
+      // No file changes = no added lines in diff
+      const hints = await deriveRiskHintsAsync(repo, snapshot({
+        modifiedFiles: []
+      }))
+
+      expect(hints.some((h) => h.source === 'rule:hardcoded-secrets')).toBe(false)
+      expect(hints.some((h) => h.source === 'rule:eval-exec-usage')).toBe(false)
+    })
   })
 })

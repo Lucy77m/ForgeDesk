@@ -184,3 +184,12 @@ export function captureGitSnapshot(repoPath: string): GitSnapshot {
     capturedAt: new Date().toISOString()
   }
 }
+
+const MAX_DIFF_BYTES = 100 * 1024
+
+export function readDiffContent(repoPath: string): string {
+  const staged = tryRunGitRaw(repoPath, ['diff', '--cached']) ?? ''
+  const worktree = tryRunGitRaw(repoPath, ['diff']) ?? ''
+  const combined = staged + worktree
+  return combined.length > MAX_DIFF_BYTES ? combined.slice(0, MAX_DIFF_BYTES) : combined
+}

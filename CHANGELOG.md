@@ -4,6 +4,47 @@ All notable ForgeDesk changes are tracked here.
 
 Version entries describe source, GitHub release, and npm publishing state.
 
+## v0.8.0 - 2026-06-22
+
+Diff-aware risk rules: analyze code content, not just file names.
+
+### Added
+
+- Risk rules now support `match: "content"` in addition to `match: "path"`
+  (default). Content rules match against git diff added lines instead of file
+  paths.
+- Added built-in content rules: `hardcoded-secrets` (detects API keys, tokens,
+  passwords in added code) and `eval-exec-usage` (detects eval/Function calls).
+- Added `readDiffContent()` to `src/git/snapshot.ts` for reading staged +
+  worktree diff content with a 100KB safety limit.
+- Updated security preset (`forgedesk rules --preset security`) with
+  content-based rules for secrets, SQL injection, and eval/exec detection.
+
+### Improved
+
+- `deriveRiskHintsAsync` now runs both path-based and content-based rules,
+  including built-in content rules when no rules.json exists.
+- Content rules only match added lines (lines starting with `+` in the diff),
+  not removed lines.
+- Old rules.json files without a `match` field default to `"path"` — fully
+  backward compatible.
+
+### Tests
+
+- Added 5 tests: content match type loading, default match type, hardcoded
+  secret detection, eval detection, and no-match-on-removed-lines.
+- Total tests: 230.
+
+### Publishing
+
+- GitHub source release and npm publish preparation.
+
+### Boundaries
+
+- Content rules analyze local git diff text. They do not call AI, upload code,
+  edit product code, commit, push, open PRs, tag, release, publish, or run in
+  the background.
+
 ## v0.7.0 - 2026-06-18
 
 Evidence-as-Code: schema, validation, and preset rules.

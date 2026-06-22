@@ -467,8 +467,10 @@ You can add custom rules by creating `.forgedesk/rules.json`:
 ```
 
 Each rule requires `name`, `pattern` (regex), `message`, `severity`, and
-`confidence`. Add `"enabled": false` to disable a rule. Custom rules are merged
-with built-in rules; same-name custom rules override the built-in version.
+`confidence`. Add `"enabled": false` to disable a rule. Add `"match": "content"`
+to match against git diff added lines instead of file paths. Custom rules are
+merged with built-in rules; same-name custom rules override the built-in
+version.
 
 If `rules.json` is missing or invalid, ForgeDesk silently falls back to built-in
 rules only. `forgedesk doctor` reports whether `rules.json` was found.
