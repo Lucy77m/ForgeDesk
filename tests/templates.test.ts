@@ -1,4 +1,6 @@
-import { describe, expect, it } from 'vitest'
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import path from 'node:path'
+import { afterEach, describe, expect, it } from 'vitest'
 import { renderChangeSummary } from '../src/templates/change-summary.js'
 import { renderPrBody } from '../src/templates/pr-body.js'
 import { renderPrEvidence } from '../src/templates/pr-evidence.js'
@@ -8,6 +10,8 @@ import { renderSummary } from '../src/templates/summary.js'
 import { renderTestEvidence } from '../src/templates/test-evidence.js'
 import { renderTestResults } from '../src/templates/test-results.js'
 import type { EvidenceBundle } from '../src/types.js'
+import { buildTemplateVars, getTemplatesReport, initTemplates, loadCustomTemplate, renderTemplate } from '../src/core/templates.js'
+import { cleanupDir, createSessionWithEvidence, initGitRepo, runCli, tempDir } from './helpers.js'
 
 function bundle(): EvidenceBundle {
   const now = '2026-06-10T00:00:00.000Z'
@@ -215,5 +219,142 @@ describe('templates', () => {
     expect(renderReviewContext(value)).toContain('Do not assume correctness')
     expect(renderTestEvidence(value)).toContain('# Test Evidence')
     expect(renderTestEvidence(value)).toContain('pnpm test: not-run')
+  })
+
+  describe('custom templates', () => {
+    const dirs: string[] = []
+
+    afterEach(() => {
+      for (const dir of dirs.splice(0)) {
+        cleanupDir(dir)
+      }
+    })
+
+    it('renderTemplate replaces simple and nested variables', () => {
+      const result = renderTemplate('{{session.title}} on {{git.branch}}', {
+        'session.title': 'My Change',
+        'git.branch': 'feature-x'
+      })
+      expect(result).toBe('My Change on feature-x')
+    })
+
+    it('renderTemplate preserves unmatched placeholders', () => {
+      const result = renderTemplate('{{unknown}}', {})
+      expect(result).toBe('{{unknown}}')
+    })
+
+    it('buildTemplateVars produces all expected variables', () => {
+      const b = bundle()
+      b.session.intent = 'Build vars test.'
+      b.session.manualChecks = [{ id: 'mc1', text: 'Checked.', createdAt: '2026-06-10T00:00:00.000Z' }]
+      const vars = buildTemplateVars(b)
+
+      expect(vars['session.title']).toBe('Demo change')
+      expect(vars['session.intent']).toBe('Build vars test.')
+      expect(vars['git.branch']).toBe('main')
+      expect(vars['manualChecks']).toContain('Checked.')
+    })
+
+    it('loadCustomTemplate returns undefined when no template exists', async () => {
+      const repo = tempDir()
+      dirs.push(repo)
+      initGitRepo(repo)
+      const result = await loadCustomTemplate(repo, 'PR_BODY.md')
+      expect(result).toBeUndefined()
+    })
+
+    it('loadCustomTemplate reads custom template content', async () => {
+      const repo = tempDir()
+      dirs.push(repo)
+      initGitRepo(repo)
+      const templatesDir = path.join(repo, '.forgedesk', 'templates')
+      mkdirSync(templatesDir, { recursive: true })
+      writeFileSync(path.join(templatesDir, 'PR_BODY.md'), 'Custom: {{session.intent}}', 'utf8')
+
+      const result = await loadCustomTemplate(repo, 'PR_BODY.md')
+      expect(result).toBe('Custom: {{session.intent}}')
+    })
+
+    it('initTemplates generates example templates', async () => {
+      const repo = tempDir()
+      dirs.push(repo)
+      initGitRepo(repo)
+
+      const written = await initTemplates(repo)
+
+      expect(written).toHaveLength(3)
+      expect(existsSync(path.join(repo, '.forgedesk', 'templates', 'PR_BODY.md'))).toBe(true)
+      const content = readFileSync(path.join(repo, '.forgedesk', 'templates', 'PR_BODY.md'), 'utf8')
+      expect(content).toContain('{{session.intent}}')
+    })
+
+    it('initTemplates does not overwrite existing templates', async () => {
+      const repo = tempDir()
+      dirs.push(repo)
+      initGitRepo(repo)
+      const templatesDir = path.join(repo, '.forgedesk', 'templates')
+      mkdirSync(templatesDir, { recursive: true })
+      writeFileSync(path.join(templatesDir, 'PR_BODY.md'), 'My custom', 'utf8')
+
+      const written = await initTemplates(repo)
+
+      expect(written).toHaveLength(2)
+      expect(readFileSync(path.join(templatesDir, 'PR_BODY.md'), 'utf8')).toBe('My custom')
+    })
+
+    it('custom template is used in evidence generation', async () => {
+      const repo = tempDir()
+      dirs.push(repo)
+      initGitRepo(repo)
+      createSessionWithEvidence(repo, {
+        intent: 'Custom template test.',
+        tests: [{ id: 't1', command: 'node --version', status: 'passed', exitCode: 0 }]
+      })
+
+      const templatesDir = path.join(repo, '.forgedesk', 'templates')
+      mkdirSync(templatesDir, { recursive: true })
+      writeFileSync(
+        path.join(templatesDir, 'PR_BODY.md'),
+        '## Custom PR\n\nIntent: {{session.intent}}\nBranch: {{git.branch}}',
+        'utf8'
+      )
+
+      expect(runCli(repo, ['evidence']).status).toBe(0)
+
+      const sessionId = JSON.parse(readFileSync(path.join(repo, '.forgedesk', 'config.json'), 'utf8')).activeSessionId
+      const prBody = readFileSync(path.join(repo, '.forgedesk', 'evidence', sessionId, 'PR_BODY.md'), 'utf8')
+      expect(prBody).toContain('## Custom PR')
+      expect(prBody).toContain('Intent: Custom template test.')
+      expect(prBody).toContain('Branch:')
+
+      // Other files use built-in templates
+      const summary = readFileSync(path.join(repo, '.forgedesk', 'evidence', sessionId, 'SUMMARY.md'), 'utf8')
+      expect(summary).toContain('# ForgeDesk Summary')
+    })
+
+    it('templates CLI shows status', () => {
+      const repo = tempDir()
+      dirs.push(repo)
+      initGitRepo(repo)
+      expect(runCli(repo, ['init', '--repo', '.']).status).toBe(0)
+
+      const result = runCli(repo, ['templates'])
+
+      expect(result.status).toBe(0)
+      expect(result.stdout).toContain('ForgeDesk Templates')
+      expect(result.stdout).toContain('PR_BODY.md: builtin')
+    })
+
+    it('templates --init generates example files', () => {
+      const repo = tempDir()
+      dirs.push(repo)
+      initGitRepo(repo)
+      expect(runCli(repo, ['init', '--repo', '.']).status).toBe(0)
+
+      const result = runCli(repo, ['templates', '--init'])
+
+      expect(result.status).toBe(0)
+      expect(result.stdout).toContain('Initialized 3 template(s)')
+    })
   })
 })

@@ -13,6 +13,7 @@ import { renderTestEvidence } from '../templates/test-evidence.js'
 import { renderTestResults } from '../templates/test-results.js'
 import { displayPath } from '../templates/format.js'
 import { deriveRiskHintsAsync } from './risk-rules.js'
+import { buildTemplateVars, isCustomizableTemplate, loadCustomTemplate, renderTemplate } from './templates.js'
 import { ForgeDeskError } from './errors.js'
 import {
   getActiveSession,
@@ -79,9 +80,16 @@ export async function generateEvidence(cwd: string, options: GenerateEvidenceOpt
     : path.join(pathsFor(workspace.repoPath).evidenceDir, session.id)
   await mkdir(outputDir, { recursive: true })
 
-  await writeFile(path.join(outputDir, 'SUMMARY.md'), renderSummary(bundle), 'utf8')
-  await writeFile(path.join(outputDir, 'PR_BODY.md'), renderPrBody(bundle), 'utf8')
-  await writeFile(path.join(outputDir, 'REVIEW_CONTEXT.md'), renderReviewContext(bundle), 'utf8')
+  const templateVars = buildTemplateVars(bundle)
+
+  async function renderWithCustom(builtIn: () => string, fileName: string): Promise<string> {
+    const custom = await loadCustomTemplate(workspace.repoPath, fileName)
+    return custom ? renderTemplate(custom, templateVars) : builtIn()
+  }
+
+  await writeFile(path.join(outputDir, 'SUMMARY.md'), await renderWithCustom(() => renderSummary(bundle), 'SUMMARY.md'), 'utf8')
+  await writeFile(path.join(outputDir, 'PR_BODY.md'), await renderWithCustom(() => renderPrBody(bundle), 'PR_BODY.md'), 'utf8')
+  await writeFile(path.join(outputDir, 'REVIEW_CONTEXT.md'), await renderWithCustom(() => renderReviewContext(bundle), 'REVIEW_CONTEXT.md'), 'utf8')
   await writeFile(path.join(outputDir, 'TEST_EVIDENCE.md'), renderTestEvidence(bundle), 'utf8')
   await writeFile(path.join(outputDir, 'PR_EVIDENCE.md'), renderPrEvidence(bundle), 'utf8')
   await writeFile(path.join(outputDir, 'CHANGE_SUMMARY.md'), renderChangeSummary(bundle), 'utf8')

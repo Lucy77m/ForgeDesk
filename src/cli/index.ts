@@ -35,6 +35,7 @@ import { openLocalTarget, parseOpenTarget, renderOpenReport } from '../core/open
 import { getReadyReport, renderReadyReport } from '../core/ready.js'
 import { renderRepairReport, repairLocalSetup } from '../core/repair.js'
 import { getRulesReport, renderRulesReport } from '../core/rules.js'
+import { getTemplatesReport, initTemplates } from '../core/templates.js'
 import { getReviewOutput } from '../core/review-output.js'
 import { getShortcutsStatus, installShortcuts, renderShortcutsReport, uninstallShortcuts } from '../core/shortcuts.js'
 import { getStatus } from '../core/status.js'
@@ -379,6 +380,40 @@ export function buildProgram(cwd = process.cwd()): Command {
     .action(async (options: { session?: string; json?: boolean }) => {
       const report = await refreshContextFile(cwd, { sessionId: options.session })
       console.log(options.json ? JSON.stringify(report, null, 2) : renderContextReport(report))
+    })
+
+  program
+    .command('templates')
+    .description('Show or initialize custom review templates.')
+    .option('--init', 'generate example templates in .forgedesk/templates/')
+    .option('--json', 'print the templates report as JSON')
+    .action(async (options: { init?: boolean; json?: boolean }) => {
+      if (options.init) {
+        const { loadWorkspace } = await import('../core/workspace.js')
+        const workspace = await loadWorkspace(cwd)
+        const written = await initTemplates(workspace.repoPath)
+        if (written.length > 0) {
+          console.log(`Initialized ${written.length} template(s): ${written.join(', ')}`)
+        } else {
+          console.log('All templates already exist. No files written.')
+        }
+        return
+      }
+      const report = await getTemplatesReport(cwd)
+      const renderTemplatesReport = (r: typeof report): string => {
+        const lines = ['ForgeDesk Templates', '', `Repo: ${r.repoPath}`, `Templates dir: ${r.templatesDir}`, '']
+        for (const t of r.templates) {
+          const status = t.custom ? 'custom' : 'builtin'
+          lines.push(`- ${t.name}: ${status}`)
+        }
+        lines.push('')
+        lines.push(`Custom templates: ${r.customCount} of ${r.templates.length}`)
+        if (r.customCount === 0) {
+          lines.push('Run "forgedesk templates --init" to generate example templates.')
+        }
+        return lines.join('\n')
+      }
+      console.log(options.json ? JSON.stringify(report, null, 2) : renderTemplatesReport(report))
     })
 
   program

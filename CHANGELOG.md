@@ -4,6 +4,42 @@ All notable ForgeDesk changes are tracked here.
 
 Version entries describe source, GitHub release, and npm publishing state.
 
+## v0.9.0 - 2026-06-22
+
+Project-level review templates.
+
+### Added
+
+- Added custom review templates support via `.forgedesk/templates/`.
+- Users can place custom `PR_BODY.md`, `SUMMARY.md`, or `REVIEW_CONTEXT.md`
+  templates with `{{variable}}` placeholders.
+- Available variables: `session.title`, `session.status`, `session.intent`,
+  `git.branch`, `git.head`, `git.changedFiles`, `project.name`, `testSummary`,
+  `riskHints`, `changedFiles`, `decisions`, `manualChecks`, `notVerified`.
+- Added `forgedesk templates` to show current template status (builtin vs
+  custom).
+- Added `forgedesk templates --init` to generate example templates with all
+  available variables.
+- Custom templates are used during `forgedesk evidence` generation. Files
+  without custom templates fall back to built-in renderers.
+
+### Tests
+
+- Added 10 custom template tests: renderTemplate, buildTemplateVars,
+  loadCustomTemplate, initTemplates, CLI status, CLI init, and evidence
+  integration with custom template.
+- Total tests: 240.
+
+### Publishing
+
+- GitHub source release and npm publish preparation.
+
+### Boundaries
+
+- Custom templates are local Markdown files with variable substitution. They do
+  not call AI, execute code, fetch from the network, or modify files outside the
+  evidence output directory.
+
 ## v0.8.0 - 2026-06-22
 
 Diff-aware risk rules: analyze code content, not just file names.

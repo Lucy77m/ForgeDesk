@@ -208,6 +208,40 @@ possible. `NOW.md` is local status, not a review verdict.
 the target has not been generated or exported yet, it fails clearly instead of
 pretending the open succeeded.
 
+## Custom Templates
+
+| Command | Purpose | Writes local data |
+|---|---|---|
+| `forgedesk templates` | Show current template status (builtin vs custom). | no |
+| `forgedesk templates --init` | Generate example templates in `.forgedesk/templates/`. | yes |
+| `forgedesk templates --json` | Print the templates report as JSON. | no |
+
+Custom templates allow you to override the default evidence output format for
+`PR_BODY.md`, `SUMMARY.md`, and `REVIEW_CONTEXT.md`. Place a Markdown file in
+`.forgedesk/templates/` with `{{variable}}` placeholders:
+
+```markdown
+## Summary
+
+{{session.intent}}
+
+## Team Review Checklist
+
+- [ ] Security review passed
+- [ ] Performance test passed
+
+## Risks
+
+{{riskHints}}
+```
+
+Available variables: `session.title`, `session.status`, `session.intent`,
+`git.branch`, `git.head`, `git.changedFiles`, `project.name`, `testSummary`,
+`riskHints`, `changedFiles`, `decisions`, `manualChecks`, `notVerified`.
+
+Files without a custom template use the built-in renderer. `--init` generates
+example templates only if they don't already exist (no overwrite).
+
 ## Episodes
 
 | Command | Purpose | Writes local data |
