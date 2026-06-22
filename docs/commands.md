@@ -300,6 +300,9 @@ execute scripts.
 | `forgedesk ci print` | Print a GitHub Actions evidence gate workflow. | no |
 | `forgedesk ci init` | Write `.github/workflows/forgedesk-evidence.yml`. | yes |
 | `forgedesk ci init --force` | Overwrite the generated workflow. | yes |
+| `forgedesk ci validate` | Validate evidence.json structure for the active session. | no |
+| `forgedesk ci validate --session <id>` | Validate a specific session. | no |
+| `forgedesk ci validate --json` | Print the validation report as JSON. | no |
 
 `ci check` verifies that evidence exists, expected evidence files are present,
 and readiness passes. If the local worktree is dirty, it also checks whether
@@ -469,6 +472,18 @@ with built-in rules; same-name custom rules override the built-in version.
 
 If `rules.json` is missing or invalid, ForgeDesk silently falls back to built-in
 rules only. `forgedesk doctor` reports whether `rules.json` was found.
+
+| Command | Purpose | Writes local data |
+|---|---|---|
+| `forgedesk rules` | Show current rules.json status. | no |
+| `forgedesk rules --preset security` | Install security-focused risk rules. | yes |
+| `forgedesk rules --preset default` | Install default risk rules as rules.json. | yes |
+| `forgedesk rules --preset <name> --force` | Overwrite existing rules.json. | yes |
+| `forgedesk rules --json` | Print the rules report as JSON. | no |
+
+Available presets: `security` (secrets, SQL injection, permissions, crypto,
+CORS/CSRF, dependency audit) and `default` (equivalent to built-in rules in
+customizable form).
 
 Risk rules do not call AI, edit product code, commit, push, open PRs, tag,
 release, publish, upload, or run in the background.

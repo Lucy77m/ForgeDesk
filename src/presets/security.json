@@ -1,0 +1,47 @@
+{
+  "schemaVersion": "forgedesk-rules-v1",
+  "rules": [
+    {
+      "name": "secrets-detected",
+      "pattern": "(api[_-]?key|secret[_-]?key|private[_-]?key|access[_-]?token|auth[_-]?token|password|credential)",
+      "message": "Possible secrets or credentials detected in changed files. Review for hardcoded sensitive values.",
+      "severity": "high",
+      "confidence": "medium"
+    },
+    {
+      "name": "sql-injection-risk",
+      "pattern": "(query|sql|execute|raw\\()",
+      "message": "SQL or query-related files changed. Review for injection risks and parameterized queries.",
+      "severity": "high",
+      "confidence": "medium"
+    },
+    {
+      "name": "permission-changes",
+      "pattern": "(permission|role|access[_-]?control|acl|authorization|rbac)",
+      "message": "Permission or access control files changed. Review authorization logic and edge cases.",
+      "severity": "high",
+      "confidence": "high"
+    },
+    {
+      "name": "cors-csrf",
+      "pattern": "(cors|csrf|cross[_-]?origin|same[_-]?origin)",
+      "message": "CORS or CSRF configuration changed. Review allowed origins and token handling.",
+      "severity": "medium",
+      "confidence": "high"
+    },
+    {
+      "name": "crypto-changes",
+      "pattern": "(crypto|cipher|encrypt|decrypt|hash|sign|verify)",
+      "message": "Cryptographic code changed. Review algorithm choices, key management, and side-channel risks.",
+      "severity": "high",
+      "confidence": "medium"
+    },
+    {
+      "name": "dependency-audit",
+      "pattern": "(package-lock\\.json|pnpm-lock\\.yaml|yarn\\.lock|Gemfile\\.lock|go\\.sum)",
+      "message": "Dependency lockfile changed. Review new dependencies for known vulnerabilities.",
+      "severity": "medium",
+      "confidence": "high"
+    }
+  ]
+}

@@ -7,6 +7,7 @@ import { EVIDENCE_FILE_NAMES } from '../src/core/constants.js'
 import { pathsFor, sessionFile } from '../src/core/workspace.js'
 import {
   CONFIG_SCHEMA_VERSION,
+  EVIDENCE_SCHEMA_VERSION,
   PROJECT_SCHEMA_VERSION,
   SESSION_SCHEMA_VERSION,
   type ChangeSession,
@@ -161,7 +162,24 @@ export function createSessionWithEvidence(repo: string, options: CreateSessionOp
 
   if (!options.skipEvidenceFiles) {
     for (const file of EVIDENCE_FILE_NAMES) {
-      writeFileSync(path.join(evidenceDir, file), `# ${file}\n`, 'utf8')
+      if (file === 'evidence.json') {
+        const bundle = {
+          schemaVersion: EVIDENCE_SCHEMA_VERSION,
+          generatedAt: testNow,
+          project: {
+            schemaVersion: PROJECT_SCHEMA_VERSION,
+            name: 'test-project',
+            repoPath: repo,
+            createdAt: testNow,
+            updatedAt: testNow
+          },
+          session,
+          gitSnapshot: session.gitSnapshot
+        }
+        writeFileSync(path.join(evidenceDir, file), `${JSON.stringify(bundle, null, 2)}\n`, 'utf8')
+      } else {
+        writeFileSync(path.join(evidenceDir, file), `# ${file}\n`, 'utf8')
+      }
     }
   }
 

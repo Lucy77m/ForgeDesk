@@ -1,0 +1,63 @@
+{
+  "schemaVersion": "forgedesk-rules-v1",
+  "rules": [
+    {
+      "name": "path-auth",
+      "pattern": "(^|/)(auth|login|session|token)(/|\\.|-|_)",
+      "message": "Auth-related files changed. Review session handling, tokens, and redirect validation.",
+      "severity": "medium",
+      "confidence": "high"
+    },
+    {
+      "name": "path-payment",
+      "pattern": "(^|/)(payment|billing|stripe)(/|\\.|-|_)",
+      "message": "Payment or billing files changed. Review charge, subscription, and webhook behavior.",
+      "severity": "high",
+      "confidence": "high"
+    },
+    {
+      "name": "path-config",
+      "pattern": "(^|/)(config|env|settings)(/|\\.|-|_)|\\.env|config\\.",
+      "message": "Configuration-related files changed. Review environment and compatibility impact.",
+      "severity": "medium",
+      "confidence": "high"
+    },
+    {
+      "name": "path-database",
+      "pattern": "(^|/)(migration|migrations|schema|db|database)(/|\\.|-|_)",
+      "message": "Database or schema files changed. Review migration and rollback behavior.",
+      "severity": "high",
+      "confidence": "high"
+    },
+    {
+      "name": "path-workflow",
+      "pattern": "(^|/)\\.github/workflows/|(^|/)(ci|workflow)(/|\\.|-|_)",
+      "message": "CI or workflow files changed. Review automation and release pipeline behavior.",
+      "severity": "medium",
+      "confidence": "high"
+    },
+    {
+      "name": "package-metadata",
+      "pattern": "^(package\\.json|pnpm-lock\\.yaml|package-lock\\.json|yarn\\.lock)$",
+      "message": "Package metadata or lockfile changed. Review dependency and script behavior.",
+      "severity": "medium",
+      "confidence": "high"
+    },
+    {
+      "name": "file-deleted",
+      "pattern": "__forgedesk_special:deleted__",
+      "message": "Files were deleted. Review whether the removal is intentional and covered by tests.",
+      "severity": "medium",
+      "confidence": "high",
+      "enabled": false
+    },
+    {
+      "name": "large-change",
+      "pattern": "__forgedesk_special:count__",
+      "message": "More than 10 files changed. Review scope and look for unrelated edits.",
+      "severity": "medium",
+      "confidence": "medium",
+      "enabled": false
+    }
+  ]
+}

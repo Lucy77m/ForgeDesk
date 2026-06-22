@@ -7,6 +7,7 @@ import { addDecision, addManualCheck, addRisk, initProject, setIntent, startSess
 import { renderAutoCaptureReport, runAutoCapture } from '../core/auto.js'
 import { getAutoConfigReport, parseAutoMode, renderAutoConfigReport, setAutoConfigMode } from '../core/auto-config.js'
 import { getCiCheckReport, initCiWorkflow, renderCiCheckReport, renderCiInitReport, renderCiWorkflow } from '../core/ci.js'
+import { getCiValidateReport, renderCiValidateReport } from '../core/ci-validate.js'
 import { getContextReport, refreshContextFile, renderContextReport } from '../core/context.js'
 import { copyToClipboard } from '../core/clipboard.js'
 import { getDoctorReport, renderDoctorReport } from '../core/doctor.js'
@@ -33,6 +34,7 @@ import { refreshNowFile, renderNowReport } from '../core/now.js'
 import { openLocalTarget, parseOpenTarget, renderOpenReport } from '../core/open.js'
 import { getReadyReport, renderReadyReport } from '../core/ready.js'
 import { renderRepairReport, repairLocalSetup } from '../core/repair.js'
+import { getRulesReport, renderRulesReport } from '../core/rules.js'
 import { getReviewOutput } from '../core/review-output.js'
 import { getShortcutsStatus, installShortcuts, renderShortcutsReport, uninstallShortcuts } from '../core/shortcuts.js'
 import { getStatus } from '../core/status.js'
@@ -304,6 +306,19 @@ export function buildProgram(cwd = process.cwd()): Command {
       console.log(options.json ? JSON.stringify(report, null, 2) : renderCiInitReport(report))
     })
 
+  ci
+    .command('validate')
+    .description('Validate evidence.json structure for a session.')
+    .option('--session <id>', 'session id; defaults to the active session')
+    .option('--json', 'print the validation report as JSON')
+    .action(async (options: { session?: string; json?: boolean }) => {
+      const report = await getCiValidateReport(cwd, { sessionId: options.session })
+      console.log(options.json ? JSON.stringify(report, null, 2) : renderCiValidateReport(report))
+      if (report.status !== 'pass') {
+        process.exitCode = 1
+      }
+    })
+
   shortcuts
     .command('install')
     .description('Install VS Code tasks and optional package scripts for ForgeDesk.')
@@ -343,6 +358,17 @@ export function buildProgram(cwd = process.cwd()): Command {
     .action(async (options: { json?: boolean }) => {
       const report = await discoverTestScripts(cwd)
       console.log(options.json ? JSON.stringify(report, null, 2) : renderTestDiscoveryReport(report))
+    })
+
+  program
+    .command('rules')
+    .description('Show or install risk rule presets.')
+    .option('--preset <name>', 'install a preset: security, default')
+    .option('--force', 'overwrite existing rules.json when installing a preset')
+    .option('--json', 'print the rules report as JSON')
+    .action(async (options: { preset?: string; force?: boolean; json?: boolean }) => {
+      const report = await getRulesReport(cwd, { preset: options.preset, force: options.force })
+      console.log(options.json ? JSON.stringify(report, null, 2) : renderRulesReport(report))
     })
 
   program

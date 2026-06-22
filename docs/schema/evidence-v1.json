@@ -1,0 +1,226 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://forgedesk.dev/schema/evidence-v1.json",
+  "title": "ForgeDesk Evidence Bundle",
+  "description": "Schema for ForgeDesk evidence.json files. This is the structured evidence pack produced by 'forgedesk evidence' or 'forgedesk auto'.",
+  "type": "object",
+  "required": ["schemaVersion", "generatedAt", "project", "session", "gitSnapshot"],
+  "properties": {
+    "schemaVersion": {
+      "const": "forgedesk-evidence-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp when this evidence bundle was generated."
+    },
+    "project": { "$ref": "#/$defs/Project" },
+    "session": { "$ref": "#/$defs/ChangeSession" },
+    "gitSnapshot": { "$ref": "#/$defs/GitSnapshot" },
+    "autoCapture": { "$ref": "#/$defs/AutoCaptureMeta" }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "Project": {
+      "type": "object",
+      "required": ["schemaVersion", "name", "repoPath", "createdAt", "updatedAt"],
+      "properties": {
+        "schemaVersion": { "const": "forgedesk-project-v1" },
+        "name": { "type": "string" },
+        "repoPath": { "type": "string" },
+        "goal": { "type": "string" },
+        "defaultBranch": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "additionalProperties": false
+    },
+    "ChangeSession": {
+      "type": "object",
+      "required": ["schemaVersion", "id", "title", "status", "decisions", "risks", "tests", "createdAt", "updatedAt"],
+      "properties": {
+        "schemaVersion": { "const": "forgedesk-session-v1" },
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "status": {
+          "type": "string",
+          "enum": ["active", "needs-review", "done", "archived"]
+        },
+        "intent": { "type": "string" },
+        "decisions": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Decision" }
+        },
+        "risks": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Risk" }
+        },
+        "tests": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/TestRun" }
+        },
+        "manualChecks": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ManualCheck" }
+        },
+        "gitSnapshot": { "$ref": "#/$defs/GitSnapshot" },
+        "evidenceDir": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "additionalProperties": false
+    },
+    "Decision": {
+      "type": "object",
+      "required": ["id", "text", "createdAt"],
+      "properties": {
+        "id": { "type": "string" },
+        "text": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "additionalProperties": false
+    },
+    "Risk": {
+      "type": "object",
+      "required": ["id", "text", "createdAt"],
+      "properties": {
+        "id": { "type": "string" },
+        "text": { "type": "string" },
+        "severity": {
+          "type": "string",
+          "enum": ["low", "medium", "high"]
+        },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "additionalProperties": false
+    },
+    "TestRun": {
+      "type": "object",
+      "required": ["id", "command", "status"],
+      "properties": {
+        "id": { "type": "string" },
+        "command": { "type": "string" },
+        "exitCode": { "type": "integer" },
+        "status": {
+          "type": "string",
+          "enum": ["recorded", "passed", "failed"]
+        },
+        "startedAt": { "type": "string", "format": "date-time" },
+        "finishedAt": { "type": "string", "format": "date-time" },
+        "summary": { "type": "string" },
+        "logFile": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "ManualCheck": {
+      "type": "object",
+      "required": ["id", "text", "createdAt"],
+      "properties": {
+        "id": { "type": "string" },
+        "text": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "additionalProperties": false
+    },
+    "GitSnapshot": {
+      "type": "object",
+      "required": ["branch", "head", "isDirty", "modifiedFiles", "addedFiles", "deletedFiles", "untrackedFiles", "recentCommits", "capturedAt"],
+      "properties": {
+        "branch": { "type": "string" },
+        "head": { "type": "string" },
+        "isDirty": { "type": "boolean" },
+        "diffFingerprint": { "type": "string" },
+        "modifiedFiles": { "type": "array", "items": { "type": "string" } },
+        "addedFiles": { "type": "array", "items": { "type": "string" } },
+        "deletedFiles": { "type": "array", "items": { "type": "string" } },
+        "untrackedFiles": { "type": "array", "items": { "type": "string" } },
+        "recentCommits": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["hash", "message"],
+            "properties": {
+              "hash": { "type": "string" },
+              "message": { "type": "string" },
+              "date": { "type": "string" }
+            },
+            "additionalProperties": false
+          }
+        },
+        "capturedAt": { "type": "string", "format": "date-time" }
+      },
+      "additionalProperties": false
+    },
+    "AutoCaptureMeta": {
+      "type": "object",
+      "properties": {
+        "title": { "$ref": "#/$defs/SourceLabel" },
+        "intent": { "$ref": "#/$defs/SourceLabel" },
+        "riskHints": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/RiskHint" }
+        },
+        "checks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["command", "status", "source"],
+            "properties": {
+              "command": { "type": "string" },
+              "status": {
+                "type": "string",
+                "enum": ["recommended", "recorded", "passed", "failed", "not-run"]
+              },
+              "source": { "type": "string" }
+            },
+            "additionalProperties": false
+          }
+        },
+        "artifacts": {
+          "type": "object",
+          "required": ["summary", "prBody", "reviewContext", "testEvidence", "rawEvidence"],
+          "properties": {
+            "summary": { "type": "string" },
+            "prBody": { "type": "string" },
+            "reviewContext": { "type": "string" },
+            "testEvidence": { "type": "string" },
+            "rawEvidence": { "type": "string" }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "SourceLabel": {
+      "type": "object",
+      "required": ["text", "source", "confidence", "confirmed"],
+      "properties": {
+        "text": { "type": "string" },
+        "source": { "type": "string" },
+        "confidence": {
+          "type": "string",
+          "enum": ["low", "medium", "high"]
+        },
+        "confirmed": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "RiskHint": {
+      "type": "object",
+      "required": ["text", "source", "severity", "confidence"],
+      "properties": {
+        "text": { "type": "string" },
+        "source": { "type": "string" },
+        "severity": {
+          "type": "string",
+          "enum": ["low", "medium", "high"]
+        },
+        "confidence": {
+          "type": "string",
+          "enum": ["low", "medium", "high"]
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

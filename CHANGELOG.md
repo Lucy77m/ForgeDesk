@@ -4,6 +4,49 @@ All notable ForgeDesk changes are tracked here.
 
 Version entries describe source, GitHub release, and npm publishing state.
 
+## v0.7.0 - 2026-06-18
+
+Evidence-as-Code: schema, validation, and preset rules.
+
+### Added
+
+- Added JSON Schema definition for evidence.json at `docs/schema/evidence-v1.json`.
+  Third-party tools can use this schema to validate ForgeDesk evidence packs.
+- Added `forgedesk ci validate` to check evidence.json structure against the
+  expected schema. Validates schemaVersion, required objects (project, session,
+  gitSnapshot), enum values, and array types.
+- Added `forgedesk ci validate --session <id>` and `--json` options.
+- Added `forgedesk rules --preset security` to install a security-focused risk
+  rule preset into `.forgedesk/rules.json`.
+- Added `forgedesk rules --preset default` to install the built-in rules as a
+  customizable rules.json.
+- Added `forgedesk rules` (no flags) to show current rules.json status.
+- Added `forgedesk rules --force` to overwrite existing rules.json.
+- Preset files are bundled in `src/presets/` (security.json, default.json).
+
+### Improved
+
+- Test helper `createSessionWithEvidence` now generates valid JSON for
+  evidence.json instead of placeholder markdown.
+
+### Tests
+
+- Added 6 ci-validate tests: valid pack, missing evidence.json, wrong
+  schemaVersion, no evidenceDir, missing evidence files, CLI integration.
+- Added 7 rules tests: show no rules, install security, install default,
+  refuse overwrite, force overwrite, reject unknown preset, show after install.
+- Total tests: 225.
+
+### Publishing
+
+- GitHub source release and npm publish preparation.
+
+### Boundaries
+
+- Evidence schema, validation, and preset rules are local file-based tools.
+  They do not call AI, fetch from the network, upload data, edit product code,
+  commit, push, open PRs, tag, release, publish, or run in the background.
+
 ## v0.6.3 - 2026-06-18
 
 Test hardening.
