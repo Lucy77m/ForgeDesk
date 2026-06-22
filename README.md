@@ -1,213 +1,98 @@
 # ForgeDesk
 
-ForgeDesk is a local auto-capture layer for AI-assisted code changes.
+AI coding tools write code fast. But when it's time to review: what was the intent? what files changed? did tests pass? what risks remain?
 
-AI coding tools can write code fast, but the resulting changes are often hard to review:
-What was the intent? What files changed? What tests ran? What risks remain?
+ForgeDesk captures your local git changes and prepares review-ready material — summary, PR body, test evidence, risk hints, review context. You get a folder of structured files that can go straight into a PR or handoff.
 
-ForgeDesk captures local git changes and prepares review-ready material:
-summary, PR body, test evidence, risk hints, review context, failed-test fix
-context, and an evidence pack.
-
-Generated review material includes reviewer checklists, known limits, suggested
-review order, and local follow-up commands where useful.
-
-It does not review code for you. It prepares the material before humans or AI
-reviewers inspect the change.
+It does not review code for you. It prepares the material so humans (or AI reviewers) can inspect the change faster.
 
 ## Install
 
-ForgeDesk is an early local MVP published to npm.
-
-Install the CLI:
-
 ```bash
 npm install -g forgedesk
-forgedesk --help
-```
-
-Or try it from a local checkout:
-
-```bash
-git clone https://github.com/Lucy77m/ForgeDesk.git
-cd ForgeDesk
-pnpm install
-pnpm build
-node dist/cli/index.js --help
 ```
 
 ## Quick Start
 
-After installing from npm, run `forgedesk` directly. From a local checkout, use
-`node dist/cli/index.js` after `pnpm build`.
+```bash
+forgedesk setup       # first time: initialize and configure
+forgedesk next        # daily: auto-capture changes and generate evidence
+```
+
+That's it. `forgedesk next` runs one safe step at a time — capture, generate evidence, check readiness, export. Run it again after making changes or recording tests.
+
+## Typical Workflow
 
 ```bash
-echo "Local change" >> README.md
-forgedesk setup
-forgedesk next --dry-run
-forgedesk next
+forgedesk setup                        # one-time setup
+# ... make code changes, run your tests ...
+forgedesk test -- npm test             # record test results
+forgedesk next                         # auto-capture → evidence → export
 ```
 
-`forgedesk setup` is the first-run local setup button. It initializes
-ForgeDesk when needed, sets the safe advisory `assist` profile, refreshes
-`NOW.md`, and repairs editor shortcuts.
+After `forgedesk next` finishes, your PR body, review context, and evidence pack are ready in `.forgedesk/exports/`.
 
-`forgedesk next` is the daily local run button. It auto-captures local changes,
-generates or refreshes evidence, checks readiness, and exports ready evidence
-one safe step at a time.
+## What You Get
 
-Decision tree:
-
-- Just starting: `forgedesk setup`
-- Have local changes: `forgedesk next`
-- Not sure what state you are in: `forgedesk doctor` or `forgedesk episodes status`
-- Tests failed: `forgedesk fix-context`
-- Need AI-friendly context: `forgedesk context`
-- Ready to hand off: `forgedesk open export`
-
-Set the local automation profile before using hooks or watch mode:
-
-```bash
-forgedesk auto-config
-forgedesk auto-config set assist
-forgedesk hooks install
-forgedesk hooks status
-forgedesk watch
-forgedesk watch --quiet
-forgedesk ignition install
-forgedesk now
-forgedesk episodes status
-forgedesk repair
-forgedesk tests discover
-forgedesk shortcuts install
-forgedesk shortcuts install --test-tasks
-forgedesk ci print
+```
+.forgedesk/evidence/<session>/
+├── SUMMARY.md           # change summary
+├── PR_BODY.md           # ready to paste into a PR
+├── REVIEW_CONTEXT.md    # structured context for reviewers
+├── TEST_EVIDENCE.md     # test results summary
+├── PR_EVIDENCE.md       # decisions, risks, manual checks
+├── evidence.json        # machine-readable evidence pack
+└── ...
 ```
 
-Auto profiles are explicit local controls. They do not enable AI calls, product
-code edits, commits, pushes, PRs, releases, publishes, uploads, or hidden
-background services.
+## Common Commands
 
-## Output
-
-```text
-.forgedesk/evidence/<session-id>/
-|-- PR_EVIDENCE.md
-|-- SUMMARY.md
-|-- PR_BODY.md
-|-- REVIEW_CONTEXT.md
-|-- TEST_EVIDENCE.md
-|-- CHANGE_SUMMARY.md
-|-- TEST_RESULTS.md
-|-- REVIEW_PROMPT.md
-|-- evidence.json
-```
-
-## Dogfood Example
-
-ForgeDesk is used on its own repository. A typical dogfood session captures a
-local change with `forgedesk next`, records `pnpm typecheck`, `pnpm test`, and
-`pnpm build`, then uses `forgedesk next` again to generate, check, and export
-review-ready material.
-
-The goal is not to prove the code is perfect. The goal is to make the change
-intent, changed files, test evidence, and remaining risks easy to inspect.
-
-## Commands
-
-```bash
-forgedesk init --repo .
-forgedesk setup
-forgedesk next --dry-run
-forgedesk next
-forgedesk auto --no-run
-forgedesk auto-config
-forgedesk auto-config set assist
-forgedesk hooks install
-forgedesk hooks status
-forgedesk hooks uninstall
-forgedesk watch
-forgedesk watch --once
-forgedesk watch --quiet
-forgedesk ignition install
-forgedesk ignition status
-forgedesk ignition uninstall
-forgedesk now
-forgedesk episodes status
-forgedesk repair
-forgedesk tests discover
-forgedesk shortcuts install
-forgedesk shortcuts install --test-tasks
-forgedesk shortcuts status
-forgedesk shortcuts uninstall
-forgedesk ci check
-forgedesk ci print
-forgedesk ci init
-forgedesk review-context
-forgedesk pr
-forgedesk fix-context
-forgedesk open
-forgedesk open now
-forgedesk open evidence
-forgedesk open export
-forgedesk open review-context
-forgedesk open pr
-forgedesk start --title "Describe the change"
-forgedesk intent "Record the user-facing goal."
-forgedesk decision "Record an implementation decision."
-forgedesk risk "Record a risk or review focus."
-forgedesk check "Record a manual verification check."
-forgedesk test -- npm test
-forgedesk evidence
-forgedesk ready
-forgedesk handoff
-forgedesk export
-forgedesk inspect --export
-```
+| Command | What it does |
+|---|---|
+| `forgedesk setup` | First-time setup |
+| `forgedesk next` | Run the next safe step |
+| `forgedesk doctor` | Check project health |
+| `forgedesk context` | Generate AI-friendly context file |
+| `forgedesk rules --preset security` | Install security risk rules |
+| `forgedesk templates --init` | Generate customizable templates |
 
 See [docs/commands.md](docs/commands.md) for the full command reference.
 
-## What ForgeDesk Does
+## Features
 
-- Reads local git status and changed files.
-- Sets up the local run-button workflow with one explicit command.
-- Auto-captures local change context.
-- Records change intent, decisions, risks, and tests.
-- Generates summaries, PR body, review context, risk hints, fix context, and evidence files.
-- Summarizes the current local work episode and next safe action.
-- Repairs safe local ForgeDesk entry points when editor shortcuts or NOW drift.
+- **Auto-capture**: Reads your git diff and captures changed files, branch, commits
+- **Evidence generation**: Produces structured Markdown and JSON evidence packs
+- **Risk detection**: Flags auth, payment, config, database changes; detects hardcoded secrets and eval usage in diffs
+- **Evidence Score**: Deterministic 0-7 quality metric for readiness
+- **Configurable rules**: Add custom risk rules via `.forgedesk/rules.json` or install presets
+- **Custom templates**: Override PR body, summary, and review context templates with your own
+- **Workspace support**: Discovers test scripts across pnpm workspace packages
+- **CI gate**: `forgedesk ci check` and `forgedesk ci validate` for CI pipelines
 
-## What ForgeDesk Does Not Do
+## What ForgeDesk Does NOT Do
 
-- It does not write code.
-- It does not review code for you.
-- It does not act as an AI code reviewer or security scanner.
-- It does not call an AI provider by default.
-- It does not commit, push, open PRs, or publish releases.
-- It does not upload your project.
+- No AI calls — ForgeDesk does not call any AI provider
+- No code review — it prepares material, not verdicts
+- No auto-commit/push/PR — all git actions are explicit
+- No cloud sync — everything stays local
+- No background services — runs on demand
 
-See [docs/boundaries.md](docs/boundaries.md) for the product boundary contract.
-See [docs/commands.md](docs/commands.md) for all CLI commands and side effects.
-See [docs/run-button.md](docs/run-button.md) for the v0.3 local run-button
-workflow.
-See [docs/reviewer-guide.md](docs/reviewer-guide.md) for how to inspect an
-evidence pack.
-See [docs/local-workflow.md](docs/local-workflow.md) for a local demo workflow.
-See [docs/troubleshooting.md](docs/troubleshooting.md) for common local errors
-and fixes.
-See [docs/roadmap.md](docs/roadmap.md) for the long-term planning reference.
-See [CHANGELOG.md](CHANGELOG.md) for local source version notes.
+## Documentation
+
+- [Command Reference](docs/commands.md) — all CLI commands and options
+- [API Contract](docs/api-contract.md) — JSON schema stability guarantees
+- [Evidence Schema](docs/schema/evidence-v1.json) — evidence.json JSON Schema
+- [Reviewer Guide](docs/reviewer-guide.md) — how to inspect an evidence pack
+- [Troubleshooting](docs/troubleshooting.md) — common errors and fixes
+- [Roadmap](docs/roadmap.md) — planning reference
 
 ## Project Status
 
-ForgeDesk v1.0.0 is the stable release of the setup-first local autopilot CLI.
-All `--json` output schemas are frozen under semver. See
-[docs/api-contract.md](docs/api-contract.md) for details.
+ForgeDesk v1.0.0 is the stable release. All `--json` output schemas are frozen under semver.
 
 ## Development
 
-The published CLI supports Node.js 20 and newer. Local development uses
-`pnpm@11.1.3`, which requires Node.js 22.13 or newer.
+Requires Node.js 20+. Local development uses pnpm:
 
 ```bash
 pnpm install
@@ -215,28 +100,6 @@ pnpm typecheck
 pnpm test
 pnpm build
 pnpm smoke
-pnpm package-smoke
 ```
 
-Run the CLI from source during development:
-
-```bash
-pnpm dev -- --help
-pnpm dev -- init --repo .
-```
-
-Run the compiled CLI after building:
-
-```bash
-node dist/cli/index.js --help
-```
-
-Check the package contents without publishing:
-
-```bash
-pnpm pack --pack-destination <temp-dir>
-npm publish --dry-run
-```
-
-See [docs/publishing.md](docs/publishing.md) for the release checklist and npm
-publishing boundary.
+See [docs/publishing.md](docs/publishing.md) for the release checklist.
